@@ -21,7 +21,7 @@
 #ifndef GFUSX_H_
 #define GFUSX_H_
 
-#include <gamefu/base.h>
+#include <kos.h>
 #include <gamefu/arch.h>
 
 /// ======================================================================== ///

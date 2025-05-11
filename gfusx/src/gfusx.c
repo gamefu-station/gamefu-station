@@ -18,11 +18,11 @@
 /// along with this program.  If not, see <https://www.gnu.org/licenses/>.   ///
 /// ======================================================================== ///
 
-#define GFUBASE_IMPLEMENTATION
-#include <gamefu/gfubase.h>
+#define KOS_IMPLEMENTATION
+#include <kos.h>
 
 #define GFUARCH_IMPLEMENTATION
-#include <gamefu/gfuarch.h>
+#include <gamefu/arch.h>
 
 #include <gamefu/gfusx.h>
 

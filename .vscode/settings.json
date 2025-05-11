@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "xhash": "c",
+        "iterator": "c",
+        "xmemory": "c"
+    }
+}

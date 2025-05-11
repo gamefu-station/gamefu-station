@@ -38,15 +38,15 @@ static GFUSX_ALWAYS_INLINE void gfusx_vm_potential_return_addr(gfusx_vm* vm, u32
 static void gfusx_vm_debug_process(u32 old_pc, u32 new_pc, u32 old_code, u32 new_code, bool linked);
 
 void gfusx_vm_logf(gfusx_vm* vm, gfusx_log_class log_class, const char* format, ...) {
-    gfu_string message = {0};
+    kos_string message = {0};
 
     va_list v;
     va_start(v, format);
-    gfu_string_vsprintf(&message, format, v);
+    kos_string_vsprintf(&message, format, v);
     va_end(v);
 
-    fprintf(stderr, GFU_STR_FMT"\n", GFU_STR_ARG(message));
-    gfu_da_dealloc(&message);
+    fprintf(stderr, KOS_STR_FMT"\n", KOS_STR_ARG(message));
+    kos_da_dealloc(&message);
 }
 
 void gfusx_vm_power_on(gfusx_vm* vm) {
@@ -127,7 +127,7 @@ static GFUSX_ALWAYS_INLINE void gfusx_vm_call_stack_set_sp(gfusx_vm* vm, u32 old
 }
 
 static GFUSX_ALWAYS_INLINE void gfusx_vm_delayed_load(gfusx_vm* vm, gfu_register reg, u32 value, u32 mask) {
-    gfu_assert(reg < 32);
+    kos_assert(reg < 32);
     gfusx_delayed_load_info* delayed_load = &vm->delayed_load_info[vm->current_delayed_load];
     delayed_load->active = true;
     delayed_load->index = reg;
