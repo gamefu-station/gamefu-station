@@ -1,0 +1,7 @@
+[extern]
+word main();
+
+word _gfusdk_start() {
+    word exit_code = main();
+    return exit_code;
+}

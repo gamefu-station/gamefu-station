@@ -1,0 +1,6 @@
+[submodule "third-party/kos"]
+	path = third-party/kos
+	url = git@github.com:nashiora/kos.h.git
+[submodule "third-party/choir"]
+	path = third-party/choir
+	url = git@github.com:nashiora/choir.git

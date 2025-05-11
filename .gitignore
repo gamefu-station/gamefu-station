@@ -1,0 +1,9 @@
+/.build
+/.scratch
+
+/nob
+/nob.exe
+/nob.old
+/nob.exe.old
+
+/update-submodules.bat

@@ -1,0 +1,25 @@
+entry _start
+
+; how many of these are needed? what are they?
+section '.code._start' code data allocatable executable
+
+weak _start
+_start:
+    j _gfusdk_start
+    nop
+.stop:
+    b .stop
+    nop
+
+; for now, GAS syntax I guess.
+; section is *A*llocatable, E*x*ecutable and contains data (@progbits).
+; but I have no idea what this actually entails for this tiny thing...
+
+;.section .text._start, "ax", @progbits
+;.global _start
+;.type _start, @function
+;.weak _start
+;_start:
+;    // TODO: store some global state here.
+;    j _gfusdk_start
+;    nop
