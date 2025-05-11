@@ -240,17 +240,34 @@ int main(int argc, char** argv) {
 
     fuld.name = "fuld";
     fuld.kind = BUILD_EXE;
+    gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fuld/src", ".c", &fuld.source_paths));
+    nob_da_append(&fuld.include_paths, "include");
+    nob_da_append(&fuld.include_paths, "third-party/kos");
+    nob_da_append(&fuld.include_paths, "third-party/choir/include");
+    nob_da_append(&fuld.include_paths, "fuld/include");
+    nob_da_append(&fuld.libraries, gfu_nob_lib_a("third-party/choir/.build/libchoir"));
 
     fuasm.name = "fuasm";
     fuasm.kind = BUILD_EXE;
+    gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fuasm/src", ".c", &fuasm.source_paths));
+    nob_da_append(&fuasm.include_paths, "include");
+    nob_da_append(&fuasm.include_paths, "third-party/kos");
+    nob_da_append(&fuasm.include_paths, "third-party/choir/include");
+    nob_da_append(&fuasm.include_paths, "fuasm/include");
+    nob_da_append(&fuasm.libraries, gfu_nob_lib_a("third-party/choir/.build/libchoir"));
 
     fucc.name = "fucc";
     fucc.kind = BUILD_EXE;
-    gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fucc/src", ".c", &gfusx.source_paths));
-    nob_da_append(&gfusx.include_paths, "include");
-    nob_da_append(&gfusx.include_paths, "third-party/kos");
-    nob_da_append(&gfusx.include_paths, "third-party/choir/include");
-    nob_da_append(&gfusx.libraries, gfu_nob_lib_a("third-party/choir/.build/libchoir"));
+    gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fuld/src", ".c", &fucc.source_paths));
+    gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fuasm/src", ".c", &fucc.source_paths));
+    gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fucc/src", ".c", &fucc.source_paths));
+    nob_da_append(&fucc.include_paths, "include");
+    nob_da_append(&fucc.include_paths, "third-party/kos");
+    nob_da_append(&fucc.include_paths, "third-party/choir/include");
+    nob_da_append(&fucc.include_paths, "fuld/include");
+    nob_da_append(&fucc.include_paths, "fuasm/include");
+    nob_da_append(&fucc.include_paths, "fucc/include");
+    nob_da_append(&fucc.libraries, gfu_nob_lib_a("third-party/choir/.build/libchoir"));
 
     gfusx.name = "gfusx";
     gfusx.kind = BUILD_EXE;
