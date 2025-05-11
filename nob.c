@@ -2,6 +2,8 @@
 #include "gfu-nob.h"
 
 bool build_obj(const char* src, const char* obj, Nob_File_Paths* include_paths, Nob_File_Paths* out_obj_files) {
+    nob_log(NOB_INFO, ">  Compiling object '%s'.", obj);
+
     bool result = true;
 
     Nob_File_Paths include_files = {0};
@@ -44,7 +46,9 @@ defer:;
     return result;
 }
 
-bool link_exe(const char* exe, Nob_File_Paths* obj_files) {
+bool link_exe(const char* exe, Nob_File_Paths* obj_files, Nob_File_Paths* lib_files) {
+    nob_log(NOB_INFO, ">  Linking executable '%s'.", exe);
+
     bool result = true;
 
     Nob_Cmd cmd = {0};
@@ -56,6 +60,7 @@ bool link_exe(const char* exe, Nob_File_Paths* obj_files) {
     gfu_nob_ld(&cmd);
     gfu_nob_ld_output(&cmd, exe);
     nob_da_append_many(&cmd, obj_files->items, obj_files->count);
+    nob_da_append_many(&cmd, lib_files->items, lib_files->count);
     gfu_nob_ld_flags(&cmd);
 
     if (!nob_cmd_run_sync(cmd)) {
@@ -81,16 +86,17 @@ typedef struct project {
     Nob_File_Paths libraries;
 } project;
 
+static project choir = {0};
 static project fuld = {0};
 static project fuasm = {0};
 static project fucc = {0};
 static project gfusx = {0};
 
 static bool build_project(project p) {
-    nob_log(NOB_INFO, "Building project '%s'.", p.name);
+    nob_log(NOB_INFO, ">> Building project '%s'.", p.name);
 
     if (p.source_paths.count == 0) {
-        nob_log(NOB_INFO, "  Nothing to build");
+        nob_log(NOB_INFO, "   Nothing to build");
         return true;
     }
 
@@ -107,14 +113,14 @@ static bool build_project(project p) {
     const char* outfile;
     if (p.kind == BUILD_EXE) {
         outfile = gfu_nob_exe(nob_temp_sprintf(".build/%s", p.name));
-        gfu_nob_try(false, link_exe(outfile, &obj_files));
+        gfu_nob_try(false, link_exe(outfile, &obj_files, &p.libraries));
     } else if (p.kind == BUILD_STATIC) {
         outfile = gfu_nob_lib_a(nob_temp_sprintf(".build/%s", p.name));
-        nob_log(NOB_ERROR, "  Can't build a static library yet.");
+        nob_log(NOB_ERROR, "Can't build a static library yet.");
         nob_return_defer(false);
     } else {
         outfile = gfu_nob_lib_so(nob_temp_sprintf(".build/%s", p.name));
-        nob_log(NOB_ERROR, "  Can't build a dynamic library yet.");
+        nob_log(NOB_ERROR, "Can't build a dynamic library yet.");
         nob_return_defer(false);
     }
 
@@ -122,7 +128,43 @@ defer:;
     nob_da_free(obj_files);
 
     if (result) {
-        nob_log(NOB_INFO, "  Success!");
+        nob_log(NOB_INFO, "   Success!");
+    }
+
+    return result;
+}
+
+static bool build_choir() {
+    nob_log(NOB_INFO, ">> Building project 'choir'.");
+    if (!gfu_nob_cd("./third-party/choir")) return false;
+    bool result = true;
+
+    Nob_Cmd cmd = {0};
+    nob_cc(&cmd);
+    nob_cc_output(&cmd, gfu_nob_exe("nob"));
+    nob_cc_inputs(&cmd, "nob.c");
+
+    if (!nob_cmd_run_sync_and_reset(&cmd)) {
+        nob_return_defer(false);
+    }
+
+    cmd.directory = gfu_nob_get_cwd();
+#ifdef _WIN32
+    nob_cmd_append(&cmd, nob_temp_sprintf("%s\\nob.exe", cmd.directory));
+#else
+    nob_cmd_append(&cmd, nob_temp_sprintf("%s/nob", cmd.directory));
+#endif
+
+    if (!nob_cmd_run_sync_and_reset(&cmd)) {
+        nob_return_defer(false);
+    }
+
+defer:;
+    nob_cmd_free(cmd);
+
+    if (!gfu_nob_cd("../..")) return false;
+    if (result) {
+        nob_log(NOB_INFO, "   Success!");
     }
 
     return result;
@@ -204,6 +246,11 @@ int main(int argc, char** argv) {
 
     fucc.name = "fucc";
     fucc.kind = BUILD_EXE;
+    gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fucc/src", ".c", &gfusx.source_paths));
+    nob_da_append(&gfusx.include_paths, "include");
+    nob_da_append(&gfusx.include_paths, "third-party/kos");
+    nob_da_append(&gfusx.include_paths, "third-party/choir/include");
+    nob_da_append(&gfusx.libraries, gfu_nob_lib_a("third-party/choir/.build/libchoir"));
 
     gfusx.name = "gfusx";
     gfusx.kind = BUILD_EXE;
@@ -222,6 +269,7 @@ int main(int argc, char** argv) {
         }
     }
 
+    gfu_nob_try(1, build_choir());
     gfu_nob_try(1, build_fuld());
     gfu_nob_try(1, build_fuasm());
     gfu_nob_try(1, build_fucc());

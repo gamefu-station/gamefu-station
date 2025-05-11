@@ -88,6 +88,8 @@
 #define gfu_nob_try(Result, Expr) do { if (!(Expr)) nob_return_defer(Result); } while (0)
 #define gfu_nob_try_int(Result, Expr) do { if (0 != (Expr)) nob_return_defer(Result); } while (0)
 
+bool gfu_nob_cd(const char* dir);
+const char* gfu_nob_get_cwd();
 bool gfu_nob_read_entire_dir_recursive(const char* dir, Nob_File_Paths* paths);
 
 Nob_String_View gfu_nob_sv_file_name(Nob_String_View path);
@@ -100,6 +102,40 @@ Nob_String_View gfu_nob_sv_file_name(Nob_String_View path);
 #define NOB_IMPLEMENTATION
 #include "nob.h"
 #undef NOB_IMPLEMENTATION
+
+bool gfu_nob_cd(const char* dir) {
+#ifdef _WIN32
+    BOOL result = SetCurrentDirectory(dir);
+    if (result == 0) nob_log(NOB_ERROR, "Failed to change directory to '%s'.", dir);
+    else nob_log(NOB_INFO, "Changed directory to '%s'.", dir);
+    return result != 0;
+#else
+    int result = chdir(dir);
+    if (result != 0) nob_log(NOB_ERROR, "Failed to change directory to '%s'.", dir);
+    else nob_log(NOB_INFO, "Changed directory to '%s'.", dir);
+    return result == 0;
+#endif
+}
+
+const char* gfu_nob_get_cwd() {
+    char buffer[4096] = {0};
+
+#ifdef _WIN32
+    DWORD result = GetCurrentDirectory(4096, buffer);
+    if (0 == result) {
+        DWORD last_error = GetLastError();
+        nob_log(NOB_ERROR, "Failed to get the CWD.");
+        return NULL;
+    }
+#else
+    if (NULL == getcwd(buffer, 4096)) {
+        nob_log(NOB_ERROR, "Failed to get the CWD.");
+        return NULL;
+    }
+#endif
+
+    return nob_temp_sprintf("%s", buffer);
+}
 
 bool gfu_nob_read_entire_dir_recursive(const char* dir, Nob_File_Paths* paths) {
     bool result = true;

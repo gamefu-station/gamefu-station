@@ -408,6 +408,7 @@ typedef struct {
     const char **items;
     size_t count;
     size_t capacity;
+    const char* directory;
 } Nob_Cmd;
 
 // Example:
@@ -918,7 +919,7 @@ Nob_Proc nob_cmd_run_async_redirect(Nob_Cmd cmd, Nob_Cmd_Redirect redirect)
     // cmd_render is for logging primarily
     nob_cmd_render(cmd, &sb);
     nob_sb_append_null(&sb);
-    BOOL bSuccess = CreateProcessA(NULL, sb.items, NULL, NULL, TRUE, 0, NULL, NULL, &siStartInfo, &piProcInfo);
+    BOOL bSuccess = CreateProcessA(NULL, sb.items, NULL, NULL, TRUE, 0, NULL, cmd.directory, &siStartInfo, &piProcInfo);
     nob_sb_free(sb);
 
     if (!bSuccess) {
@@ -979,6 +980,7 @@ Nob_Proc nob_cmd_run_async_and_reset(Nob_Cmd *cmd)
 {
     Nob_Proc proc = nob_cmd_run_async(*cmd);
     cmd->count = 0;
+    cmd->directory = NULL;
     return proc;
 }
 
@@ -986,6 +988,7 @@ Nob_Proc nob_cmd_run_async_redirect_and_reset(Nob_Cmd *cmd, Nob_Cmd_Redirect red
 {
     Nob_Proc proc = nob_cmd_run_async_redirect(*cmd, redirect);
     cmd->count = 0;
+    cmd->directory = NULL;
     if (redirect.fdin) {
         nob_fd_close(*redirect.fdin);
         *redirect.fdin = NOB_INVALID_FD;
