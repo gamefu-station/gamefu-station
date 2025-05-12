@@ -53,9 +53,17 @@ bool link_exe(const char* exe, Nob_File_Paths* obj_files, Nob_File_Paths* lib_fi
 
     Nob_Cmd cmd = {0};
 
-    int rebuild_status = nob_needs_rebuild(exe, obj_files->items, obj_files->count);
-    if (rebuild_status < 0) nob_return_defer(false);
-    if (0 == rebuild_status) nob_return_defer(true);
+    if (nob_file_exists(exe)) {
+        int rebuild_status = nob_needs_rebuild(exe, obj_files->items, obj_files->count);
+        if (rebuild_status < 0) nob_return_defer(false);
+
+        if (0 == rebuild_status) {
+            rebuild_status = nob_needs_rebuild(exe, lib_files->items, lib_files->count);
+            if (rebuild_status < 0) nob_return_defer(false);
+        }
+
+        if (0 == rebuild_status) nob_return_defer(true);
+    }
 
     gfu_nob_ld(&cmd);
     gfu_nob_ld_output(&cmd, exe);

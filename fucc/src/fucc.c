@@ -10,6 +10,9 @@ int main(int argc, char** argv) {
 
     context = choir_context_create();
 
+    choir_diag_issue(context, CHOIR_INFO, "Hello, FUCC, from Choir diagnostics!");
+    choir_diag_issue(context, CHOIR_FATAL, "Now die");
+
 defer:
     choir_context_destroy(context);
     return result;
