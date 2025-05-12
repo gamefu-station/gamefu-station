@@ -53,17 +53,9 @@ bool link_exe(const char* exe, Nob_File_Paths* obj_files, Nob_File_Paths* lib_fi
 
     Nob_Cmd cmd = {0};
 
-    if (nob_file_exists(exe)) {
-        int rebuild_status = nob_needs_rebuild(exe, obj_files->items, obj_files->count);
-        if (rebuild_status < 0) nob_return_defer(false);
-
-        if (0 == rebuild_status) {
-            rebuild_status = nob_needs_rebuild(exe, lib_files->items, lib_files->count);
-            if (rebuild_status < 0) nob_return_defer(false);
-        }
-
-        if (0 == rebuild_status) nob_return_defer(true);
-    }
+    int rebuild_status = nob_needs_rebuild(exe, obj_files->items, obj_files->count);
+    if (rebuild_status < 0) nob_return_defer(false);
+    if (0 == rebuild_status) nob_return_defer(true);
 
     gfu_nob_ld(&cmd);
     gfu_nob_ld_output(&cmd, exe);
@@ -248,6 +240,7 @@ int main(int argc, char** argv) {
 
     fuld.name = "fuld";
     fuld.kind = BUILD_EXE;
+    gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fuld/lib", ".c", &fuld.source_paths));
     gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fuld/src", ".c", &fuld.source_paths));
     nob_da_append(&fuld.include_paths, "include");
     nob_da_append(&fuld.include_paths, "third-party/kos");
@@ -257,6 +250,7 @@ int main(int argc, char** argv) {
 
     fuasm.name = "fuasm";
     fuasm.kind = BUILD_EXE;
+    gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fuasm/lib", ".c", &fuasm.source_paths));
     gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fuasm/src", ".c", &fuasm.source_paths));
     nob_da_append(&fuasm.include_paths, "include");
     nob_da_append(&fuasm.include_paths, "third-party/kos");
@@ -266,8 +260,9 @@ int main(int argc, char** argv) {
 
     fucc.name = "fucc";
     fucc.kind = BUILD_EXE;
-    gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fuld/src", ".c", &fucc.source_paths));
-    gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fuasm/src", ".c", &fucc.source_paths));
+    gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fuld/lib", ".c", &fucc.source_paths));
+    gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fuasm/lib", ".c", &fucc.source_paths));
+    gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fucc/lib", ".c", &fucc.source_paths));
     gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fucc/src", ".c", &fucc.source_paths));
     nob_da_append(&fucc.include_paths, "include");
     nob_da_append(&fucc.include_paths, "third-party/kos");
