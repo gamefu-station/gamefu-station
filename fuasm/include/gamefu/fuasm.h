@@ -31,5 +31,6 @@ typedef struct fuasm_translation_unit {
 
 const char* fuasm_token_kind_name_get(fuasm_token_kind kind);
 fuasm_token fuasm_read_token(fuasm_lexer* lexer);
+void guasm_assemble();
 
 #endif /* GAMEFU_FUASM_H_ */
