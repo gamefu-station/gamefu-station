@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     {
         FILE* f = fopen(input_files[i], "rb");
         if (f == nullptr) {
-            choir_diag_issue(context, CHOIR_ERROR, "Failed to open ELF object file '%s'.", input_files[i]);
+            choir_diag_issue(context, CHOIR_ERROR, "Failed to open input ELF object file '%s'.", input_files[i]);
             kos_return_defer(1);
         }
 
@@ -47,15 +47,30 @@ int main(int argc, char** argv) {
         fclose(f);
 
         if (!success) {
-            choir_diag_issue(context, CHOIR_ERROR, "Failed to read ELF object file '%s'.", input_files[i]);
+            choir_diag_issue(context, CHOIR_ERROR, "Failed to read input ELF object file '%s'.", input_files[i]);
             kos_return_defer(1);
         }
 
-        gfu_elf_debug_print(&elf_data[i]);
+        f = fopen(output_file, "wb");
+        if (f == nullptr) {
+            choir_diag_issue(context, CHOIR_ERROR, "Failed to open output ELF object file '%s'.", output_file);
+            kos_return_defer(1);
+        }
+
+        success = gfu_elf_to_file(&elf_data[i], f);
+        fclose(f);
+
+        if (!success) {
+            choir_diag_issue(context, CHOIR_ERROR, "Failed to write output ELF object file '%s'.", output_file);
+            kos_return_defer(1);
+        }
+
+        //gfu_elf_debug_print(&elf_data[i]);
 
         //fprintf(stderr, ";; ELF Hexdump for '%s'\n", input_files[i]);
         //kos_hexdump(elf_data[i].raw.file_data, (ssize_t)elf_data[i].raw.data_size);
 
+        /*
         for (uint32_t j = 0; j < elf_data[i].segment_count; j++) {
             fprintf(stderr, ";; Segment 0x%04X for '%s'\n", elf_data[i].segments[j].type, input_files[i]);
             kos_hexdump(elf_data[i].segments[j].data, (ssize_t)elf_data[i].segments[j].data_size);
@@ -67,6 +82,7 @@ int main(int argc, char** argv) {
             kos_hexdump(elf_data[i].sections[j].data, (ssize_t)elf_data[i].sections[j].data_size);
             fprintf(stderr, "\n");
         }
+        */
     }
 
 defer:;

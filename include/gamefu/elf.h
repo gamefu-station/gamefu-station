@@ -224,6 +224,7 @@ typedef struct gfu_elf_raw {
 
 typedef struct gfu_elf_segment {
     uint32_t offset;
+    uint32_t data_size;
 
     uint32_t type;
     uint32_t virtual_address;
@@ -231,13 +232,13 @@ typedef struct gfu_elf_segment {
     uint32_t memory_size;
     uint32_t flags;
     uint32_t align;
-
-    uint32_t data_size;
-    char* data;
 } gfu_elf_segment;
 
 typedef struct gfu_elf_section {
     uint32_t offset;
+
+    uint16_t owning_segment;
+    uint32_t name_index;
 
     const char* name;
     uint32_t type;
@@ -246,6 +247,7 @@ typedef struct gfu_elf_section {
     uint32_t link;
     uint32_t info;
     uint32_t align;
+    uint32_t entry_size;
 
     uint32_t data_size;
     char* data;
@@ -257,6 +259,7 @@ typedef struct gfu_elf {
     uint8_t endianness;
     uint32_t flags;
     uint32_t entry;
+    uint16_t name_table_index;
 
     uint32_t segment_count;
     gfu_elf_segment* segments;
@@ -269,6 +272,7 @@ bool gfu_elf_from_file(gfu_elf* elf, FILE* f);
 bool gfu_elf_from_bytes(gfu_elf* elf, char* data, size_t size);
 void gfu_elf_free(gfu_elf* elf);
 void gfu_elf_debug_print(gfu_elf* elf);
+bool gfu_elf_to_file(gfu_elf* elf, FILE* f);
 
 #endif /* GAMEFU_ELF_H_ */
 
@@ -385,6 +389,7 @@ bool gfu_elf_from_bytes(gfu_elf* elf, char* data, size_t size) {
     elf->segments = calloc((size_t)elf->segment_count, sizeof *elf->segments);
     elf->section_count = header->sh_count;
     elf->sections = calloc((size_t)elf->section_count, sizeof *elf->sections);
+    elf->name_table_index = header->sh_names_index;
 
     const char* name_table;
     {
@@ -397,16 +402,37 @@ bool gfu_elf_from_bytes(gfu_elf* elf, char* data, size_t size) {
         gfu_elf_segment* segment = &elf->segments[i];
 
         segment->offset = entry->offset;
-
+        segment->type = entry->type;
+        segment->virtual_address = entry->virtual_address;
+        segment->physical_address = entry->physical_address;
         segment->data_size = entry->file_size;
-        segment->data = data_start + entry->offset;
+        segment->flags = entry->flags;
+        segment->align = entry->align;
+
+        //segment->data_size = entry->file_size;
+        //segment->data = data_start + entry->offset;
     }
 
     for (uint32_t i = 0; i < elf->section_count; i++) {
         gfu_elf_sh_entry* entry = &elf->raw.sections[i];
         gfu_elf_section* section = &elf->sections[i];
 
+        for (uint16_t j = 0; j < elf->segment_count; j++) {
+            if (entry->offset >= elf->segments[j].offset && entry->offset + entry->size <= elf->segments[j].offset + elf->segments[j].data_size) {
+                section->owning_segment = j;
+                break;
+            }
+        }
+
+        section->name_index = entry->name_index;
         section->name = &name_table[entry->name_index];
+        section->type = entry->type;
+        section->flags = entry->flags;
+        section->virtual_address = entry->virtual_address;
+        section->link = entry->link;
+        section->info = entry->info;
+        section->align = entry->align;
+        section->entry_size = entry->entry_size;
 
         section->data_size = entry->size;
         section->data = data_start + entry->offset;
@@ -476,6 +502,138 @@ void gfu_elf_debug_print(gfu_elf* elf) {
         fprintf(stderr, "%02X ", elf->raw.sections[i].entry_size);
         fprintf(stderr, "\n");
     }
+}
+
+bool gfu_elf_to_file(gfu_elf* elf, FILE* f) {
+    // TODO(local): define actual implementation for HOSTTOELF2 and HOSTTOELF4
+#define HOSTTOELF2(Value) (Value)
+#define HOSTTOELF4(Value) (Value)
+#define WRITE1(Value) do { fputc((Value), f); } while (0)
+#define WRITE2(Value) do { uint16_t v = HOSTTOELF2(Value); fputc(v & 0xFF, f); fputc((v >> 8) & 0xFF, f); } while (0)
+#define WRITE4(Value) do { uint32_t v = HOSTTOELF4(Value); fputc(v & 0xFF, f); fputc((v >> 8) & 0xFF, f); fputc((v >> 16) & 0xFF, f); fputc((v >> 24) & 0xFF, f); } while (0)
+
+    uint32_t header_size = sizeof(gfu_elf_header);
+
+    uint32_t ph_offset = 0;
+    if (elf->segment_count != 0) {
+        ph_offset = header_size;
+    }
+
+    uint32_t sh_offset = 0;
+    if (elf->section_count != 0) {
+        sh_offset = elf->segment_count * sizeof(gfu_elf_ph_entry);
+        if (ph_offset != 0) {
+            sh_offset += ph_offset;
+        } else {
+            sh_offset += header_size;
+        }
+    }
+
+    uint32_t soffset = sh_offset + elf->section_count * sizeof(gfu_elf_sh_entry);
+    for (size_t i = 0; i < elf->segment_count; i++) {
+        elf->segments[i].offset = soffset;
+        for (size_t j = 0; j < elf->section_count; j++) {
+            if (elf->sections[j].owning_segment == i) {
+                elf->sections[j].offset = soffset;
+                soffset += elf->sections[j].data_size;
+                soffset = (uint32_t)kos_align_to((isize)soffset, 4);
+            }
+        }
+    }
+
+    for (size_t j = 0; j < elf->section_count; j++) {
+        if (elf->sections[j].owning_segment >= elf->segment_count) {
+            elf->sections[j].offset = soffset;
+            soffset += elf->sections[j].data_size;
+            soffset = (uint32_t)kos_align_to((isize)soffset, 4);
+        }
+    }
+
+    uint16_t sh_name_index = elf->name_table_index;
+    uint32_t total_size = soffset;
+
+    assert(header_size % 4 == 0);
+    assert(ph_offset % 4 == 0);
+    assert(sh_offset % 4 == 0);
+    assert(total_size % 4 == 0);
+
+    WRITE1(0x7F);
+    WRITE1(0x45);
+    WRITE1(0x4C);
+    WRITE1(0x46);
+
+    WRITE1(1); // class
+    WRITE1(elf->endianness); // endianness
+    WRITE1(1); // version
+    WRITE1(0x22); // abi
+    WRITE1(0x23); // abi_version
+    for (int i = 0; i < 7; i++) WRITE1(0);
+    WRITE2(GFU_ELF_TYPE_REL); // type
+    WRITE2(0x08); // machine
+    WRITE4(1); // version2
+    WRITE4(elf->entry); // entry
+    WRITE4(ph_offset); // ph_offset
+    WRITE4(sh_offset); // sh_offset
+    WRITE4(elf->flags); // flags
+    WRITE2(header_size); // header_size
+    if (elf->segment_count != 0)
+        WRITE2(sizeof(gfu_elf_ph_entry)); // ph_entry_size
+    else WRITE2(0);
+    WRITE2(elf->segment_count); // ph_count
+    if (elf->section_count != 0)
+        WRITE2(sizeof(gfu_elf_sh_entry)); // sh_entry_size
+    else WRITE2(0);
+    WRITE2(elf->section_count); // sh_count
+    WRITE2(sh_name_index); // sh_names_index
+
+    if (elf->segment_count != 0) {
+        assert(ftell(f) == (int64_t)ph_offset);
+        for (size_t i = 0; i < elf->segment_count; i++) {
+            gfu_elf_segment* segment = &elf->segments[i];
+            assert(ftell(f) == (int64_t)segment->offset);
+            WRITE4(segment->type);
+            WRITE4(segment->offset);
+            WRITE4(segment->virtual_address);
+            WRITE4(segment->physical_address);
+            WRITE4(segment->data_size); // file_size
+            WRITE4(segment->data_size); // memory_size
+            WRITE4(segment->flags);
+            WRITE4(segment->align);
+        }
+    }
+
+    if (elf->section_count != 0) {
+        assert(ftell(f) == (int64_t)sh_offset);
+        for (size_t i = 0; i < elf->section_count; i++) {
+            gfu_elf_section* section = &elf->sections[i];
+            WRITE4(section->name_index);
+            WRITE4(section->type);
+            WRITE4(section->flags);
+            WRITE4(section->virtual_address);
+            WRITE4(section->offset);
+            WRITE4(section->data_size); // size
+            WRITE4(section->link);
+            WRITE4(section->info);
+            WRITE4(section->align);
+            WRITE4(section->entry_size);
+        }
+    }
+
+    for (size_t i = 0; i < elf->section_count; i++) {
+        gfu_elf_section* section = &elf->sections[i];
+        assert(ftell(f) == (int64_t)section->offset);
+        fwrite(section->data, (size_t)section->data_size, 1, f);
+        isize padding = kos_align_padding((isize)section->data_size, 4);
+        for (isize i = 0; i < padding; i++) fputc(0, f);
+    }
+
+#undef WRITE4
+#undef WRITE2
+#undef WRITE1
+#undef HOSTTOELF4
+#undef HOSTTOELF2
+
+    return true;
 }
 
 #endif /* GFU_ELF_IMPL */
