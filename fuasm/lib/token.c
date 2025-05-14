@@ -1,4 +1,4 @@
-#include <gamefu/fuasm.h>
+#include "lexer_internal.h"
 
 const char* fuasm_token_kind_name_get(fuasm_token_kind kind) {
     switch (kind) {

@@ -1,4 +1,5 @@
 #include <gamefu/fuasm.h>
+#include "lexer_internal.h"
 
 static struct {
     kos_string_view image;

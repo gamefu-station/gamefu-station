@@ -1,5 +1,7 @@
 #define KOS_IMPL
 #include <kos.h>
+#define GFU_ELF_IMPL
+#include <gamefu/elf.h>
 
 #include <choir/core.h>
 #include <gamefu/fuasm.h>
@@ -24,15 +26,12 @@ int main(int argc, char** argv) {
         kos_return_defer(1);
     }
 
-    fuasm_lexer lexer = {
+    fuasm_translation_unit unit = {
         .context = context,
         .source = source,
     };
 
-    fuasm_token token = {0};
-    while (token = fuasm_read_token(&lexer), token.kind != FUASM_TK_END_OF_FILE) {
-        choir_diag_issue_source_bytes(context, CHOIR_INFO, source, token.begin, "%s", fuasm_token_kind_name_get(token.kind));
-    }
+    fuasm_assemble(&unit);
 
 defer:
     choir_context_destroy(context);
