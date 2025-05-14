@@ -120,11 +120,11 @@ fuasm_token fuasm_read_token(fuasm_lexer* lexer) {
                     advance(lexer);
                 }
 
+                result.text_value = kos_sv(choir_source_text_get(lexer->source, nullptr) + result.begin, lexer->position - result.begin);
                 if (current(lexer) == ':') {
                     advance(lexer);
                     result.kind = is_local_label ? FUASM_TK_LOCAL_LABEL : FUASM_TK_GLOBAL_LABEL;
                 } else {
-                    result.text_value = kos_sv(choir_source_text_get(lexer->source, nullptr) + result.begin, lexer->position - result.begin);
                     for (isize i = 0; 0 != keywords[i].kind; i++) {
                         if (kos_sv_equals(keywords[i].image, result.text_value)) {
                             result.kind = keywords[i].kind;

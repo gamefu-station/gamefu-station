@@ -10,7 +10,8 @@
 #    define nob_cc_flags(cmd) nob_cmd_append((cmd), "-std=c23", "-Wall", "-Wextra", \
          "-Wno-unused", "-Wno-gnu-zero-variadic-macro-arguments", "-Wno-trigraphs", \
          "-Wno-unused-parameter", "-Wno-unused-function", "-Wno-unused-variable",   \
-         "-Werror", "-ggdb", "-Werror=return-type", "-pedantic", "-pedantic-errors", "-fsanitize=address")
+         "-Werror", "-ggdb", "-Werror=return-type", "-pedantic", "-pedantic-errors", "-fsanitize=address", \
+         "-D_CRT_SECURE_NO_WARNINGS")
 #endif
 
 #if defined(_MSC_VER)

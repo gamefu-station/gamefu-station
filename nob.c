@@ -244,6 +244,7 @@ int main(int argc, char** argv) {
     gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fuld/src", ".c", &fuld.source_paths));
     nob_da_append(&fuld.include_paths, "include");
     nob_da_append(&fuld.include_paths, "third-party/kos");
+    nob_da_append(&fuld.include_paths, "third-party/elf");
     nob_da_append(&fuld.include_paths, "third-party/choir/include");
     nob_da_append(&fuld.include_paths, "fuld/include");
     nob_da_append(&fuld.libraries, gfu_nob_lib_a("third-party/choir/.build/libchoir"));
@@ -254,6 +255,7 @@ int main(int argc, char** argv) {
     gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fuasm/src", ".c", &fuasm.source_paths));
     nob_da_append(&fuasm.include_paths, "include");
     nob_da_append(&fuasm.include_paths, "third-party/kos");
+    nob_da_append(&fuasm.include_paths, "third-party/elf");
     nob_da_append(&fuasm.include_paths, "third-party/choir/include");
     nob_da_append(&fuasm.include_paths, "fuasm/include");
     nob_da_append(&fuasm.libraries, gfu_nob_lib_a("third-party/choir/.build/libchoir"));
@@ -266,6 +268,7 @@ int main(int argc, char** argv) {
     gfu_nob_try(1, gfu_nob_read_entire_dir_recursive_ext("fucc/src", ".c", &fucc.source_paths));
     nob_da_append(&fucc.include_paths, "include");
     nob_da_append(&fucc.include_paths, "third-party/kos");
+    nob_da_append(&fucc.include_paths, "third-party/elf");
     nob_da_append(&fucc.include_paths, "third-party/choir/include");
     nob_da_append(&fucc.include_paths, "fuld/include");
     nob_da_append(&fucc.include_paths, "fuasm/include");
@@ -278,6 +281,7 @@ int main(int argc, char** argv) {
     nob_da_append(&gfusx.include_paths, "include");
     nob_da_append(&gfusx.include_paths, "gfusx/include");
     nob_da_append(&gfusx.include_paths, "third-party/kos");
+    nob_da_append(&gfusx.include_paths, "third-party/elf");
     nob_da_append(&gfusx.include_paths, "gfusx/include");
 
     gfu_nob_try(1, nob_mkdir_if_not_exists(".build"));

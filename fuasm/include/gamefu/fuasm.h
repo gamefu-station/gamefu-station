@@ -8,7 +8,6 @@
 typedef struct fuasm_translation_unit {
     choir_context_ref context;
     choir_source_ref source;
-    gfu_elf elf;
 } fuasm_translation_unit;
 
 void fuasm_assemble(fuasm_translation_unit* unit);

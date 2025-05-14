@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
 
     const char* output_file = "a.o";
     const char* input_files[INPUT_FILE_MAX] = {0};
-    gfu_elf elf_data[INPUT_FILE_MAX] = {0};
+    elf32_raw elf32_data[INPUT_FILE_MAX] = {0};
     ssize_t input_file_count = 0;
 
     context = choir_context_create();
@@ -37,57 +37,12 @@ int main(int argc, char** argv) {
 
     for (ssize_t i = 0; i < input_file_count; i++)
     {
-        FILE* f = fopen(input_files[i], "rb");
-        if (f == nullptr) {
-            choir_diag_issue(context, CHOIR_ERROR, "Failed to open input ELF object file '%s'.", input_files[i]);
-            kos_return_defer(1);
-        }
-
-        bool success = gfu_elf_from_file(&elf_data[i], f);
-        fclose(f);
-
-        if (!success) {
-            choir_diag_issue(context, CHOIR_ERROR, "Failed to read input ELF object file '%s'.", input_files[i]);
-            kos_return_defer(1);
-        }
-
-        f = fopen(output_file, "wb");
-        if (f == nullptr) {
-            choir_diag_issue(context, CHOIR_ERROR, "Failed to open output ELF object file '%s'.", output_file);
-            kos_return_defer(1);
-        }
-
-        success = gfu_elf_to_file(&elf_data[i], f);
-        fclose(f);
-
-        if (!success) {
-            choir_diag_issue(context, CHOIR_ERROR, "Failed to write output ELF object file '%s'.", output_file);
-            kos_return_defer(1);
-        }
-
-        //gfu_elf_debug_print(&elf_data[i]);
-
-        //fprintf(stderr, ";; ELF Hexdump for '%s'\n", input_files[i]);
-        //kos_hexdump(elf_data[i].raw.file_data, (ssize_t)elf_data[i].raw.data_size);
-
-        /*
-        for (uint32_t j = 0; j < elf_data[i].segment_count; j++) {
-            fprintf(stderr, ";; Segment 0x%04X for '%s'\n", elf_data[i].segments[j].type, input_files[i]);
-            kos_hexdump(elf_data[i].segments[j].data, (ssize_t)elf_data[i].segments[j].data_size);
-            fprintf(stderr, "\n");
-        }
-
-        for (uint32_t j = 0; j < elf_data[i].section_count; j++) {
-            fprintf(stderr, ";; Section %s (0x%04X) for '%s'\n", elf_data[i].sections[j].name, elf_data[i].raw.sections[j].name_index, input_files[i]);
-            kos_hexdump(elf_data[i].sections[j].data, (ssize_t)elf_data[i].sections[j].data_size);
-            fprintf(stderr, "\n");
-        }
-        */
+        elf32_data[i] = elf32_read_raw_from_file(input_files[i]);
     }
 
 defer:;
     for (ssize_t i = 0; i < input_file_count; i++)
-        gfu_elf_free(&elf_data[i]);
+        elf32_raw_free(&elf32_data[i]);
 
     choir_context_destroy(context);
     return result;
