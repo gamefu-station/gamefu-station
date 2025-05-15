@@ -4,7 +4,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 
-void gfu_nob_cmd_append_cc(Nob_Cmd* cmd);
 #define nob_cc(cmd) gfu_nob_cmd_append_cc(cmd)
 
 #if defined(_MSC_VER) && !defined(__clang__)
@@ -88,6 +87,8 @@ void gfu_nob_cmd_append_cc(Nob_Cmd* cmd);
 #endif
 
 #include "nob.h"
+
+void gfu_nob_cmd_append_cc(Nob_Cmd* cmd);
 
 #define gfu_nob_try(Result, Expr) do { if (!(Expr)) nob_return_defer(Result); } while (0)
 #define gfu_nob_try_int(Result, Expr) do { if (0 != (Expr)) nob_return_defer(Result); } while (0)
