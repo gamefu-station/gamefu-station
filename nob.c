@@ -57,11 +57,11 @@ bool link_exe(const char* exe, Nob_File_Paths* obj_files, Nob_File_Paths* lib_fi
     if (rebuild_status < 0) nob_return_defer(false);
     if (0 == rebuild_status) nob_return_defer(true);
 
-    gfu_nob_ld(&cmd);
-    gfu_nob_ld_output(&cmd, exe);
+    nob_cc(&cmd);
+    nob_cc_output(&cmd, exe);
     nob_da_append_many(&cmd, obj_files->items, obj_files->count);
     nob_da_append_many(&cmd, lib_files->items, lib_files->count);
-    gfu_nob_ld_flags(&cmd);
+    //gfu_nob_ld_flags(&cmd);
 
     if (!nob_cmd_run_sync(cmd)) {
         nob_return_defer(false);

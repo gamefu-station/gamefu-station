@@ -2,6 +2,7 @@
 #define ELF_SINGLE_H_
 
 #include <stdint.h>
+#include <errno.h>
 
 #define ELF_MAG0 (0x7F)
 #define ELF_MAG1 ('E')

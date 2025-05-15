@@ -12,7 +12,7 @@
 #    define nob_cc_flags(cmd) nob_cmd_append((cmd), "-std=c23", "-Wall", "-Wextra", \
          "-Wno-unused", "-Wno-gnu-zero-variadic-macro-arguments", "-Wno-trigraphs", \
          "-Wno-unused-parameter", "-Wno-unused-function", "-Wno-unused-variable",   \
-         "-Werror", "-ggdb", "-Werror=return-type", "-pedantic", "-pedantic-errors", "-fsanitize=address", \
+         "-Werror", "-ggdb", "-Werror=return-type", "-pedantic", "-pedantic-errors", \
          "-D_CRT_SECURE_NO_WARNINGS")
 #endif
 
@@ -48,12 +48,12 @@
 
 #if defined(_MSC_VER)
 #    if defined(__clang__)
-#        define gfu_nob_ld_flags(cmd) nob_cmd_append((cmd), "-fsanitize=address")
+#        define gfu_nob_ld_flags(cmd)
 #    else
 #        define gfu_nob_ld_flags(cmd) nob_cmd_append((cmd), "/nologo")
 #    endif
 #else
-#    define gfu_nob_ld_flags(cmd) nob_cmd_append((cmd), "-fsanitize=address")
+#    define gfu_nob_ld_flags(cmd)
 #endif
 
 #if defined(_MSC_VER)
