@@ -146,14 +146,16 @@ bool gfu_nob_read_entire_dir_recursive(const char* dir, Nob_File_Paths* paths) {
         nob_return_defer(false);
     }
 
-    for (size_t i = 2; i < this_paths.count; i++) {
+    for (size_t i = 0; i < this_paths.count; i++) {
         const char* child_name = this_paths.items[i];
+        if (child_name[0] == '.') continue;
+
         const char* child_path = nob_temp_sprintf("%s/%s", dir, child_name);
 
         Nob_File_Type child_file_type = nob_get_file_type(child_path);
         if (child_file_type == NOB_FILE_DIRECTORY) {
             gfu_nob_read_entire_dir_recursive(child_path, paths);
-        } else if (child_name[0] != '.') {
+        } else {
             nob_da_append(paths, child_path);
         }
     }
@@ -170,14 +172,16 @@ bool gfu_nob_read_entire_dir_recursive_ext(const char* dir, const char* ext, Nob
         nob_return_defer(false);
     }
 
-    for (size_t i = 2; i < this_paths.count; i++) {
+    for (size_t i = 0; i < this_paths.count; i++) {
         const char* child_name = this_paths.items[i];
+        if (child_name[0] == '.') continue;
+
         const char* child_path = nob_temp_sprintf("%s/%s", dir, child_name);
 
         Nob_File_Type child_file_type = nob_get_file_type(child_path);
         if (child_file_type == NOB_FILE_DIRECTORY) {
             gfu_nob_read_entire_dir_recursive_ext(child_path, ext, paths);
-        } else if (child_name[0] != '.' && nob_sv_end_with(nob_sv_from_cstr(child_name), ext)) {
+        } else if (nob_sv_end_with(nob_sv_from_cstr(child_name), ext)) {
             nob_da_append(paths, child_path);
         }
     }
