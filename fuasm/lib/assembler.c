@@ -3,14 +3,37 @@
 #include <gamefu/fuasm.h>
 #include "lexer_internal.h"
 
+static struct {
+    kos_string_view name;
+    gfu_elf_section_kind kind;
+} section_map[] = {
+    {KOS_SV_CONST("init"), GFU_ELF_SECT_INIT},
+    {KOS_SV_CONST("fini"), GFU_ELF_SECT_FINI},
+    {KOS_SV_CONST("ctor"), GFU_ELF_SECT_CTOR},
+    {KOS_SV_CONST("dtor"), GFU_ELF_SECT_DTOR},
+    {KOS_SV_CONST("text"), GFU_ELF_SECT_TEXT},
+    {KOS_SV_CONST("bss"), GFU_ELF_SECT_BSS},
+    {KOS_SV_CONST("data"), GFU_ELF_SECT_DATA},
+    {KOS_SV_CONST("rodata"), GFU_ELF_SECT_RODATA},
+    {0},
+};
+
 typedef struct fuasm_instructions {
     KOS_DYNAMIC_ARRAY_FIELDS(u32);
 } fuasm_instructions;
 
+typedef struct fuasm_raw_bytes {
+    KOS_DYNAMIC_ARRAY_FIELDS(char);
+} fuasm_raw_bytes;
+
 typedef struct fuasm_section_info {
+    gfu_elf_section_kind kind;
     kos_string_view name;
     i64 size;
-    fuasm_instructions instructions;
+    union {
+        fuasm_instructions instructions;
+        fuasm_raw_bytes bytes;
+    };
 } fuasm_section_info;
 
 typedef struct fuasm_section_infos {
@@ -29,27 +52,6 @@ typedef struct fuasm_symbol_addr {
 typedef struct fuasm_symbol_addrs {
     KOS_DYNAMIC_ARRAY_FIELDS(fuasm_symbol_addr);
 } fuasm_symbol_addrs;
-
-typedef enum fuasm_operand_kind {
-    FUASM_OPERAND_REG,
-    FUASM_OPERAND_IMM,
-} fuasm_operand_kind;
-
-typedef struct fuasm_operand {
-    fuasm_operand_kind kind;
-    ssize_t begin, end;
-    union {
-        gfu_register reg;
-        u32 imm;
-    };
-} fuasm_operand;
-
-typedef struct fuasm_statement {
-    fuasm_token label;
-    fuasm_token mnemonic;
-    ssize_t addr;
-    fuasm_operand operands[3];
-} fuasm_statement;
 
 typedef struct fuasm_assembler {
     fuasm_translation_unit* unit;
@@ -119,6 +121,23 @@ void fuasm_assemble(fuasm_translation_unit* unit) {
         fprintf(stderr, "Section '"KOS_STR_FMT"'\n", KOS_STR_ARG(asm.sections.data[i].name));
         kos_hexdump(kos_cast(const char*) asm.sections.data[i].instructions.data, 4 * asm.sections.data[i].instructions.count);
     }
+
+    for (ssize_t i = 0; i < asm.sections.count; i++) {
+        fuasm_section_info* section = &asm.sections.data[i];
+        if (section->kind == GFU_ELF_SECT_TEXT) {
+            choir_assert(unit->context, 4 * section->instructions.count == section->size, "you fucked up");
+            unit->section_text.kind = GFU_ELF_SECT_TEXT;
+            unit->section_text.size = 4 * section->instructions.count;
+            unit->section_text.data = malloc((size_t)unit->section_text.size);
+            memcpy(unit->section_text.data, section->instructions.data, (size_t)unit->section_text.size);
+        } else {
+            choir_diag_issue(unit->context, CHOIR_REMARK, "Unused section '"KOS_STR_FMT"'.", KOS_STR_ARG(section->name));
+        }
+    }
+
+    kos_da_dealloc(&asm.sections);
+    kos_da_dealloc(&asm.symbols);
+    kos_da_dealloc(&asm.tokens);
 }
 
 static int mnemonic_instruction_count(fuasm_token_kind kind) {
@@ -297,7 +316,7 @@ static void precalculate_symbol_addresses(fuasm_assembler* asm) {
         bool is_at_label_def = is_at(asm, FUASM_TK_GLOBAL_LABEL) || is_at(asm, FUASM_TK_LOCAL_LABEL);
         if (is_at_label_def && asm->sections.count == 0) {
             current_section_index = 0;
-            kos_da_push(&asm->sections, ((fuasm_section_info){ .name = KOS_SV_CONST("text") }));
+            kos_da_push(&asm->sections, ((fuasm_section_info){ .kind = GFU_ELF_SECT_TEXT, .name = KOS_SV_CONST("text") }));
         }
 
         fuasm_section_info* section = &asm->sections.data[current_section_index];
@@ -333,7 +352,17 @@ static void precalculate_symbol_addresses(fuasm_assembler* asm) {
             advance(asm);
             ct = expect(asm, FUASM_TK_GLOBAL_LABEL, "a section name");
 
-            // TODO(local): Error if an invalid section name is provided.
+            gfu_elf_section_kind kind = GFU_ELF_SECT_NULL;
+            for (ssize_t i = 0; kind == GFU_ELF_SECT_NULL && section_map[i].kind != 0; i++) {
+                if (kos_sv_equals(section_map[i].name, ct.text_value)) {
+                    kind = section_map[i].kind;
+                }
+            }
+
+            if (kind == GFU_ELF_SECT_NULL) {
+                choir_diag_issue_source_bytes(asm->unit->context, CHOIR_ERROR, asm->unit->source, ct.begin, "Invalid section name.");
+                exit(1);
+            }
 
             bool redefined_section = false;
             for (ssize_t i = 0; i < asm->sections.count; i++) {
@@ -349,7 +378,7 @@ static void precalculate_symbol_addresses(fuasm_assembler* asm) {
             }
 
             current_section_index = asm->sections.count;
-            kos_da_push(&asm->sections, ((fuasm_section_info){ .name = ct.text_value }));
+            kos_da_push(&asm->sections, ((fuasm_section_info){ .kind = kind, .name = ct.text_value }));
 
             goto next_instruction;
         }
@@ -361,7 +390,7 @@ static void precalculate_symbol_addresses(fuasm_assembler* asm) {
 
         if (asm->sections.count == 0) {
             current_section_index = 0;
-            kos_da_push(&asm->sections, ((fuasm_section_info){ .name = KOS_SV_CONST("text") }));
+            kos_da_push(&asm->sections, ((fuasm_section_info){ .kind = GFU_ELF_SECT_TEXT, .name = KOS_SV_CONST("text") }));
             section = &asm->sections.data[current_section_index];
         }
 
@@ -408,6 +437,8 @@ static void read_statement(fuasm_assembler* asm) {
             choir_diag_issue_source_bytes(asm->unit->context, CHOIR_ERROR, asm->unit->source, current(asm).begin, "Unimplemented mnemonic.");
             exit(1);
         } break; // goto next_instruction_no_check;
+
+        case FUASM_TK_MN_SECTION: goto next_instruction_no_check;
 
         case FUASM_TK_MN_ADD: {
             advance(asm);
