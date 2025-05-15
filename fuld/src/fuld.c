@@ -35,9 +35,12 @@ int main(int argc, char** argv) {
 
     // TODO(local): check if the output file is part of the input list, that's probably not intended
 
-    for (ssize_t i = 0; i < input_file_count; i++)
-    {
+    for (ssize_t i = 0; i < input_file_count; i++) {
         elf32_data[i] = elf32_read_raw_from_file(input_files[i]);
+        if (elf32_data[i].error_message != nullptr) {
+            choir_diag_issue(context, CHOIR_ERROR, "Error reading ELF object '%s': %s\n", input_files[i], elf32_data[i].error_message);
+            kos_return_defer(1);
+        }
     }
 
 defer:;

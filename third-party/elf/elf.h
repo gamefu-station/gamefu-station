@@ -228,7 +228,7 @@ ELF_VERSIONS(X)
 } elf_version;
 
 #define ELF_OSABIS(X) \
-    X(NONE, 0) \
+    X(SYSV, 0) \
     X(GAMEFU, 69)
 
 typedef enum elf_osabi {
@@ -236,6 +236,31 @@ typedef enum elf_osabi {
 ELF_OSABIS(X)
 #undef X
 } elf_osabi;
+
+#define ELF_MIPS_RELOCATION_TYPES(X) \
+    X(NONE, 0) \
+    X(16, 1) \
+    X(32, 2) \
+    X(REL32, 3) \
+    X(26, 4) \
+    X(HI16, 5) \
+    X(LO16, 6) \
+    X(GPREL16, 7) \
+    X(LITERAL, 8) \
+    X(GOT16, 9) \
+    X(PC16, 10) \
+    X(CALL16, 11) \
+    X(GPREL32, 12) \
+    X(GOTHI16, 21) \
+    X(GOTLO16, 22) \
+    X(CALLHI16, 30) \
+    X(CALLLO16, 31)
+
+typedef enum elf_mips_relocation_types {
+#define X(id, val) ELF_R_MIPS_##id = (val),
+ELF_MIPS_RELOCATION_TYPES(X)
+#undef X
+} elf_mips_relocation_types;
 
 #define ELF32_ST_BIND(x) ((x) >> 4)
 #define ELF32_ST_TYPE(x) ((x) & 0x0F)
@@ -596,7 +621,7 @@ elf32_raw elf32_read_raw_from_file(const char* file_path) {
     char* data = malloc((size_t)file_size);
     if (data == NULL) RETURN_ERRMSG("Failed to allocate data buffer.");
 
-    size_t read_count = fread(data, (size_t)file_size, 1, f);
+    size_t read_count = fread(data, 1, (size_t)file_size, f);
     if (ferror(f)) RETURN_ERRMSG(strerror(errno));
 
     fclose(f);
@@ -646,7 +671,7 @@ elf32_raw elf32_read_raw_from_bytes(char* data, elf32_word size) {
         uint16_t endian_check = 0x0201;
         host_endian = *((uint8_t*)&endian_check);
     }
-    
+
 #define ELFTOHOST2(Value) (host_endian == elf_endian) ? (Value) : ((((Value) >> 8) & 0xFF) | (((Value) & 0xFF) << 8))
 #define ELFTOHOST4(Value) (host_endian == elf_endian) ? (Value) : ((((Value) >> 24) & 0xFF) | (((Value) >> 8) & 0xFF00) | (((Value) & 0xFF) << 24) | (((Value) & 0xFF00) << 8))
 #define READ2() (assert(data < data_end), data += 2, ELFTOHOST2(*(uint16_t*)(data - 2)))
@@ -665,20 +690,30 @@ elf32_raw elf32_read_raw_from_bytes(char* data, elf32_word size) {
     header->sh_entry_size = READ2();
     header->sh_count = READ2();
     header->sh_names_index = READ2();
-    
+
     assert(header->header_size == sizeof(elf32_header));
     assert(header->ph_entry_size == 0 || header->ph_entry_size == sizeof(elf32_segment_header));
     assert(header->sh_entry_size == 0 || header->sh_entry_size == sizeof(elf32_section_header));
 
     if (data_start + header->ph_offset + (header->ph_count * sizeof(elf32_segment_header)) > data_end)
-        RETURN_ERRMSG(0, "Not enough bytes for the ELF program header table.");
+        RETURN_ERRMSG(header->ph_offset, "Not enough bytes for the ELF program header table.");
 
     if (data_start + header->sh_offset + (header->sh_count * sizeof(elf32_section_header)) > data_end)
-        RETURN_ERRMSG(0, "Not enough bytes for the ELF section header table.");
+        RETURN_ERRMSG(header->sh_offset, "Not enough bytes for the ELF section header table.");
+
+    if (header->ph_count != 0) {
+        result.segments = malloc(header->ph_count * sizeof(elf32_segment_header));
+    }
+
+    if (header->sh_count != 0) {
+        result.sections = malloc(header->sh_count * sizeof(elf32_section_header));
+    }
 
     for (elf32_word i = 0; i < header->ph_count; i++) {
         data = data_start + header->ph_offset + (i * sizeof(elf32_segment_header));
+        assert(data + sizeof(elf32_segment_header) <= data_end);
         elf32_segment_header* entry = &result.segments[i];
+        assert(entry != nullptr);
         entry->type = READ4();
         entry->offset = READ4();
         entry->virtual_address = READ4();
@@ -691,7 +726,9 @@ elf32_raw elf32_read_raw_from_bytes(char* data, elf32_word size) {
 
     for (elf32_word i = 0; i < header->sh_count; i++) {
         data = data_start + header->sh_offset + (i * sizeof(elf32_section_header));
+        assert(data + sizeof(elf32_section_header) <= data_end);
         elf32_section_header* entry = &result.sections[i];
+        assert(entry != nullptr);
         entry->name_index = READ4();
         entry->type = READ4();
         entry->flags = READ4();

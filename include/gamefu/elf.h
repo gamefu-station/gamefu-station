@@ -27,21 +27,6 @@ GFU_ELF_SECTIONS(X)
 #undef X
 } gfu_elf_section_kind;
 
-typedef enum gfu_elf_relocation_type {
-    GFU_ELF_RELOCATION_RS,
-    GFU_ELF_RELOCATION_RT,
-    GFU_ELF_RELOCATION_RD,
-    GFU_ELF_RELOCATION_SHAMT,
-    GFU_ELF_RELOCATION_FUNCT,
-    GFU_ELF_RELOCATION_IMM,
-    GFU_ELF_RELOCATION_ADDR,
-    GFU_ELF_RELOCATION_CODE,
-    GFU_ELF_RELOCATION_SEL,
-} gfu_elf_relocation_type;
-
-#define GFU_ELF32_ST_RELKIND(x) ((x) >> 8)
-#define GFU_ELF32_ST_INFO(k, b, t) (((k) << 8) | (((b) & 0x0F) << 4) | ((t) & 0x0F))
-
 #endif /* GAMEFU_ELF_H_ */
 
 
