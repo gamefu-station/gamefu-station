@@ -7,11 +7,11 @@ mkdir -p bin
 if [ -z ${flags+x} ]; then flags=devcc; fi
 if [ -z ${gfusx_platform+x} ]; then gfusx_platform=GLFW; fi
 
-echo "Building GameFU HXD Utility..."
-cc -o hxd src/hxd.c @${flags}.txt
+echo "Building GameFU HX Utility..."
+cc -o bin/hx gfu-hx/hx.c @${flags}.txt
 
 echo "Building GameFU Assembler ISel Table Generator..."
-./hxd ./lib/fuasm.isel -i -n isel > ./iselgen/isel_source.h
+./bin/hx ./lib/fuasm.isel -i -n isel > ./iselgen/isel_source.h
 cc -o bin/iselgen iselgen/iselgen.c @${flags}.txt
 
 echo "Running GameFU Assembler ISel Table Generator..."
@@ -29,7 +29,7 @@ cc -o fuasm src/fuasm.c @${flags}.txt
 
 echo "Building GameFU Station BIOS..."
 ./fuasm -o bios.gfu lib/bios/boot.fus
-./hxd bios.gfu -i -n gfusx_default_bios > ./lib/gfusx/default_bios.h
+./bin/hx bios.gfu -i -n gfusx_default_bios > ./lib/gfusx/default_bios.h
 # rm bios.gfu # once it's in the include file we don't need the raw binary, de-clutter while we're here
 
 gfusx_platform_lib=""

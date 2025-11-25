@@ -1,5 +1,3 @@
-#include <gamefu/gamefu.h>
-
 #include <errno.h>
 #include <inttypes.h>
 #include <stdbool.h>
