@@ -1,0 +1,27 @@
+struct fu_device;
+
+struct fu_file {
+    unsigned word device_id;
+    unsigned word device_flags;
+    unsigned word fd;
+    unsigned word flags;
+    fu_device* device;
+    unsigned byte* buffer;
+    unsigned word count;
+    unsigned word offset;
+    unsigned word length;
+    unsigned word errno;
+    unsigned word lba;
+}
+
+struct fu_device {
+    const byte* name;
+    const byte* desc;
+
+    unsigned word flags;
+    unsigned word block_size;
+
+    void* userdata;
+
+    [word, word](void* userdata, fu_file* file, const byte* file_path, fu_file_mode mode);
+}

@@ -1,0 +1,6 @@
+%section text kernel.a0vec x #A0 #10
+
+gfu_a0_vector:
+    la t0, gfu_a0_handler
+    jr t0
+    nop

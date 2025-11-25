@@ -1,0 +1,4 @@
+%section data
+_fuKernelA0CallbackTable:
+    bytes #3FC
+%section text

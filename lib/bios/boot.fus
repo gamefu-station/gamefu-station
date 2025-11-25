@@ -1,0 +1,263 @@
+%address_space bios
+%entry reset
+
+reset:
+    ;; Set default RAM_SIZE to the "small", 4 MiB mode
+    li t0, #3F88
+    sh #1F801060, t0
+
+    j boot
+
+boot:
+    ;; Reset all the registers to zero
+    move at, zero
+    move r0, zero
+    move r1, zero
+    move a0, zero
+    move a1, zero
+    move a2, zero
+    move a3, zero
+    move t0, zero
+    move t1, zero
+    move t2, zero
+    move t3, zero
+    move t4, zero
+    move t5, zero
+    move t6, zero
+    move t7, zero
+    move s0, zero
+    move s1, zero
+    move s2, zero
+    move s3, zero
+    move s4, zero
+    move s5, zero
+    move s6, zero
+    move s7, zero
+    move t8, zero
+    move t9, zero
+    move k0, zero
+    move k1, zero
+    move gp, zero
+    move sp, zero
+    move fp, zero
+    move ra, zero
+    mthi zero
+    mtlo zero
+
+    ;; reset COP0
+    mtc0  3, 0
+    mtc0  5, 0
+    mtc0  6, 0
+    mtc0  7, 0
+    mtc0  9, 0
+    mtc0 11, 0
+    mtc0 12, 0
+    mtc0 13, 0
+
+    ;; Build the A0 system function table
+    la t0, gfu_a0_vector
+    li t1, #A0
+    lw t2, 0(t0) ; copy the first word of instructions
+    sw 0(t1), t2
+    lw t2, 4(t0) ; then the second
+    sw 4(t1), t2
+    lw t2, 8(t0) ; then third
+    sw 8(t1), t2
+    lw t2, 12(t0) ; and finally fourth
+    sw 12(t1), t2
+
+    la t0, gfu_a0_table
+    la t1, _file_write_string
+    sw #010C(t0), t1 ; hex 10C is hex 43*4, the index of file_write_string
+
+    ;; Copy the interrupt handler
+    la t0, sw_exception_vector
+    li t1, #80
+    lw t2, 0(t0) ; copy the first word of instructions
+    sw 0(t1), t2
+    lw t2, 4(t0) ; then the second
+    sw 4(t1), t2
+    lw t2, 8(t0) ; then third
+    sw 8(t1), t2
+    lw t2, 12(t0) ; and finally fourth
+    sw 12(t1), t2
+
+    ;; enable software interrupts? dunno how to do this properly yet.
+    li t0, #1F801070
+    sw 4(t0), #03FF
+
+    ;; Enable COP0 for Kernel+User
+    ;; Set boot exception vector to ROM/KSEG1
+    mtc0 12, #10400000
+
+    ;; Set up a FUCRT0
+
+    ;; Set default stack top to the "small", 4 KiB mode's end
+    li sp, #00400000
+    move fp, sp
+
+    ;; Set DMA default configuration
+    li t0, #1F8010F0 ; DMA_DPCR
+    li t1, #07654321 ; DMA priority values
+    li t2, #00000088 ; The two we're going to enable right now
+    or t1, t1, t2
+    sw 0(t0), t1
+
+    ;; Enable DMA interrupts
+    li t0, #1F8010F4 ; DMA_DICR
+    li t1, #00800000 ; DMA Master channel interrupt enable flag
+    li t2, #00FF0000 ; All 6 DMA channels interrupts are also enabled
+    or t1, t1, t2
+    sw 0(t0), t1
+
+    ;; Enable interrupt handling
+    mtc0 12, #0401
+
+    j startup
+
+startup:
+    li a0, #10000
+    li a1, #0004
+    li a2, 0
+    jal read_rom_chip_to_ram
+
+    ;; Load ROM header data from the CHIP into address #0400
+    li t0, #10000
+    lw t1, 8(t0)
+    lw t2, 12(t0)
+
+    push t1
+
+    li a0, #10000
+    move a1, t2
+    li a2, 4
+    jal read_rom_chip_to_ram
+
+    pop t0
+    jalr t0
+
+    ;; jal _fucrt_start
+
+stop:
+    ;; j stop
+    move r0, zero
+    syscall ;; exit
+
+;; void read_rom_chip_to_ram(uword madr, uword word_count)
+read_rom_chip_to_ram:
+    push ra
+
+    li t0, #1F801800
+    lui t1, #0300
+    or t1, t1, a2
+    sw 4(t0), t2        ;; CHIP1(03) CHIP set read/write offset
+    sw 4(t0), #04000003 ;; CHIP1(04) CHIP to RAM
+
+    li t0, #1F801080     ;; DMA0 (CHIP)
+    sw 0(t0), a0         ;; DMA0 (CHIP) MADR
+    and a1, a1, #FFFF
+    sw 4(t0), a1         ;; DMA0 (CHIP) BCR  (4 words)
+    sw 8(t0), #11000000  ;; DMA0 (CHIP) CHCR
+
+.waitloop_istat1:
+    li t0, #1F801070
+    lw t1, 0(t0)
+    li t2, #0008
+    and t1, t1, t2
+    beq t1, zero, .waitloop_istat1
+
+    li t0, #1F8010F4
+    lw t1, 0(t0)
+    li t9, #01FFFFFF
+    and t1, t1, t9
+    sw 0(t0), t1 ;; Store DICR
+
+    li t0, #1F801070
+    li t2, #0008
+    lw t1, 0(t0)
+    li t9, #FFFFFFFF
+    xor t9, t2, t9 ;; Mask out the DMA bit
+    and t1, t1, t9 ;; Unset the DMA bit
+    sw 0(t0), t1 ;; Store ISTAT
+
+    pop ra
+    ret
+
+sw_exception_vector:
+    la t0, sw_exception_handler
+    jr t0
+    nop
+    nop
+
+sw_exception_handler:
+    mfc0 k0, 14
+    push k0
+
+    mfc0 t0, 13
+    srl t0, t0, 2
+    and t0, t0, #1F
+
+    ;; so here, we should have the exception code.
+    ;; we also currently expect it to be #00.
+    ;; ... now that we're handling an interrupt, what do we actually fucking *do*?
+
+    bne t0, zero, .return
+    jal interrupt_handler
+
+.return:
+    pop k0
+    jr k0
+
+interrupt_handler:
+    ;; set these up as arguments to nested functions
+    li a0, #1F801070
+    lw a1, 0(a0) ;; ISTAT
+    lw a2, 4(a0) ;; IMASK
+
+    li t0, #8 ; DMA
+    and t1, a1, t0
+    beq t1, zero, .return
+    j dma_interrupt_handler
+
+.return:
+    ret
+
+dma_interrupt_handler:
+    ;;li t1, #FFFFFFFF
+    ;;xor t1, t0, t1 ;; Mask out the DMA bit
+    ;;and a1, a1, t1 ;; Unset the DMA bit
+    ;; sw 0(a0), a1 ;; Store ISTAT
+
+    ;;move t0, zero ;; dicr
+    ;;move t1, zero ;; dirqs
+    ;;lw t0, #1F8010F4
+    ;;srl t1, t1, 24
+    ;;and t0, t0, #00FF7FFF
+
+    ret
+
+gfu_a0_vector:
+    la t0, gfu_a0_handler ; a light-weight function we can copy into address A0 to
+    jr t0                 ; actually call our A0 handler function instead
+    nop
+    nop
+
+gfu_a0_handler:
+    la t0, gfu_a0_table     ; load the address of the a0 table
+    sll t2, t1, 2           ; mul the contents of t1 by 4 to align them to an A0 index
+    add t2, t0              ; add the index to the address of the a0 table
+    lw t2, 0(t2)            ; load the value (an address) stored at that index in the a0 table
+    li t0, #A0              ; store hex A0 in the t0 register for the caller to know about, I guess
+    jr t2                   ; jump to the a0 function, maintaining the previous return address so
+    nop                     ;   it can return to user code immediately
+
+%data
+gfu_a0_table:
+    bytes #1000
+
+%text
+;; [word, word] file_write_string
+_file_write_string:
+    or r0, zero, #43
+    syscall
+    ret

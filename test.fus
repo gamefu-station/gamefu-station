@@ -1,0 +1,83 @@
+%entry _start
+%data
+_data: bytes "\25\75\0A\00"
+%text
+_main:
+    push fp
+    move fp, sp
+    stal 16
+    ;; AutoAssign
+    ;; Literal
+    li t0, 0
+    sw -4(fp), t0
+    ;; AutoAssign
+    ;; Literal
+    li t0, 1
+    sw -8(fp), t0
+.label0:
+    ;; Less
+    ;; AutoVar
+    lw t0, -4(fp)
+    ;; Literal
+    li t1, 1000000
+    slt t0, t0, t1
+    sw -16(fp), t0
+    ;; JmpIfNotLabel
+    ;; AutoVar
+    lw t0, -16(fp)
+    beq t0, zero, .label1
+    ;; Funcall
+    push ra
+    li r1, 1
+    ;; DataOffset
+    la a0, _data
+    addi a0, a0, 0
+    stal 4
+    ;; AutoVar
+    lw t0, -4(fp)
+    sw 0(sp), t0
+    call _printf
+    stdal 4
+    lw r0, -16(fp)
+    pop ra
+    ;; Plus
+    ;; AutoVar
+    lw t0, -4(fp)
+    ;; AutoVar
+    lw t1, -8(fp)
+    add t0, t0, t1
+    sw -16(fp), t0
+    ;; AutoAssign
+    ;; AutoVar
+    lw t0, -16(fp)
+    sw -12(fp), t0
+    ;; AutoAssign
+    ;; AutoVar
+    lw t0, -8(fp)
+    sw -4(fp), t0
+    ;; AutoAssign
+    ;; AutoVar
+    lw t0, -12(fp)
+    sw -8(fp), t0
+    ;; JmpLabel
+    j .label0
+.label1:
+    stdal 16
+    pop fp
+    ret
+_puts:
+    or t1, zero, #43
+    move a1, a0
+    or a0, zero, 1
+    li t0, #A0
+    jr t0
+_printf:
+    or r0, zero, #45
+    move a1, a0
+    or a0, zero, 1
+    syscall
+    ret
+_start:
+    call _main
+    or r0, zero, 0
+    syscall

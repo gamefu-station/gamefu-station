@@ -1,0 +1,10 @@
+CompileFlags:
+  Add:
+    - "-DGFUSX_PLATFORM_GLFW"
+    - "-Iinclude"
+    - "-Wno-unused-variable"
+    - "-Wno-unused-function"
+    - "-Wno-unused-label"
+
+Diagnostics:
+  UnusedIncludes: None

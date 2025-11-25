@@ -1,0 +1,31 @@
+function void fuKernelA0Callback();
+
+fuKernelA0Callback[#FF] fuKernelA0CallbackTable;
+
+// The #A0 function index is passed in R0.
+asm fuKernelA0Handler {
+    la t0, fuKernelA0CallbackTable
+    sll t1, r0, 2
+    add t0, t1
+    lw t0, 0(t0)
+    jr t0
+    nop
+}
+
+/* An example of what we can do with section declarations if we needed this more than one time.
+section fuKernelA0VectorSection {
+    type = "text";
+    name = "kernel.a0vec";
+    flags = "x";
+    offset = #A0;
+    length = #10;
+}
+*/
+
+// [section fuKernelA0VectorSection]
+[section("text", "kernel.a0vec", #A0, #10)]
+asm fuKernelA0Vector {
+    la t0, fuKernelA0Handler
+    jr t0
+    nop
+}
