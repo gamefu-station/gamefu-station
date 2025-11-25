@@ -9,6 +9,7 @@ libglfw3.a
 !gfusx/
 !hxd/
 
+bin/
 fuzz/
 
 *.gfo

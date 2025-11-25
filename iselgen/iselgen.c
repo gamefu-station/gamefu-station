@@ -19,7 +19,7 @@
 #define ECHOETOK_IMPL
 #include <echoetok.h>
 
-#include "iselgen/isel_source.h"
+#include "isel_source.h"
 
 #define ISEL_TOKEN_KINDS(X) \
     X(MATCH) \

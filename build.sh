@@ -2,6 +2,8 @@
 
 set -e
 
+mkdir -p bin
+
 if [ -z ${flags+x} ]; then flags=devcc; fi
 if [ -z ${gfusx_platform+x} ]; then gfusx_platform=GLFW; fi
 
@@ -9,12 +11,12 @@ echo "Building GameFU HXD Utility..."
 cc -o hxd src/hxd.c @${flags}.txt
 
 echo "Building GameFU Assembler ISel Table Generator..."
-./hxd ./lib/fuasm.isel -i -n isel > ./src/iselgen/isel_source.h
-cc -o iselgen src/iselgen.c @${flags}.txt
+./hxd ./lib/fuasm.isel -i -n isel > ./iselgen/isel_source.h
+cc -o bin/iselgen iselgen/iselgen.c @${flags}.txt
 
 echo "Running GameFU Assembler ISel Table Generator..."
-./iselgen
-rm iselgen # don't need it for now, de-clutter while we're here
+./bin/iselgen
+rm bin/iselgen # don't need it for now, de-clutter while we're here
 
 echo "Building GameFU Assembler..."
 cc -o fuasm src/fuasm.c @${flags}.txt
