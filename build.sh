@@ -19,7 +19,7 @@ echo "Running GameFU Assembler ISel Table Generator..."
 rm bin/iselgen # don't need it for now, de-clutter while we're here
 
 echo "Building GameFU Assembler..."
-cc -o fuasm src/fuasm.c @${flags}.txt
+cc -o bin/as gfu-as/as.c @${flags}.txt
 
 # echo "Building GameFU C Compiler..."
 # cc -o fucc src/fucc.c @${flags}.txt
@@ -28,7 +28,7 @@ cc -o fuasm src/fuasm.c @${flags}.txt
 # cc -o fucc src/fucc2.c @${flags}.txt
 
 echo "Building GameFU Station BIOS..."
-./fuasm -o bios.gfu lib/bios/boot.fus
+./bin/as -o bios.gfu lib/bios/boot.fus
 ./bin/hx bios.gfu -i -n gfusx_default_bios > ./lib/gfusx/default_bios.h
 # rm bios.gfu # once it's in the include file we don't need the raw binary, de-clutter while we're here
 
