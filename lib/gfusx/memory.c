@@ -6,7 +6,7 @@
 #include <gfusx/memory.h>
 #include <gfusx/vm.h>
 
-#include "default_bios.h"
+#include "../gfu-sx/default_bios.h"
 
 bool gfusx_memory_init(gfusx_t* vm) {
     gfu_assert(vm != nullptr, "Where is the VM?");

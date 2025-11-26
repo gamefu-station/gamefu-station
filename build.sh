@@ -29,7 +29,7 @@ cc -o bin/as gfu-as/as.c @${flags}.txt
 
 echo "Building GameFU Station BIOS..."
 ./bin/as -o bios.gfu lib/bios/boot.fus
-./bin/hx bios.gfu -i -n gfusx_default_bios > ./lib/gfusx/default_bios.h
+./bin/hx bios.gfu -i -n gfusx_default_bios > ./gfu-sx/default_bios.h
 # rm bios.gfu # once it's in the include file we don't need the raw binary, de-clutter while we're here
 
 gfusx_platform_lib=""
@@ -49,4 +49,4 @@ else
 fi
 
 echo "Building GFUSX Emulator..."
-cc -o gfusx src/gfusx.c @${flags}.txt -DGFUSX_PLATFORM_$gfusx_platform -Ivendor/glfw3/include bin/libglfw3.a -lm
+cc -o bin/sx gfu-sx/sx.c @${flags}.txt -DGFUSX_PLATFORM_$gfusx_platform -Ivendor/glfw3/include bin/libglfw3.a -lm
