@@ -1,11 +1,11 @@
 #ifndef GFUSX_VM_H_
 #define GFUSX_VM_H_
 
-#include <gfusx/prologue.h>
-#include <gfusx/chip.h>
-#include <gfusx/fu6109.h>
-#include <gfusx/memory.h>
-#include <gfusx/platform.h>
+#include "prologue.h"
+#include "chip.h"
+#include "fu6109.h"
+#include "memory.h"
+#include "platform.h"
 
 #define GFUSX_CYCLE_BIAS 2
 

@@ -1,8 +1,8 @@
-#include <gfusx/prologue.h>
-#include <gfusx/chip.h>
-#include <gfusx/hardware.h>
-#include <gfusx/memory.h>
-#include <gfusx/vm.h>
+#include "prologue.h"
+#include "chip.h"
+#include "hardware.h"
+#include "memory.h"
+#include "vm.h"
 
 #include <errno.h>
 #include <stdio.h>

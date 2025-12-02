@@ -4,7 +4,7 @@
 #include "../common/common.h"
 #include <gamefu/system.h>
 
-#include <gfusx/memory.h>
+#include "memory.h"
 
 // #define GFUSX_FU6109_CLOCK_SPEED 33868800
 #define GFUSX_FU6109_CLOCK_SPEED 33868800

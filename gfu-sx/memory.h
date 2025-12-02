@@ -3,7 +3,7 @@
 
 #include "../common/common.h"
 
-#include <gfusx/prologue.h>
+#include "prologue.h"
 
 typedef struct gfusx_memory {
     gfu_ubyte_t* wram;

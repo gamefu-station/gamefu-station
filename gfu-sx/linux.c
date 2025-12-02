@@ -1,5 +1,5 @@
-#include <gfusx/prologue.h>
-#include <gfusx/platform.h>
+#include "prologue.h"
+#include "platform.h"
 
 #include <unistd.h>
 

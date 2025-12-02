@@ -1,7 +1,7 @@
 #ifndef GFUSX_PLATFORM_H_
 #define GFUSX_PLATFORM_H_
 
-#include <gfusx/prologue.h>
+#include "prologue.h"
 
 typedef struct gfusx_platform gfusx_platform_t;
 

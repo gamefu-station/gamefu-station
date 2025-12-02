@@ -1,6 +1,6 @@
-#include <gfusx/prologue.h>
-#include <gfusx/platform.h>
-#include <gfusx/vm.h>
+#include "prologue.h"
+#include "platform.h"
+#include "vm.h"
 
 #include <errno.h>
 #include <stdio.h>

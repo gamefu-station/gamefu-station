@@ -1,7 +1,7 @@
 #ifndef GFUSX_HARDWARE_H_
 #define GFUSX_HARDWARE_H_
 
-#include <gfusx/prologue.h>
+#include "prologue.h"
 
 gfu_ubyte_t gfusx_hardware_read_byte(gfusx_t* vm, gfu_uword_t addr);
 gfu_uhalf_t gfusx_hardware_read_half(gfusx_t* vm, gfu_uword_t addr);

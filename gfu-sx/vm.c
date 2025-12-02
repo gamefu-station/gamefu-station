@@ -1,7 +1,7 @@
-#include <gfusx/prologue.h>
-#include <gfusx/memory.h>
-#include <gfusx/fu6109.h>
-#include <gfusx/vm.h>
+#include "prologue.h"
+#include "memory.h"
+#include "fu6109.h"
+#include "vm.h"
 
 bool gfusx_vm_init(gfusx_t* vm) {
     if (!gfusx_memory_init(vm)) return false;

@@ -2,9 +2,9 @@
 #include <gamefu/system.h>
 #include <gamefu/object.h>
 
-#include <gfusx/prologue.h>
-#include <gfusx/memory.h>
-#include <gfusx/vm.h>
+#include "prologue.h"
+#include "memory.h"
+#include "vm.h"
 
 #include "../gfu-sx/default_bios.h"
 

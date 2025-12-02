@@ -1,8 +1,8 @@
-#include <gfusx/prologue.h>
-#include <gfusx/chip.h>
-#include <gfusx/hardware.h>
-#include <gfusx/memory.h>
-#include <gfusx/vm.h>
+#include "prologue.h"
+#include "chip.h"
+#include "hardware.h"
+#include "memory.h"
+#include "vm.h"
 
 gfu_ubyte_t gfusx_hardware_read_byte(gfusx_t* vm, gfu_uword_t addr) {
     gfu_uword_t hwaddr = addr & 0x1FFFFFFF;

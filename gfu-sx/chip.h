@@ -1,7 +1,7 @@
 #ifndef GFUSX_CHIP_H_
 #define GFUSX_CHIP_H_
 
-#include <gfusx/prologue.h>
+#include "prologue.h"
 
 typedef union gfusx_chip_status {
     gfu_uword_t value;

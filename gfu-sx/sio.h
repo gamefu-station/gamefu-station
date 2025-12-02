@@ -1,7 +1,7 @@
 #ifndef GFUSX_SIO_H_
 #define GFUSX_SIO_H_
 
-#include <gfusx/prologue.h>
+#include "prologue.h"
 
 /*
 

@@ -4,11 +4,11 @@
 #include "../gfu-opcodes/register.h"
 #include "../gfu-opcodes/syscall.h"
 
-#include <gfusx/prologue.h>
-#include <gfusx/fu6109.h>
-#include <gfusx/hardware.h>
-#include <gfusx/memory.h>
-#include <gfusx/vm.h>
+#include "prologue.h"
+#include "fu6109.h"
+#include "hardware.h"
+#include "memory.h"
+#include "vm.h"
 
 #define _rnZero_ GFU_GPR_ZERO
 #define _rN_(N)  vm->cpu.regs.gpr.values[N]

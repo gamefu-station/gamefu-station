@@ -3,11 +3,11 @@
 #include <gamefu/asm.h>
 #include <gamefu/object.h>
 
-#include <gfusx/prologue.h>
-#include <gfusx/chip.h>
-#include <gfusx/memory.h>
-#include <gfusx/platform.h>
-#include <gfusx/vm.h>
+#include "prologue.h"
+#include "chip.h"
+#include "memory.h"
+#include "platform.h"
+#include "vm.h"
 
 typedef struct gfusx_options {
     const char* program_name;
