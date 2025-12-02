@@ -18,6 +18,11 @@ echo "Running GameFU Assembler ISel Table Generator..."
 ./bin/iselgen
 rm bin/iselgen # don't need it for now, de-clutter while we're here
 
+echo "Building libgfu-opcodes.a..."
+cc -o bin/gfu-opcodes.o -c gfu-opcodes/register.c @${flags}.txt
+ar rcs bin/libgfu-opcodes.a bin/gfu-opcodes.o
+rm bin/gfu-opcodes.o # don't need it for now, de-clutter while we're here
+
 echo "Building GameFU Assembler..."
 cc -o bin/as gfu-as/as.c @${flags}.txt
 

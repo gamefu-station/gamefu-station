@@ -1,4 +1,5 @@
 #include "../common/common.h"
+
 #include "register.h"
 
 static struct {
@@ -6,9 +7,8 @@ static struct {
     const char* name;
     size_t name_length;
 } gfu_gpr_names[] = {
-#define X(Id, Name) { GFU_GPR_##Id, "" Name "", sizeof(Name) - 1 },
-    GFU_GPR(X)
-#undef X
+#define GPR(Id, Name) { GFU_GPR_##Id, "" Name "", sizeof(Name) - 1 },
+#include "x/registers.h"
     {GFU_GPR_INVALID, nullptr, 0},
 };
 
@@ -28,9 +28,8 @@ static struct {
     const char* name;
     size_t name_length;
 } gfu_cp0r_names[] = {
-#define X(Id, Value, Name) { GFU_CP0R_##Id, "" Name "", sizeof(Name) - 1 },
-    GFU_CP0R(X)
-#undef X
+#define C0R(Id, Name) { GFU_CP0R_##Id, "" Name "", sizeof(Name) - 1 },
+#include "x/registers.h"
     {GFU_CP0R_INVALID, nullptr, 0},
 };
 
