@@ -1,8 +1,9 @@
 #include "../common/common.h"
 
-#include <gamefu/asm.h>
 #include "../gfu-opcodes/register.h"
 #include "../gfu-opcodes/syscall.h"
+// TODO(local): this should totally be things in opcodes, right? maybe? we'll see
+#include "../gfu-as/asm.h"
 
 #include "prologue.h"
 #include "fu6109.h"

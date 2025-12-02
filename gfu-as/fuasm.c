@@ -1,7 +1,8 @@
 #include "../common/common.h"
 
-#include <gamefu/asm.h>
 #include <gamefu/isel.h>
+#include <gamefu/system.h>
+#include <gamefu/object.h>
 
 #if defined(__linux__)
 #  include <unistd.h>
@@ -14,6 +15,8 @@
 
 #define ECHOETOK_IMPL
 #include <echoetok.h>
+
+#include "asm.h"
 
 #define VERSION "0.0.1.0"
 
@@ -1327,7 +1330,7 @@ static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
                 const char* image;
             } mnemonics[] = {
 #define MNEM(Id, Name) { FUASM_MNEM_##Id, Name },
-#include <gamefu/mnemonics.h>
+#include "x/mnemonics.h"
                 {0},
             };
 

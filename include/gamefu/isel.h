@@ -2,13 +2,11 @@
 #define GAMEFU_ISEL_H_
 
 #include "../common/common.h"
+
 #include "../gfu-opcodes/instruction.h"
 #include "../gfu-opcodes/register.h"
-
-#include "gamefu.h"
-#include "asm.h"
-
-#include <stdbool.h>
+// TODO(local): this should totally be things in opcodes, right? maybe? we'll see
+#include "../gfu-as/asm.h"
 
 typedef enum isel_type {
     ISEL_TY_INVALID,

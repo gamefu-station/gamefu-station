@@ -15,7 +15,7 @@
 typedef enum fuasm_mnemonic {
     FUASM_MNEM_INVALID,
 #define MNEM(Id, Name) FUASM_MNEM_##Id,
-#include "mnemonics.h"
+#include "x/mnemonics.h"
 } fuasm_mnemonic, fuasm_mnemonic_t;
 
 typedef enum fuasm_directive {

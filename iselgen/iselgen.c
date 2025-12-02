@@ -1,6 +1,8 @@
 #include "../common/common.h"
 
-#include <gamefu/asm.h>
+// TODO(local): this should totally be things in opcodes, right? maybe? we'll see
+#include "../gfu-as/asm.h"
+
 #include <gamefu/isel.h>
 
 #if defined(__linux__)
@@ -194,7 +196,7 @@ int main(int argc, char** argv) {
     fprintf(stderr, "Emit storage required: %d bytes (%d items)\n", isel_emit_arena.allocated, emit_count);
     fprintf(stderr, "Pattern storage required: %d bytes (%d items)\n", isel_pattern_arena.allocated, pattern_count);
 
-    f = fopen("./include/gamefu/mnemonics.h", "w");
+    f = fopen("./gfu-as/x/mnemonics.h", "w");
 
     fprintf(f, "#ifndef MNEM\n");
     fprintf(f, "#  define MNEM(Id, ...) TK(MNEM_##Id)\n");
