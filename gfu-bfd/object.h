@@ -2,6 +2,7 @@
 #define GAMEFU_OBJECT_H_
 
 #include "../common/common.h"
+
 #include <gamefu/system.h>
 
 #define GFUOBJ_ADDRSPACE_BIOS 0x01

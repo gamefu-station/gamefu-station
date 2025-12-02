@@ -1,8 +1,9 @@
 #include "../common/common.h"
 
-#include <gamefu/isel.h>
 #include <gamefu/system.h>
-#include <gamefu/object.h>
+
+#include "../iselgen/isel.h"
+#include "../gfu-bfd/object.h"
 
 #if defined(__linux__)
 #  include <unistd.h>

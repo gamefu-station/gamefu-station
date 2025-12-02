@@ -1,6 +1,8 @@
 #include "../common/common.h"
+
 #include <gamefu/system.h>
-#include <gamefu/object.h>
+
+#include "../gfu-bfd/object.h"
 
 #include "prologue.h"
 #include "memory.h"

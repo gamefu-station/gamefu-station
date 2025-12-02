@@ -1,5 +1,5 @@
-#ifndef GAMEFU_SYSTEM_INSTRUCTION_H_
-#define GAMEFU_SYSTEM_INSTRUCTION_H_
+#ifndef GAMEFU_OPCODES_INSTRUCTION_H_
+#define GAMEFU_OPCODES_INSTRUCTION_H_
 
 #include "../common/common.h"
 
@@ -137,4 +137,4 @@ typedef union gfu_inst {
 
 static_assert(sizeof(gfu_inst) == sizeof(gfu_uword), "Ensure that the union of bitfields does not change the size of the instruction type.");
 
-#endif /* GAMEFU_SYSTEM_INSTRUCTION_H_ */
+#endif /* GAMEFU_OPCODES_INSTRUCTION_H_ */

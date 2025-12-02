@@ -1,6 +1,6 @@
 #include "../common/common.h"
 
-#include <gamefu/object.h>
+#include "../gfu-bfd/object.h"
 
 #include "../gfu-opcodes/instruction.h"
 #include "../gfu-opcodes/register.h"

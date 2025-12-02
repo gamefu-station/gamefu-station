@@ -4,17 +4,11 @@
 #include "../gfu-opcodes/register.h"
 #include "../gfu-opcodes/syscall.h"
 
-#include <gamefu/isel.h>
+#include "isel.h"
 
 #if defined(__linux__)
 #  include <unistd.h>
 #endif
-
-#include <ctype.h>
-#include <errno.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <string.h>
 
 #define ECHOETOK_IMPL
 #include <echoetok.h>
