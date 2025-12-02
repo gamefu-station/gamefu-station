@@ -61,7 +61,7 @@ iselgen/isel_source.h: iselgen/isel.txt bin/hx
 	bin/hx $< -i -n isel > $@
 
 AS_C=gfu-as/as.c
-AS_O:=$(patsubst gfu-as/%.c,bin/o/gfu-as/%.o,$(subst gfu-as/isel_tables.c $(AS_C),,$(wildcard gfu-as/*.c)))
+AS_O:=$(patsubst gfu-as/%.c,bin/o/gfu-as/%.o,$(subst $(AS_C),,$(subst gfu-as/isel_tables.c,,$(wildcard gfu-as/*.c))))
 AS_H:=gfu-as/x/mnemonics.h $(wildcard gfu-as/include/**/*.h)
 bin/as: bin/o/gfu-as/as.o bin/libgfu-as.a
 	@mkdir -p bin
@@ -88,12 +88,16 @@ gfu-sx/default_bios.h: bin/bios.gfu
 	./bin/hx bin/bios.gfu -i -n gfusx_default_bios > ./gfu-sx/default_bios.h
 
 SX_C=gfu-sx/sx.c
-SX_O:=$(patsubst gfu-sx/%.c,bin/o/gfu-sx/%.o,$(wildcard gfu-sx/*.c))
+SX_O:=$(patsubst gfu-sx/%.c,bin/o/gfu-sx/%.o,$(subst $(SX_C),,$(wildcard gfu-sx/*.c)))
 SX_H:=$(wildcard gfu-sx/include/**/*.h)
-bin/sx: bin/libgfu-common.a gfu-sx/default_bios.h bin/libglfw3.a $(SX_O)
+bin/sx: bin/o/gfu-sx/sx.o bin/libgfu-common.a bin/libglfw3.a bin/libgfu-sx.a gfu-sx/default_bios.h $(SX_O)
 	@mkdir -p bin
-	cc -o $@ $(SX_O) bin/libgfu-common.a bin/libglfw3.a -lm $(CFLAGS)
+	cc -o $@ bin/o/gfu-sx/sx.o bin/libgfu-common.a bin/libgfu-sx.a bin/libglfw3.a -lm $(CFLAGS)
 	@echo "> Built GameFU Station emulator"
+bin/libgfu-sx.a: $(SX_O)
+	@mkdir -p bin
+	ar rcs $@ $(SX_O)
+	@echo "> Built libgfu-sx.a"
 bin/o/gfu-sx/%.o: gfu-sx/%.c $(wildcard gfu-sx/*.h) $(SX_H)
 	@mkdir -p bin/o/gfu-sx
 	cc -o $@ -c $< -Igfu-common/include -Igfu-sx/include -Ivendor/glfw3/include -DGFUSX_PLATFORM_GLFW $(CFLAGS)
