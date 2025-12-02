@@ -2,7 +2,7 @@
 #define GFUSX_FU6109_H_
 
 #include "../common/common.h"
-#include <gamefu/system.h>
+#include "../gfu-bfd/system.h"
 
 #include "memory.h"
 

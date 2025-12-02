@@ -1,6 +1,6 @@
 #include "../common/common.h"
 
-#include <gamefu/system.h>
+#include "../gfu-bfd/system.h"
 
 #include "../iselgen/isel.h"
 #include "../gfu-bfd/object.h"

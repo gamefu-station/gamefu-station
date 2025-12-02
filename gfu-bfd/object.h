@@ -1,9 +1,9 @@
-#ifndef GAMEFU_OBJECT_H_
-#define GAMEFU_OBJECT_H_
+#ifndef GAMEFU_BFD_OBJECT_H_
+#define GAMEFU_BFD_OBJECT_H_
 
 #include "../common/common.h"
 
-#include <gamefu/system.h>
+#include "system.h"
 
 #define GFUOBJ_ADDRSPACE_BIOS 0x01
 #define GFUOBJ_ADDRSPACE_USER 0x02
@@ -106,4 +106,4 @@ typedef struct gfuobj_rel {
     } info;
 } gfuobj_rel_t;
 
-#endif /* GAMEFU_OBJECT_H_ */
+#endif /* GAMEFU_BFD_OBJECT_H_ */

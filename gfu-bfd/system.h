@@ -1,5 +1,5 @@
-#ifndef GAMEFU_SYSTEM_H_
-#define GAMEFU_SYSTEM_H_
+#ifndef GAMEFU_BFD_SYSTEM_H_
+#define GAMEFU_BFD_SYSTEM_H_
 
 #include "../common/common.h"
 
@@ -111,4 +111,4 @@ enum {
 #define GFU_CHIP0_ADDR (GFU_EXP1_IOPORT_BASE + 0x0800)
 #define GFU_CHIP1_ADDR (GFU_EXP1_IOPORT_BASE + 0x0804)
 
-#endif /* GAMEFU_SYSTEM_H_ */
+#endif /* GAMEFU_BFD_SYSTEM_H_ */
