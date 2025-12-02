@@ -1325,9 +1325,8 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
                 gfu_gpr _register;
                 const char* image;
             } registers[] = {
-#define X(Id, Image) { GFU_GPR_##Id, Image },
-                GFU_GPR(X)
-#undef X
+#define GPR(Id, Image) { GFU_GPR_##Id, Image },
+#include "../gfu-opcodes/x/registers.h"
                 {0},
             };
 

@@ -97,9 +97,8 @@ static struct mnemonic {
 static int mnemonic_count = 0;
 
 static const char* isel_register_constants[] = {
-#define X(Id, Image) [GFU_GPR_##Id] = "GFU_GPR_" #Id,
-    GFU_GPR(X)
-#undef X
+#define GPR(Id, Image) [GFU_GPR_##Id] = "GFU_GPR_" #Id,
+#include "../gfu-opcodes/x/registers.h"
 };
 
 static const char* isel_opcode_constants[] = {
@@ -662,9 +661,8 @@ static struct {
     gfu_gpr _register;
     const char* image;
 } isel_registers[] = {
-#define X(Id, Image) { GFU_GPR_##Id, "" Image "" },
-    GFU_GPR(X)
-#undef X
+#define GPR(Id, Image) { GFU_GPR_##Id, "" Image "" },
+#include "../gfu-opcodes/x/registers.h"
     {0},
 };
 

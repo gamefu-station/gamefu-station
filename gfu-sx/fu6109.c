@@ -47,21 +47,14 @@
 #define _iAddr_  inst.addr.value
 
 static const char* regname[] = {
-#define X(Id, Name) [GFU_GPR_##Id] = "" Name,
-    GFU_GPR(X)
-#undef X
+#define GPR(Id, Name) [GFU_GPR_##Id] = "" Name,
+#include "../gfu-opcodes/x/registers.h"
     nullptr,
 };
 
 #ifdef GFU_NTRACE
 #  define gfusx_trace_disasm(Vm, Inst) do { } while (0)
 #else
-static const char* regnames[] = {
-#define X(Id, Name) [GFU_GPR_##Id] = "" Name "",
-    GFU_GPR(X)
-#undef X
-};
-
 static const char* opnames[] = {
 #define X(Id, Value) [GFU_OP_##Id] = #Id,
     GFU_OP(X)
@@ -94,9 +87,9 @@ static void gfusx_trace_disasm(gfusx_t* vm, gfu_uword addr, gfu_inst inst) {
         fprintf(
             stderr,
             "d=%02X (%s), l=%02X (%s), r=%02X (%s), sh=%d, fn=%02X (%s)",
-            inst.reg.d, regnames[inst.reg.d],
-            inst.reg.l, regnames[inst.reg.l],
-            inst.reg.r, regnames[inst.reg.r],
+            inst.reg.d, regname[inst.reg.d],
+            inst.reg.l, regname[inst.reg.l],
+            inst.reg.r, regname[inst.reg.r],
             inst.reg.shift,
             inst.reg.function, fnnames[inst.reg.function]
         );
@@ -104,9 +97,9 @@ static void gfusx_trace_disasm(gfusx_t* vm, gfu_uword addr, gfu_inst inst) {
         fprintf(
             stderr,
             "d=%02X (%s), l=%02X (%s), r=%02X (%s), sh=%d, fn=%02X (%s)",
-            inst.reg.d, regnames[inst.reg.d],
-            inst.reg.l, regnames[inst.reg.l],
-            inst.reg.r, regnames[inst.reg.r],
+            inst.reg.d, regname[inst.reg.d],
+            inst.reg.l, regname[inst.reg.l],
+            inst.reg.r, regname[inst.reg.r],
             inst.reg.shift,
             inst.reg.function, c0fnnames[inst.reg.function]
         );
@@ -116,8 +109,8 @@ static void gfusx_trace_disasm(gfusx_t* vm, gfu_uword addr, gfu_inst inst) {
         fprintf(
             stderr,
             "d=%02X (%s), l=%02X (%s), imm=%04X",
-            inst.imm.d, regnames[inst.imm.d],
-            inst.imm.l, regnames[inst.imm.l],
+            inst.imm.d, regname[inst.imm.d],
+            inst.imm.l, regname[inst.imm.l],
             inst.imm.value
         );
     }
@@ -802,7 +795,7 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword pc, gfu_uword code) {
 }
 
 static void gfusx_dumpreg(gfusx_t* vm) {
-    static const char* regnames[34] = {
+    static const char* regname[34] = {
         " zero", "  at", "  r0", "  r1",
         "   a0", "  a1", "  a2", "  a3",
         "   t0", "  t1", "  t2", "  t3",
@@ -820,7 +813,7 @@ static void gfusx_dumpreg(gfusx_t* vm) {
         int begin = i * 4;
         int end = begin + 4;
         for (int j = begin; j < end && j < 34; j++) {
-            fprintf(stderr, "%s %08X ", regnames[j], _rN_(j));
+            fprintf(stderr, "%s %08X ", regname[j], _rN_(j));
         }
         fputc('\n', stderr);
     }
