@@ -1,4 +1,4 @@
-#include <gamefu/prologue.h>
+#include "../common/common.h"
 
 #include <gamefu/memory.h>
 #include <gamefu/diagnostic.h>
@@ -112,8 +112,8 @@ typedef enum fuasm_section {
     FUASM_DATA,
 } fuasm_section;
 
-static void show_help(VOIDPROTO);
-static void show_version(VOIDPROTO);
+static void show_help(void);
+static void show_version(void);
 static bool fuasm_options_parse(int argc, char** argv, fuasm_options* options);
 static void print_verbose(fuasm_state* state, const char* format, ...);
 
@@ -137,7 +137,7 @@ int fuasm_driver_main(int argc, char** argv) {
     };
 
     if (!fuasm_options_parse(argc, argv, &state.options)) {
-        gfu_return_defer(1);
+        return_defer(1);
     }
 
     gfu_arena_init(&state.string_arena, 32 * 1024 * 1024);
@@ -169,13 +169,13 @@ int fuasm_driver_main(int argc, char** argv) {
 
     gfu_uword_t rom_size;
     char* rom_data = fuasm_assemble_internal(&state, &rom_size);
-    if (rom_data == nullptr) gfu_return_defer(1);
+    if (rom_data == nullptr) return_defer(1);
 
     errno = 0;
     f = fopen(output_name, "wb");
     if (f == nullptr) {
         diag_issue(DIAG_ERROR, NOSOURCE, "Failed to open output file '%s': %s", output_name, strerror(errno));
-        gfu_return_defer(1);
+        return_defer(1);
     }
 
     errno = 0;
@@ -183,7 +183,7 @@ int fuasm_driver_main(int argc, char** argv) {
     free(rom_data);
     if (ferror(f)) {
         diag_issue(DIAG_ERROR, NOSOURCE, "Failed to write to output file '%s': %s", output_name, strerror(errno));
-        gfu_return_defer(1);
+        return_defer(1);
     }
 
 defer:;
@@ -295,7 +295,7 @@ static const char* fuasm_intern_string(fuasm_state* state, const char* s, gfu_uw
 
 #define SHIFT (argc == 0 ? nullptr : (argc--, *(argv++)))
 
-static void show_help(VOIDPROTO) {
+static void show_help(void) {
     bool use_color = isatty(fileno(stderr));
 
     fprintf(
@@ -312,7 +312,7 @@ static void show_help(VOIDPROTO) {
     );
 }
 
-static void show_version(VOIDPROTO) {
+static void show_version(void) {
     fprintf(
         stderr,
         "GameFU Assembler version " VERSION "\n"

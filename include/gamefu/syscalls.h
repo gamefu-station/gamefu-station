@@ -1,7 +1,7 @@
 #ifndef GAMEFU_SYSCALLS_H_
 #define GAMEFU_SYSCALLS_H_
 
-#include <gamefu/prologue.h>
+#include "../common/common.h"
 
 #define FUASM_SYSCALLS(X) \
     X(RESERVED00, 0x00) \

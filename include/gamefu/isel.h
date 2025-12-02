@@ -1,7 +1,7 @@
 #ifndef GAMEFU_ISEL_H_
 #define GAMEFU_ISEL_H_
 
-#include <gamefu/prologue.h>
+#include "../common/common.h"
 #include <gamefu/system/instruction.h>
 #include <gamefu/system/register.h>
 

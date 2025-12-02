@@ -42,15 +42,15 @@ gfu_uhalf_t gfusx_hardware_read_half(gfusx_t* vm, gfu_uword_t addr) {
 
         default: {
             gfusx_logf(vm, "Unknown 16-bit hardware read at address %08X.", addr);
-            gfu_uhalf_t* hwptr = gfu_cast(gfu_uhalf_t*, vm->memory.hard + (hwaddr & 0xFFFF));
-            *hwptr = GFU_SWAP16(value);
+            gfu_uhalf_t* hwptr = cast(gfu_uhalf_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+            *hwptr = SWAP16(value);
             return value;
         }
     }
 
     gfusx_logf(vm, "Known 16-bit hardware read at address %08X.", addr);
-    gfu_uhalf_t* hwptr = gfu_cast(gfu_uhalf_t*, vm->memory.hard + (hwaddr & 0xFFFF));
-    *hwptr = GFU_SWAP16(value);
+    gfu_uhalf_t* hwptr = cast(gfu_uhalf_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+    *hwptr = SWAP16(value);
     return value;
 }
 
@@ -127,15 +127,15 @@ gfu_uword_t gfusx_hardware_read_word(gfusx_t* vm, gfu_uword_t addr) {
 
         default: {
             gfusx_logf(vm, "Unknown 32-bit hardware read at address %08X.", addr);
-            gfu_uword_t* hwptr = gfu_cast(gfu_uword_t*, vm->memory.hard + (hwaddr & 0xFFFF));
-            *hwptr = GFU_SWAP32(value);
+            gfu_uword_t* hwptr = cast(gfu_uword_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+            *hwptr = SWAP32(value);
             return value;
         }
     }
 
     gfusx_logf(vm, "Known 32-bit hardware read at address %08X.", addr);
-    gfu_uword_t* hwptr = gfu_cast(gfu_uword_t*, vm->memory.hard + (hwaddr & 0xFFFF));
-    *hwptr = GFU_SWAP32(value);
+    gfu_uword_t* hwptr = cast(gfu_uword_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+    *hwptr = SWAP32(value);
     return value;
 }
 
@@ -186,15 +186,15 @@ void gfusx_hardware_write_half(gfusx_t* vm, gfu_uword_t addr, gfu_uhalf_t value)
 
         default: {
             gfusx_logf(vm, "Unknown 16-bit hardware write at address %08X of value %04X.", addr, value);
-            gfu_uhalf_t* hwptr = gfu_cast(gfu_uhalf_t*, vm->memory.hard + (hwaddr & 0xFFFF));
-            *hwptr = GFU_SWAP16(value);
+            gfu_uhalf_t* hwptr = cast(gfu_uhalf_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+            *hwptr = SWAP16(value);
             return;
         }
     }
 
     gfusx_logf(vm, "Known 16-bit hardware write at address %08X of value %04X.", addr, value);
-    gfu_uhalf_t* hwptr = gfu_cast(gfu_uhalf_t*, vm->memory.hard + (hwaddr & 0xFFFF));
-    *hwptr = GFU_SWAP16(value);
+    gfu_uhalf_t* hwptr = cast(gfu_uhalf_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+    *hwptr = SWAP16(value);
 }
 
 void gfusx_hardware_write_word(gfusx_t* vm, gfu_uword_t addr, gfu_uword_t value) {
@@ -302,15 +302,15 @@ void gfusx_hardware_write_word(gfusx_t* vm, gfu_uword_t addr, gfu_uword_t value)
 
         default: {
             gfusx_logf(vm, "Unknown 32-bit hardware write at address %08X of value %08X.", addr, value);
-            gfu_uword_t* hwptr = gfu_cast(gfu_uword_t*, vm->memory.hard + (hwaddr & 0xFFFF));
-            *hwptr = GFU_SWAP32(value);
+            gfu_uword_t* hwptr = cast(gfu_uword_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+            *hwptr = SWAP32(value);
             return;
         }
     }
 
     gfusx_logf(vm, "Known 32-bit hardware write at address %08X of value %08X.", addr, value);
-    gfu_uword_t* hwptr = gfu_cast(gfu_uword_t*, vm->memory.hard + (hwaddr & 0xFFFF));
-    *hwptr = GFU_SWAP32(value);
+    gfu_uword_t* hwptr = cast(gfu_uword_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+    *hwptr = SWAP32(value);
 }
 
 void gfusx_set_irq(gfusx_t* vm, gfu_uword_t irq) {

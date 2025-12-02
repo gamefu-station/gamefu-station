@@ -41,10 +41,10 @@ static void seek_line_column(source source, int32_t location, int32_t* line, int
 
 static thread_local bool has_issued_error;
 
-void diag_flush(VOIDPROTO) {
+void diag_flush(void) {
 }
 
-void diag_pause_error_flush(VOIDPROTO) {
+void diag_pause_error_flush(void) {
 }
 
 void diag_color_output(bool enable) {
@@ -53,7 +53,7 @@ void diag_color_output(bool enable) {
 void diag_exit_on_error(bool enable) {
 }
 
-bool diag_has_issued_error(VOIDPROTO) {
+bool diag_has_issued_error(void) {
     return has_issued_error;
 }
 
@@ -103,7 +103,7 @@ struct {
     int32_t error_limit, error_count;
 } diag_state = {0};
 
-void diag_flush(VOIDPROTO) {
+void diag_flush(void) {
     if (diag_state.count <= 0) return;
     diag_level level = diag_state.group[0].level;
 
@@ -137,7 +137,7 @@ void diag_flush(VOIDPROTO) {
     if (level == DIAG_FATAL) abort();
 }
 
-void diag_pause_error_flush(VOIDPROTO) {
+void diag_pause_error_flush(void) {
     diag_state.pause_error_flush = true;
 }
 
@@ -149,7 +149,7 @@ void diag_exit_on_error(bool enable) {
     diag_state.exit_on_error = enable;
 }
 
-bool diag_has_issued_error(VOIDPROTO) {
+bool diag_has_issued_error(void) {
     return diag_state.error_count > 0;
 }
 

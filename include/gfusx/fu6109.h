@@ -1,7 +1,7 @@
 #ifndef GFUSX_FU6109_H_
 #define GFUSX_FU6109_H_
 
-#include <gamefu/prologue.h>
+#include "../common/common.h"
 #include <gamefu/system.h>
 
 #include <gfusx/memory.h>
@@ -66,8 +66,8 @@ typedef union gfusx_fu6109_cop0_registers {
     } named;
 } gfusx_fu6109_cop0_registers_t;
 
-gfu_static_assert(sizeof(gfusx_fu6109_gpr_registers_t) == 34 * sizeof(gfu_uword_t), "Ensure that the union of GPR registers always maintains matching size.");
-gfu_static_assert(sizeof(gfusx_fu6109_cop0_registers_t) == 32 * sizeof(gfu_uword_t), "Ensure that the union of COP0 registers always maintains matching size.");
+static_assert(sizeof(gfusx_fu6109_gpr_registers_t) == 34 * sizeof(gfu_uword_t), "Ensure that the union of GPR registers always maintains matching size.");
+static_assert(sizeof(gfusx_fu6109_cop0_registers_t) == 32 * sizeof(gfu_uword_t), "Ensure that the union of COP0 registers always maintains matching size.");
 
 typedef struct gfusx_fu6109_registers {
     gfusx_fu6109_gpr_registers_t gpr;

@@ -1,7 +1,7 @@
 #ifndef GAMEFU_ASM_H_
 #define GAMEFU_ASM_H_
 
-#include <gamefu/prologue.h>
+#include "../common/common.h"
 #include <gamefu/source.h>
 #include <gamefu/system/instruction.h>
 #include <gamefu/system/register.h>
@@ -48,7 +48,7 @@ typedef union fuasm_inst {
     } addr;
 } fuasm_inst, fuasm_inst_t;
 
-gfu_static_assert(sizeof(fuasm_inst_t) == sizeof(gfu_uword_t), "Ensure that the union of bitfields does not change the size of the instruction type.");
+static_assert(sizeof(fuasm_inst_t) == sizeof(gfu_uword_t), "Ensure that the union of bitfields does not change the size of the instruction type.");
 
 #define FUASM_EXPR_KINDS(X) \
     X(REG) \

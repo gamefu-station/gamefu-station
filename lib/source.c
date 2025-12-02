@@ -14,14 +14,14 @@ bool load_source_from_file(const char* path, source* source) {
     if (f == NULL) {
         diag_pause_error_flush();
         diag_issue(DIAG_ERROR, NOSOURCE, "Failed to open source file '%s': %s.", path, strerror(errno));
-        gfu_return_defer(false);
+        return_defer(false);
     }
 
     errno = 0;
     if (0 != fseek(f, 0, SEEK_END)) {
         diag_pause_error_flush();
         diag_issue(DIAG_ERROR, NOSOURCE, "Failed to read source file '%s': %s.", path, strerror(errno));
-        gfu_return_defer(false);
+        return_defer(false);
     }
 
     errno = 0;
@@ -29,14 +29,14 @@ bool load_source_from_file(const char* path, source* source) {
     if (length < 0) {
         diag_pause_error_flush();
         diag_issue(DIAG_ERROR, NOSOURCE, "Failed to read source file '%s': %s.", path, strerror(errno));
-        gfu_return_defer(false);
+        return_defer(false);
     }
 
     errno = 0;
     if (0 != fseek(f, 0, SEEK_SET)) {
         diag_pause_error_flush();
         diag_issue(DIAG_ERROR, NOSOURCE, "Failed to read source file '%s': %s.", path, strerror(errno));
-        gfu_return_defer(false);
+        return_defer(false);
     }
 
     char* text = calloc((size_t)(length + 1), sizeof *text);
@@ -46,7 +46,7 @@ bool load_source_from_file(const char* path, source* source) {
     if (ferror(f)) {
         diag_pause_error_flush();
         diag_issue(DIAG_ERROR, NOSOURCE, "Failed to read source file '%s': %s.", path, strerror(errno));
-        gfu_return_defer(false);
+        return_defer(false);
     }
 
     source->text = text;

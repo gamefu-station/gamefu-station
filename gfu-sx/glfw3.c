@@ -68,11 +68,11 @@ bool gfusx_platform_init(gfusx_t* vm) {
         const char* description = NULL;
         glfwGetError(&description);
         fprintf(stderr, "Failed to initialize GLFW: %s\n", description);
-        gfu_return_defer(false);
+        return_defer(false);
     }
 
     if (!check_required_glfw_version(vm)) {
-        gfu_return_defer(false);
+        return_defer(false);
     }
 
     if (!vm->headless) {
@@ -83,13 +83,13 @@ bool gfusx_platform_init(gfusx_t* vm) {
             const char* description = NULL;
             glfwGetError(&description);
             fprintf(stderr, "Failed to create window with GLFW: %s\n", description);
-            gfu_return_defer(false);
+            return_defer(false);
         }
 
         glfwMakeContextCurrent(window);
         if (!gladLoadGLES2(glfwGetProcAddress)) {
             fprintf(stderr, "Failed to initialize OpenGL ES 2.0\n");
-            gfu_return_defer(false);
+            return_defer(false);
         }
     }
 

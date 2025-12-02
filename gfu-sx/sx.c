@@ -1,4 +1,4 @@
-#include <gamefu/prologue.h>
+#include "../common/common.h"
 #include <gamefu/asm.h>
 #include <gamefu/diagnostic.h>
 #include <gamefu/object.h>
@@ -35,12 +35,12 @@ int main(int argc, char** argv) {
     vm.trace = options.trace;
     vm.headless = options.headless;
 
-    if (!gfusx_vm_init(&vm)) gfu_return_defer(1);
+    if (!gfusx_vm_init(&vm)) return_defer(1);
 
     gfu_ubyte_t* ram_ptr = gfusx_memory_get_wptr(&vm, GFU_KSEG1_BASE + GFU_WRAM_BASE + GFU_BIOS_RAM_SIZE);
     if (options.rom_path != nullptr) {
         if (!gfusx_chip_insert_rom_file(&vm, options.rom_path)) {
-            gfu_return_defer(1);
+            return_defer(1);
         }
     } else {
         fuasm_inst inst = {0};
@@ -48,11 +48,11 @@ int main(int argc, char** argv) {
         inst.reg.function = GFU_OPFN_OR;
         inst.reg.d = GFU_GPR_R0;
         inst.reg.l = inst.reg.r = 0;
-        *(gfu_cast(gfu_uword_t*, ram_ptr)) = inst.raw;
+        *(cast(gfu_uword_t*, ram_ptr)) = inst.raw;
         ram_ptr += 4;
 
         inst.reg.function = GFU_OPFN_SYSCALL;
-        *(gfu_cast(gfu_uword_t*, ram_ptr)) = inst.raw;
+        *(cast(gfu_uword_t*, ram_ptr)) = inst.raw;
         ram_ptr += 4;
     }
 
@@ -101,20 +101,20 @@ static bool gfusx_parse_options(int argc, char** argv, gfusx_options_t* options)
 #include "../lib/source.c"
 #include "../lib/memory.c"
 
-#include "../lib/gfusx/chip.c"
-#include "../lib/gfusx/fu6109.c"
-#include "../lib/gfusx/hardware.c"
-#include "../lib/gfusx/memory.c"
-#include "../lib/gfusx/vm.c"
+#include "chip.c"
+#include "fu6109.c"
+#include "hardware.c"
+#include "memory.c"
+#include "vm.c"
 
 #if defined(GFUSX_PLATFORM_GLFW)
-#  include "../lib/gfusx/glfw3.c"
+#  include "glfw3.c"
 #else
-#  include "../lib/gfusx/null.c"
+#  include "null.c"
 #endif
 
 #if defined(_WIN32)
-#  include "../lib/gfusx/win32.c"
+#  include "win32.c"
 #elif defined(__linux__)
-#  include "../lib/gfusx/linux.c"
+#  include "linux.c"
 #endif

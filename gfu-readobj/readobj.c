@@ -1,4 +1,4 @@
-#include <gamefu/prologue.h>
+#include "../common/common.h"
 
 typedef struct readobj_options {
     const char* program_name;
@@ -15,7 +15,7 @@ defer:;
     return result;
 }
 
-static void readobj_print_help() {
+static void readobj_print_help(void) {
     fprintf(
         stderr,
         "readobj -- Display information about a GFU object file.\n"

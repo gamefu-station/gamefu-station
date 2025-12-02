@@ -22,11 +22,11 @@ typedef enum diag_level {
     DIAG_FATAL,
 } diag_level;
 
-void diag_flush(VOIDPROTO);
-void diag_pause_error_flush(VOIDPROTO);
+void diag_flush(void);
+void diag_pause_error_flush(void);
 void diag_color_output(bool enable);
 void diag_exit_on_error(bool enable);
-bool diag_has_issued_error(VOIDPROTO);
+bool diag_has_issued_error(void);
 void diag_issue(diag_level level, source source, int32_t location, const char* format, ...);
 void diag_issue_v(diag_level level, source source, int32_t location, const char* format, va_list v);
 

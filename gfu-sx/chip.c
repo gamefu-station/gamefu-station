@@ -43,26 +43,26 @@ bool gfusx_chip_insert_rom_file(gfusx_t* vm, const char* rom_file_path) {
     FILE* rom_file = fopen(rom_file_path, "rb");
     if (rom_file == nullptr) {
         gfusx_logf(vm, "Failed to load ROM file '%s': %s.\n", rom_file_path, strerror(errno));
-        gfu_return_defer(false);
+        return_defer(false);
     }
 
     errno = 0;
     if (fseek(rom_file, 0, SEEK_END) != 0) {
         gfusx_logf(vm, "Failed to read ROM file '%s': %s.\n", rom_file_path, strerror(errno));
-        gfu_return_defer(false);
+        return_defer(false);
     }
 
     errno = 0;
     int64_t length = ftell(rom_file);
     if (length < 0) {
         gfusx_logf(vm, "Failed to read ROM file '%s': %s.\n", rom_file_path, strerror(errno));
-        gfu_return_defer(false);
+        return_defer(false);
     }
 
     errno = 0;
     if (fseek(rom_file, 0, SEEK_SET) != 0) {
         gfusx_logf(vm, "Failed to read ROM file '%s': %s.\n", rom_file_path, strerror(errno));
-        gfu_return_defer(false);
+        return_defer(false);
     }
 
     rom_data = calloc((size_t)length, 1);
@@ -70,7 +70,7 @@ bool gfusx_chip_insert_rom_file(gfusx_t* vm, const char* rom_file_path) {
     errno = 0;
     if ((size_t)length != fread(rom_data, (size_t)length, 1, rom_file) && ferror(rom_file)) {
         gfusx_logf(vm, "Failed to read ROM file '%s': %s.\n", rom_file_path, strerror(errno));
-        gfu_return_defer(false);
+        return_defer(false);
     }
 
 defer:;

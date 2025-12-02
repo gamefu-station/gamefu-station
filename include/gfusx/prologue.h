@@ -1,7 +1,7 @@
 #ifndef GFUSX_PROLOGUE_H_
 #define GFUSX_PROLOGUE_H_
 
-#include <gamefu/prologue.h>
+#include "../common/common.h"
 
 typedef struct gfusx gfusx_t;
 
@@ -18,7 +18,7 @@ typedef struct gfusx_uwpair {
     gfu_uword_t r;
 } gfusx_uwpair_t;
 
-gfu_static_assert(sizeof(gfusx_uwpair_t) == sizeof(gfu_ulong_t), "uwpair should be two uwords, or one ulong in size.");
+static_assert(sizeof(gfusx_uwpair_t) == sizeof(gfu_ulong_t), "uwpair should be two uwords, or one ulong in size.");
 
 #define GFUSX_UWPAIR(L, R) ((gfusx_uwpair_t){(L), (R)})
 

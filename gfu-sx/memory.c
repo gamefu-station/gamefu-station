@@ -1,4 +1,4 @@
-#include <gamefu/prologue.h>
+#include "../common/common.h"
 #include <gamefu/system.h>
 #include <gamefu/object.h>
 
@@ -203,8 +203,8 @@ gfu_uhalf_t gfusx_memory_read_half(gfusx_t* vm, gfu_uword_t addr) {
 
     if (page_ptr != nullptr) {
         gfu_uword_t offset = addr & 0xFFFE;
-        gfu_uhalf_t* addr_ptr = gfu_cast(gfu_uhalf_t*, page_ptr + offset);
-        return GFU_SWAP16(*addr_ptr);
+        gfu_uhalf_t* addr_ptr = cast(gfu_uhalf_t*, page_ptr + offset);
+        return SWAP16(*addr_ptr);
     }
 
     if (
@@ -215,8 +215,8 @@ gfu_uhalf_t gfusx_memory_read_half(gfusx_t* vm, gfu_uword_t addr) {
             gfu_ubyte_t* hard = vm->memory.hard;
             gfu_assert(hard != nullptr, "Where are the hardware registers?");
             gfu_uword_t offset = (addr & 0xFFFE) & (GFU_EXP1_SCRATCH_SIZE - 1);
-            gfu_uhalf_t* hard_ptr = gfu_cast(gfu_uhalf_t*, hard + offset);
-            return GFU_SWAP16(*hard_ptr);
+            gfu_uhalf_t* hard_ptr = cast(gfu_uhalf_t*, hard + offset);
+            return SWAP16(*hard_ptr);
         }
 
         return gfusx_hardware_read_half(vm, addr);
@@ -241,8 +241,8 @@ static gfu_uword_t gfusx_memory_read_word_impl(gfusx_t* vm, gfu_uword_t addr) {
 
     if (page_ptr != nullptr) {
         gfu_uword_t offset = addr & 0xFFFC;
-        gfu_uword_t* addr_ptr = gfu_cast(gfu_uword_t*, page_ptr + offset);
-        return GFU_SWAP32(*addr_ptr);
+        gfu_uword_t* addr_ptr = cast(gfu_uword_t*, page_ptr + offset);
+        return SWAP32(*addr_ptr);
     }
 
     if (
@@ -253,8 +253,8 @@ static gfu_uword_t gfusx_memory_read_word_impl(gfusx_t* vm, gfu_uword_t addr) {
             gfu_ubyte_t* hard = vm->memory.hard;
             gfu_assert(hard != nullptr, "Where are the hardware registers?");
             gfu_uword_t offset = (addr & 0xFFFC) & (GFU_EXP1_SCRATCH_SIZE - 1);
-            gfu_uword_t* hard_ptr = gfu_cast(gfu_uword_t*, hard + offset);
-            return GFU_SWAP32(*hard_ptr);
+            gfu_uword_t* hard_ptr = cast(gfu_uword_t*, hard + offset);
+            return SWAP32(*hard_ptr);
         }
 
         return gfusx_hardware_read_word(vm, addr);
@@ -322,7 +322,7 @@ void gfusx_memory_write_half(gfusx_t* vm, gfu_uword_t addr, gfu_uhalf_t value) {
 
     if (page_ptr != nullptr) {
         gfu_uword_t offset = addr & 0xFFFE;
-        gfu_uhalf_t* addr_ptr = gfu_cast(gfu_uhalf_t*, page_ptr + offset);
+        gfu_uhalf_t* addr_ptr = cast(gfu_uhalf_t*, page_ptr + offset);
         *addr_ptr = value;
         return;
     }
@@ -335,7 +335,7 @@ void gfusx_memory_write_half(gfusx_t* vm, gfu_uword_t addr, gfu_uhalf_t value) {
             gfu_ubyte_t* hard = vm->memory.hard;
             gfu_assert(hard != nullptr, "Where are the hardware registers?");
             gfu_uword_t offset = (addr & 0xFFFE) & (GFU_EXP1_SCRATCH_SIZE - 1);
-            gfu_uhalf_t* hard_ptr = gfu_cast(gfu_uhalf_t*, hard + offset);
+            gfu_uhalf_t* hard_ptr = cast(gfu_uhalf_t*, hard + offset);
             *hard_ptr = value;
             return;
         }
@@ -356,7 +356,7 @@ void gfusx_memory_write_word(gfusx_t* vm, gfu_uword_t addr, gfu_uword_t value) {
 
     if (page_ptr != nullptr) {
         gfu_uword_t offset = addr & 0xFFFE;
-        gfu_uword_t* addr_ptr = gfu_cast(gfu_uword_t*, page_ptr + offset);
+        gfu_uword_t* addr_ptr = cast(gfu_uword_t*, page_ptr + offset);
         *addr_ptr = value;
         return;
     }
@@ -369,7 +369,7 @@ void gfusx_memory_write_word(gfusx_t* vm, gfu_uword_t addr, gfu_uword_t value) {
             gfu_ubyte_t* hard = vm->memory.hard;
             gfu_assert(hard != nullptr, "Where are the hardware registers?");
             gfu_uword_t offset = (addr & 0xFFFE) & (GFU_EXP1_SCRATCH_SIZE - 1);
-            gfu_uword_t* hard_ptr = gfu_cast(gfu_uword_t*, hard + offset);
+            gfu_uword_t* hard_ptr = cast(gfu_uword_t*, hard + offset);
             *hard_ptr = value;
             return;
         }
@@ -396,8 +396,8 @@ gfu_uhalf_t gfusx_memory_read_hwreg_half(gfusx_t* vm, gfu_uhalf_t reg) {
     gfu_ubyte_t* hard = vm->memory.hard;
     gfu_assert(hard != nullptr, "Where are the hardware registers?");
 
-    gfu_uhalf_t* hard_ptr = gfu_cast(gfu_uhalf_t*, hard + (reg & 0xFFFE));
-    return GFU_SWAP16(*hard_ptr);
+    gfu_uhalf_t* hard_ptr = cast(gfu_uhalf_t*, hard + (reg & 0xFFFE));
+    return SWAP16(*hard_ptr);
 }
 
 gfu_uword_t gfusx_memory_read_hwreg_word(gfusx_t* vm, gfu_uhalf_t reg) {
@@ -407,8 +407,8 @@ gfu_uword_t gfusx_memory_read_hwreg_word(gfusx_t* vm, gfu_uhalf_t reg) {
     gfu_ubyte_t* hard = vm->memory.hard;
     gfu_assert(hard != nullptr, "Where are the hardware registers?");
 
-    gfu_uword_t* hard_ptr = gfu_cast(gfu_uword_t*, hard + (reg & 0xFFFC));
-    return GFU_SWAP32(*hard_ptr);
+    gfu_uword_t* hard_ptr = cast(gfu_uword_t*, hard + (reg & 0xFFFC));
+    return SWAP32(*hard_ptr);
 }
 
 void gfusx_memory_write_hwreg_byte(gfusx_t* vm, gfu_uhalf_t reg, gfu_ubyte_t value) {
@@ -429,8 +429,8 @@ void gfusx_memory_write_hwreg_half(gfusx_t* vm, gfu_uhalf_t reg, gfu_uhalf_t val
     gfu_ubyte_t* hard = vm->memory.hard;
     gfu_assert(hard != nullptr, "Where are the hardware registers?");
 
-    gfu_uhalf_t* hard_ptr = gfu_cast(gfu_uhalf_t*, hard + (reg & 0xFFFE));
-    *hard_ptr = GFU_SWAP16(value);
+    gfu_uhalf_t* hard_ptr = cast(gfu_uhalf_t*, hard + (reg & 0xFFFE));
+    *hard_ptr = SWAP16(value);
 }
 
 void gfusx_memory_write_hwreg_word(gfusx_t* vm, gfu_uhalf_t reg, gfu_uword_t value) {
@@ -440,8 +440,8 @@ void gfusx_memory_write_hwreg_word(gfusx_t* vm, gfu_uhalf_t reg, gfu_uword_t val
     gfu_ubyte_t* hard = vm->memory.hard;
     gfu_assert(hard != nullptr, "Where are the hardware registers?");
 
-    gfu_uword_t* hard_ptr = gfu_cast(gfu_uword_t*, hard + (reg & 0xFFFC));
-    *hard_ptr = GFU_SWAP32(value);
+    gfu_uword_t* hard_ptr = cast(gfu_uword_t*, hard + (reg & 0xFFFC));
+    *hard_ptr = SWAP32(value);
 }
 
 gfu_ubyte_t* gfusx_memory_get_rptr(gfusx_t* vm, gfu_uword_t addr) {

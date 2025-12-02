@@ -16,7 +16,7 @@ typedef union gfusx_gpr {
     } regs;
 } gfusx_gpr, gfusx_gpr_t;
 
-gfu_static_assert(sizeof(gfusx_gpr_t) == 34 * sizeof(gfu_uword_t), "");
+static_assert(sizeof(gfusx_gpr_t) == 34 * sizeof(gfu_uword_t), "");
 
 typedef struct gfusx {
     gfu_ubyte_t** mem_rlut;
@@ -31,7 +31,7 @@ typedef struct gfusx {
     bool trace : 1;
 } gfusx, gfusx_t;
 
-gfusx_t* gfusx_create(VOIDPROTO);
+gfusx_t* gfusx_create(void);
 void gfusx_destroy(gfusx_t* vm);
 
 void gfusx_interpret(gfusx_t* vm);

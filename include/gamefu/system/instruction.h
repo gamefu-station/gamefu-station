@@ -1,7 +1,7 @@
 #ifndef GAMEFU_SYSTEM_INSTRUCTION_H_
 #define GAMEFU_SYSTEM_INSTRUCTION_H_
 
-#include <gamefu/prologue.h>
+#include "../common/common.h"
 #include <gamefu/system/register.h>
 
 #define GFU_OP(X) \

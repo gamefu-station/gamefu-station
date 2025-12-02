@@ -1,7 +1,7 @@
 #ifndef GAMEFU_OBJECT_H_
 #define GAMEFU_OBJECT_H_
 
-#include <gamefu/prologue.h>
+#include "../common/common.h"
 #include <gamefu/system.h>
 
 #define GFUOBJ_ADDRSPACE_BIOS 0x01
@@ -57,7 +57,7 @@ typedef union gfuobj_flags {
     } bits;
 } gfuobj_flags_t;
 
-gfu_static_assert(sizeof(gfuobj_flags_t) == 1 * sizeof(gfu_uword_t), "GameFU Object flags expected to be 1 32-bit word.");
+static_assert(sizeof(gfuobj_flags_t) == 1 * sizeof(gfu_uword_t), "GameFU Object flags expected to be 1 32-bit word.");
 
 typedef struct gfuobj2_header {
     gfu_uword_t magic;
@@ -70,7 +70,7 @@ typedef struct gfuobj2_header {
     gfu_uword_t rom_size;
 } gfuobj2_header_t;
 
-gfu_static_assert(sizeof(gfuobj_header_t) == 4 * sizeof(gfu_uword_t), "GameFU Object header expected to be 4 32-bit words.");
+static_assert(sizeof(gfuobj_header_t) == 4 * sizeof(gfu_uword_t), "GameFU Object header expected to be 4 32-bit words.");
 
 typedef enum gfuobj_section_class {
     GFUOBJ_CLASS_DATA,

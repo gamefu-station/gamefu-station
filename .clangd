@@ -1,10 +1,14 @@
 CompileFlags:
   Add:
-    - "-DGFUSX_PLATFORM_GLFW"
     - "-Iinclude"
+    - "-Ivendor/glfw3/include"
+    - "-DGFUSX_PLATFORM_GLFW"
     - "-Wno-unused-variable"
     - "-Wno-unused-function"
     - "-Wno-unused-label"
+    - "-std=c99"
+    - "-pedantic"
+    - "-pedantic-errors"
 
 Diagnostics:
   UnusedIncludes: None

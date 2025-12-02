@@ -1,4 +1,4 @@
-#include <gamefu/prologue.h>
+#include "../common/common.h"
 #include <gamefu/asm.h>
 #include <gamefu/system/register.h>
 #include <gamefu/system/syscall.h>
@@ -404,13 +404,13 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
         }
 
         case GFU_OP_ADDI: { // 0x08  addi reg $d, reg $l, imm $v
-            gfu_long_t v = ((gfu_long_t)_rL_ + gfu_sext(half, long, _iImm_));
+            gfu_long_t v = ((gfu_long_t)_rL_ + sext(half, long, _iImm_));
             // TODO(echoe): overflow exceptions
             if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)v;
         } break;
 
         case GFU_OP_ADDIU: { // 0x09  addiu reg $d, reg $l, imm $v
-            gfu_long_t v = ((gfu_long_t)_rL_ + gfu_sext(half, long, _iImm_));
+            gfu_long_t v = ((gfu_long_t)_rL_ + sext(half, long, _iImm_));
             if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)v;
         } break;
 
@@ -443,13 +443,13 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
         case GFU_OP_LB: { // 0x20  lb reg $d, imm $v(reg $l)
             gfu_uword_t addr = (gfu_uword_t)((gfu_half_t)_iImm_ + (gfu_long_t)_rL_);
             gfu_ubyte_t v = gfusx_memory_read_byte(vm, addr);
-            if (_iD_ != _rnZero_) _rD_ = gfu_sext(byte, word, v);
+            if (_iD_ != _rnZero_) _rD_ = sext(byte, word, v);
         } break;
 
         case GFU_OP_LH: { // 0x21  lh reg $d, imm $v(reg $l)
             gfu_uword_t addr = (gfu_uword_t)((gfu_half_t)_iImm_ + (gfu_long_t)_rL_);
             gfu_uhalf_t v = gfusx_memory_read_half(vm, addr);
-            if (_iD_ != _rnZero_) _rD_ = gfu_sext(half, word, v);
+            if (_iD_ != _rnZero_) _rD_ = sext(half, word, v);
         } break;
 
         case GFU_OP_LWL: { // 0x22  lwl reg $d, imm $v(reg $l)
@@ -692,7 +692,7 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
                 } break;
 
                 case GFU_OPFN_MUL: { // 0x1C  mul reg $d, reg $l, reg $r
-                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)(gfu_sext(word, long, _rL_) * gfu_sext(word, long, _rR_));
+                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)(sext(word, long, _rL_) * sext(word, long, _rR_));
                 } break;
 
                 case GFU_OPFN_ADD: { // 0x20  add reg $d, reg $l, reg $r
@@ -850,7 +850,7 @@ static void gfusx_dumpstack(gfusx_t* vm) {
         stack_bottom += GFU_MAIN0_RAM_SIZE;
     }
 
-    gfu_uword_t stack_size = gfu_cast(gfu_uword_t, stack_bottom - stack_top);
+    gfu_uword_t stack_size = cast(gfu_uword_t, stack_bottom - stack_top);
     if (stack_size == 0) return;
 
     fprintf(stderr, "Stack           +00      +04      +08      +0C      +10      +14      +18      +1C\n");

@@ -1,4 +1,4 @@
-#include <gamefu/prologue.h>
+#include "../common/common.h"
 #include <gamefu/system/register.h>
 
 static struct {
