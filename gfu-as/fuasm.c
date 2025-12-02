@@ -47,7 +47,7 @@ typedef struct gfuas_state {
     bool is_entry_set;
 } gfuas_state;
 
-#define FUASM_TOKEN_KINDS(X) \
+#define GFUAS_TOKEN_KINDS(X) \
     X(ENDL) \
     X(DIRECTIVE) \
     X(LABEL_GLOBAL) \
@@ -58,18 +58,18 @@ typedef struct gfuas_state {
     X(BYTE_STRING)
 
 typedef enum gfuas_token_kind {
-    FUASM_TK_INVALID = 0x00FFFFFF,
-    FUASM_TK_EOF = 0,
+    GFUAS_TK_INVALID = 0x00FFFFFF,
+    GFUAS_TK_EOF = 0,
 
-    FUASM_TK_PRINTABLE_BEGIN = ETOK_PRINTABLE_BEGIN,
-    FUASM_TK_PRINTABLE_END = ETOK_PRINTABLE_END,
+    GFUAS_TK_PRINTABLE_BEGIN = ETOK_PRINTABLE_BEGIN,
+    GFUAS_TK_PRINTABLE_END = ETOK_PRINTABLE_END,
 
-    FUASM_TK_INVALID_CHARACTER = ETOK_INVALID_CHARACTER,
+    GFUAS_TK_INVALID_CHARACTER = ETOK_INVALID_CHARACTER,
 
     _gfuas_tk_multibyte_offset = ETOK_MULTIBYTE_BEGIN,
 
-#define X(Id) FUASM_TK_##Id,
-    FUASM_TOKEN_KINDS(X)
+#define X(Id) GFUAS_TK_##Id,
+    GFUAS_TOKEN_KINDS(X)
 #undef X
 } gfuas_token_kind;
 
@@ -107,8 +107,8 @@ typedef struct gfuas_parser {
 #define PDATA ((gfuas_userdata) {parser->state, parser->source})
 
 typedef enum gfuas_section {
-    FUASM_TEXT,
-    FUASM_DATA,
+    GFUAS_TEXT,
+    GFUAS_DATA,
 } gfuas_section;
 
 static void show_help(void);
@@ -424,19 +424,19 @@ static isel_type gfuas_expr_kindo_isel_type(gfuas_expr expr) {
     switch (expr.kind) {
         default: return ISEL_TY_INVALID;
 
-        case FUASM_EXPR_REG: return ISEL_TY_REG;
+        case GFUAS_EXPR_REG: return ISEL_TY_REG;
 
-        case FUASM_EXPR_IMM:
-        case FUASM_EXPR_IMM_UPPER:
-        case FUASM_EXPR_IMM_LOWER:
+        case GFUAS_EXPR_IMM:
+        case GFUAS_EXPR_IMM_UPPER:
+        case GFUAS_EXPR_IMM_LOWER:
             return ISEL_TY_IMM;
 
-        case FUASM_EXPR_ADDR:
-        case FUASM_EXPR_ADDR_UPPER:
-        case FUASM_EXPR_ADDR_LOWER:
+        case GFUAS_EXPR_ADDR:
+        case GFUAS_EXPR_ADDR_UPPER:
+        case GFUAS_EXPR_ADDR_LOWER:
             return ISEL_TY_ADDR;
 
-        case FUASM_EXPR_BYTE_STRING: return ISEL_TY_STR;
+        case GFUAS_EXPR_BYTE_STRING: return ISEL_TY_STR;
     }
 }
 
@@ -477,24 +477,24 @@ static gfu_uword gfuas_match_isel(const gfuas_stmt* stmt) {
 static bool gfuas_eval_expr(gfuas_state* state, gfu_uword label_scope, source source, gfuas_expr expr, gfu_uword* result) {
 #define R(Value) do { *result = (Value); return true; } while (0)
     switch (expr.kind) {
-        case FUASM_EXPR_INVALID: R(0);
-        case FUASM_EXPR_BYTE_STRING: R(0);
+        case GFUAS_EXPR_INVALID: R(0);
+        case GFUAS_EXPR_BYTE_STRING: R(0);
 
-        case FUASM_EXPR_REG: R((gfu_uword)expr.as._register);
+        case GFUAS_EXPR_REG: R((gfu_uword)expr.as._register);
 
-        case FUASM_EXPR_IMM: R(expr.as.immediate);
-        case FUASM_EXPR_IMM_LOWER: R(expr.as.immediate & 0xFFFF);
-        case FUASM_EXPR_IMM_UPPER: R((expr.as.immediate >> 16) & 0xFFFF);
+        case GFUAS_EXPR_IMM: R(expr.as.immediate);
+        case GFUAS_EXPR_IMM_LOWER: R(expr.as.immediate & 0xFFFF);
+        case GFUAS_EXPR_IMM_UPPER: R((expr.as.immediate >> 16) & 0xFFFF);
 
-        case FUASM_EXPR_ADDR:
-        case FUASM_EXPR_ADDR_LOWER:
-        case FUASM_EXPR_ADDR_UPPER: {
+        case GFUAS_EXPR_ADDR:
+        case GFUAS_EXPR_ADDR_LOWER:
+        case GFUAS_EXPR_ADDR_UPPER: {
             gfu_uword addr = gfuas_lookup_address_raw(state, label_scope, expr.source, expr.as.address.location, expr.as.address.as.label);
             if (addr == ISEL_LABEL_NOT_FOUND) return false;
 
-            if (expr.kind == FUASM_EXPR_ADDR_LOWER) {
+            if (expr.kind == GFUAS_EXPR_ADDR_LOWER) {
                 R(addr & 0xFFFF);
-            } else if (expr.kind == FUASM_EXPR_ADDR_UPPER) {
+            } else if (expr.kind == GFUAS_EXPR_ADDR_UPPER) {
                 R(addr >> 16);
             } else R(addr);
         }
@@ -507,12 +507,12 @@ static bool gfuas_eval_expr(gfuas_state* state, gfu_uword label_scope, source so
 static gfu_uword gfuas_emit_isel(gfuas_state* state, gfu_uword label_scope, gfu_uword addr, const gfuas_stmt* ir, char* rom, const gfuas_expr* vars) {
     isel_pattern pattern = isel_patterns[ir->pattern_index];
 
-    if (ir->mnemonic == FUASM_MNEM_BYTES) {
+    if (ir->mnemonic == GFUAS_MNEM_BYTES) {
         gfuas_expr expr = vars[isel_emits[pattern.emit_index].arguments[0].as.var_index];
-        if (expr.kind == FUASM_EXPR_BYTE_STRING) {
+        if (expr.kind == GFUAS_EXPR_BYTE_STRING) {
             memcpy(rom, expr.as.byte_string.data, (size_t)expr.as.byte_string.length);
             return expr.as.byte_string.length;
-        } else if (expr.kind == FUASM_EXPR_IMM) {
+        } else if (expr.kind == GFUAS_EXPR_IMM) {
             memset(rom, 0, (size_t)expr.as.immediate);
             return expr.as.immediate;
         } else {
@@ -633,23 +633,23 @@ static gfu_uword gfuas_emit_isel(gfuas_state* state, gfu_uword label_scope, gfu_
 /* ===== Parser Shit ===== */
 
 static bool gfuas_parser_is_at_end(gfuas_parser* parser) {
-    return parser->tk.kind == FUASM_TK_EOF;
+    return parser->tk.kind == GFUAS_TK_EOF;
 }
 
 static gfuas_token gfuas_parser_peek(gfuas_parser* parser) {
-    if (parser->next.kind == FUASM_TK_INVALID) {
+    if (parser->next.kind == GFUAS_TK_INVALID) {
         parser->next = gfuas_lexer_read(&parser->lexer);
     }
     return parser->next;
 }
 
 static void gfuas_parser_advance(gfuas_parser* parser) {
-    if (parser->tk.kind == FUASM_TK_EOF) return;
-    if (parser->next.kind != FUASM_TK_INVALID) {
+    if (parser->tk.kind == GFUAS_TK_EOF) return;
+    if (parser->next.kind != GFUAS_TK_INVALID) {
         parser->tk = parser->next;
-        parser->next = (gfuas_token) { .kind = FUASM_TK_INVALID };
+        parser->next = (gfuas_token) { .kind = GFUAS_TK_INVALID };
     } else parser->tk = gfuas_lexer_read(&parser->lexer);
-    assertn(parser->next.kind == FUASM_TK_INVALID);
+    assertn(parser->next.kind == GFUAS_TK_INVALID);
 }
 
 static bool gfuas_parserry(gfuas_parser* parser, gfuas_token_kind kind) {
@@ -661,7 +661,7 @@ static bool gfuas_parserry(gfuas_parser* parser, gfuas_token_kind kind) {
 static bool gfuas_parser_expect(gfuas_parser* parser, gfuas_token_kind kind, const char* what, gfuas_token* token) {
     if (parser->tk.kind != kind) {
         // gfuas_token_dump(parser->tk);
-        if (kind >= FUASM_TK_PRINTABLE_BEGIN && kind <= FUASM_TK_PRINTABLE_END) {
+        if (kind >= GFUAS_TK_PRINTABLE_BEGIN && kind <= GFUAS_TK_PRINTABLE_END) {
             diag_issue(DIAG_FATAL, parser->source, parser->tk.location, "Expected '%c'.", kind);
         } else {
             diag_issue(DIAG_FATAL, parser->source, parser->tk.location, "Expected %s.", what);
@@ -680,29 +680,29 @@ static bool gfuas_parse_expr(gfuas_parser* parser, gfuas_expr* out_expr) {
     expr.source = parser->source;
     expr.location = parser->tk.location;
 
-    if (parser->tk.kind == FUASM_TK_LABEL_GLOBAL || parser->tk.kind == FUASM_TK_LABEL_LOCAL) {
-        expr.kind = FUASM_EXPR_ADDR;
-        expr.as.address.kind = FUASM_ADDR_LABEL;
+    if (parser->tk.kind == GFUAS_TK_LABEL_GLOBAL || parser->tk.kind == GFUAS_TK_LABEL_LOCAL) {
+        expr.kind = GFUAS_EXPR_ADDR;
+        expr.as.address.kind = GFUAS_ADDR_LABEL;
         expr.as.address.location = parser->tk.location;
         expr.as.address.as.label = parser->tk.as.label;
         gfuas_parser_advance(parser);
-    } else if (parser->tk.kind == FUASM_TK_REGISTER) {
-        expr.kind = FUASM_EXPR_REG;
+    } else if (parser->tk.kind == GFUAS_TK_REGISTER) {
+        expr.kind = GFUAS_EXPR_REG;
         expr.as._register = parser->tk.as._register;
         gfuas_parser_advance(parser);
-    } else if (parser->tk.kind == FUASM_TK_IMMEDIATE) {
-        expr.kind = FUASM_EXPR_IMM;
+    } else if (parser->tk.kind == GFUAS_TK_IMMEDIATE) {
+        expr.kind = GFUAS_EXPR_IMM;
         expr.as.immediate = parser->tk.as.immediate;
         gfuas_parser_advance(parser);
-    } else if (parser->tk.kind == FUASM_TK_BYTE_STRING) {
-        expr.kind = FUASM_EXPR_BYTE_STRING;
+    } else if (parser->tk.kind == GFUAS_TK_BYTE_STRING) {
+        expr.kind = GFUAS_EXPR_BYTE_STRING;
         expr.as.byte_string.data = parser->tk.as.byte_string.data;
         expr.as.byte_string.length = parser->tk.as.byte_string.length;
         gfuas_parser_advance(parser);
     } else if (parser->tk.kind == '-') {
         gfuas_parser_advance(parser);
-        if (parser->tk.kind == FUASM_TK_IMMEDIATE) {
-            expr.kind = FUASM_EXPR_IMM;
+        if (parser->tk.kind == GFUAS_TK_IMMEDIATE) {
+            expr.kind = GFUAS_EXPR_IMM;
             expr.as.immediate = (gfu_uword)(-(gfu_word)parser->tk.as.immediate);
             gfuas_parser_advance(parser);
         } else {
@@ -724,40 +724,40 @@ static gfuas_stmt* parse_statement(gfuas_parser* parser) {
     gfuas_state* state = parser->state;
     source source = parser->source;
 
-    assertn(parser->tk.kind != FUASM_TK_ENDL && parser->tk.kind != FUASM_TK_EOF);
+    assertn(parser->tk.kind != GFUAS_TK_ENDL && parser->tk.kind != GFUAS_TK_EOF);
 
     gfuas_stmt* stmt = arena_alloc(&state->stmt_arena, sizeof *stmt);
     stmt->source = source;
     stmt->location = parser->tk.location;
 
-    if (parser->tk.kind == FUASM_TK_DIRECTIVE) {
+    if (parser->tk.kind == GFUAS_TK_DIRECTIVE) {
         stmt->directive = parser->tk.as.directive;
         gfuas_parser_advance(parser);
 
-        if (stmt->directive == FUASM_DIR_ADDRESS_SPACE) {
+        if (stmt->directive == GFUAS_DIR_ADDRESS_SPACE) {
             if (!is_first) {
                 diag_issue(DIAG_ERROR, source, stmt->location, "'#address_space' directive must be the first statement.");
                 return nullptr;
             }
 
-            if (parser->tk.kind == FUASM_TK_LABEL_GLOBAL && 0 == strcmp("bios", parser->tk.as.label)) {
+            if (parser->tk.kind == GFUAS_TK_LABEL_GLOBAL && 0 == strcmp("bios", parser->tk.as.label)) {
                 state->address_space = GFUOBJ_ADDRSPACE_BIOS;
                 gfuas_parser_advance(parser);
-            } else if (parser->tk.kind == FUASM_TK_LABEL_GLOBAL && 0 == strcmp("user", parser->tk.as.label)) {
+            } else if (parser->tk.kind == GFUAS_TK_LABEL_GLOBAL && 0 == strcmp("user", parser->tk.as.label)) {
                 state->address_space = GFUOBJ_ADDRSPACE_USER;
                 gfuas_parser_advance(parser);
             } else {
                 diag_issue(DIAG_ERROR, source, parser->tk.location, "Expected 'bios' or 'user'.");
                 return nullptr;
             }
-        } else if (stmt->directive == FUASM_DIR_ENTRY) {
+        } else if (stmt->directive == GFUAS_DIR_ENTRY) {
             if (state->is_entry_set) {
                 diag_issue(DIAG_ERROR, source, stmt->location, "'#entry' may only be specified once.");
                 return nullptr;
             }
 
             gfuas_token entry_name_token;
-            if (!gfuas_parser_expect(parser, FUASM_TK_LABEL_GLOBAL, "a global label", &entry_name_token)) {
+            if (!gfuas_parser_expect(parser, GFUAS_TK_LABEL_GLOBAL, "a global label", &entry_name_token)) {
                 return nullptr;
             }
 
@@ -769,20 +769,20 @@ static gfuas_stmt* parse_statement(gfuas_parser* parser) {
     }
 
     if (
-        (parser->tk.kind == FUASM_TK_LABEL_GLOBAL || parser->tk.kind == FUASM_TK_LABEL_LOCAL) &&
+        (parser->tk.kind == GFUAS_TK_LABEL_GLOBAL || parser->tk.kind == GFUAS_TK_LABEL_LOCAL) &&
         gfuas_parser_peek(parser).kind == ':'
     ) {
         stmt->label = parser->tk.as.label;
-        stmt->is_label_local = parser->tk.kind == FUASM_TK_LABEL_LOCAL;
+        stmt->is_label_local = parser->tk.kind == GFUAS_TK_LABEL_LOCAL;
         gfuas_parser_advance(parser); // label
         gfuas_parser_advance(parser); // colon
     }
 
-    if (parser->tk.kind == FUASM_TK_MNEMONIC) {
+    if (parser->tk.kind == GFUAS_TK_MNEMONIC) {
         stmt->mnemonic = parser->tk.as.mnemonic;
         gfuas_parser_advance(parser);
 
-        if (parser->tk.kind == FUASM_TK_ENDL || parser->tk.kind == FUASM_TK_EOF) {
+        if (parser->tk.kind == GFUAS_TK_ENDL || parser->tk.kind == GFUAS_TK_EOF) {
             goto stmt_end;
         }
 
@@ -798,7 +798,7 @@ static gfuas_stmt* parse_statement(gfuas_parser* parser) {
             }
 
             if (parser->tk.kind == '(') {
-                if (expr->kind != FUASM_EXPR_IMM) {
+                if (expr->kind != GFUAS_EXPR_IMM) {
                     diag_issue(DIAG_ERROR, source, parser->tk.location, "Base register syntax can only be applied after an immediate value.");
                     return nullptr;
                 }
@@ -810,13 +810,13 @@ static gfuas_stmt* parse_statement(gfuas_parser* parser) {
 
                 gfuas_parser_advance(parser);
                 gfuas_expr base_expr = {
-                    .kind = FUASM_EXPR_REG,
+                    .kind = GFUAS_EXPR_REG,
                     .is_base = true,
                     .location = parser->tk.location,
                 };
 
                 gfuas_token tk;
-                if (!gfuas_parser_expect(parser, FUASM_TK_REGISTER, "a register name", &tk)) {
+                if (!gfuas_parser_expect(parser, GFUAS_TK_REGISTER, "a register name", &tk)) {
                     return nullptr;
                 }
 
@@ -833,16 +833,16 @@ static gfuas_stmt* parse_statement(gfuas_parser* parser) {
 stmt_end:;
     is_first = false;
 
-    if (parser->tk.kind != FUASM_TK_ENDL) {
+    if (parser->tk.kind != GFUAS_TK_ENDL) {
         diag_issue(DIAG_ERROR, source, parser->tk.location, "Extra tokens at the end of a statement.");
         return nullptr;
     }
 
-    while (parser->tk.kind != FUASM_TK_ENDL) {
+    while (parser->tk.kind != GFUAS_TK_ENDL) {
         gfuas_parser_advance(parser);
     }
 
-    assertn(parser->tk.kind == FUASM_TK_ENDL);
+    assertn(parser->tk.kind == GFUAS_TK_ENDL);
     gfuas_parser_advance(parser);
 
     return stmt;
@@ -850,7 +850,7 @@ stmt_end:;
 
 static char* gfuas_assemble_ir_internal(gfuas_state* state, gfu_uword* rom_size) {
     gfuas_stmt* const ir = state->ir;
-    gfuas_section section = FUASM_TEXT;
+    gfuas_section section = GFUAS_TEXT;
 
     /* Step 0: Collect label count */
 
@@ -866,18 +866,18 @@ static char* gfuas_assemble_ir_internal(gfuas_state* state, gfu_uword* rom_size)
 
     gfu_uword text_instruction_count = 0;
 
-    section = FUASM_TEXT;
+    section = GFUAS_TEXT;
     for (gfuas_stmt* stmt = ir; stmt != nullptr; ) {
         switch (stmt->directive) {
             default: assertn(false && "Unhandled directive"); break;
-            case FUASM_DIR_INVALID: break;
-            case FUASM_DIR_ADDRESS_SPACE: break;
-            case FUASM_DIR_ENTRY: break;
-            case FUASM_DIR_TEXT: section = FUASM_TEXT; break;
-            case FUASM_DIR_DATA: section = FUASM_DATA; break;
+            case GFUAS_DIR_INVALID: break;
+            case GFUAS_DIR_ADDRESS_SPACE: break;
+            case GFUAS_DIR_ENTRY: break;
+            case GFUAS_DIR_TEXT: section = GFUAS_TEXT; break;
+            case GFUAS_DIR_DATA: section = GFUAS_DATA; break;
         }
 
-        if (stmt->mnemonic == FUASM_MNEM_INVALID) {
+        if (stmt->mnemonic == GFUAS_MNEM_INVALID) {
             stmt = stmt->next;
             continue;
         }
@@ -891,15 +891,15 @@ static char* gfuas_assemble_ir_internal(gfuas_state* state, gfu_uword* rom_size)
         isel_pattern pattern = isel_patterns[stmt->pattern_index];
         assertn(pattern.match_count > 0);
 
-        if (section == FUASM_TEXT) {
+        if (section == GFUAS_TEXT) {
             text_instruction_count += pattern.emit_count;
         }
 
         for (gfu_uword i = 0; i < pattern.match_count; i++) {
-            if (section == FUASM_TEXT && stmt->mnemonic == FUASM_MNEM_BYTES) {
+            if (section == GFUAS_TEXT && stmt->mnemonic == GFUAS_MNEM_BYTES) {
                 diag_issue(DIAG_ERROR, stmt->source, stmt->location, "'bytes' statement can only occur inside the #data section.");
                 return nullptr;
-            } else if (section == FUASM_DATA && stmt->mnemonic != FUASM_MNEM_BYTES) {
+            } else if (section == GFUAS_DATA && stmt->mnemonic != GFUAS_MNEM_BYTES) {
                 diag_issue(DIAG_ERROR, stmt->source, stmt->location, "Currently only 'bytes' statement may occur inside the #data section.");
                 return nullptr;
             }
@@ -916,19 +916,19 @@ static char* gfuas_assemble_ir_internal(gfuas_state* state, gfu_uword* rom_size)
     gfu_uword data_index = 0;
     gfu_uword label_scope = ISEL_LABEL_NOPARENT;
 
-    section = FUASM_TEXT;
+    section = GFUAS_TEXT;
     for (gfuas_stmt* stmt = ir; stmt != nullptr; ) {
         switch (stmt->directive) {
             default: assertn(false && "Unhandled directive"); break;
-            case FUASM_DIR_INVALID: break;
-            case FUASM_DIR_ADDRESS_SPACE: break;
-            case FUASM_DIR_ENTRY: break;
-            case FUASM_DIR_TEXT: section = FUASM_TEXT; break;
-            case FUASM_DIR_DATA: section = FUASM_DATA; break;
+            case GFUAS_DIR_INVALID: break;
+            case GFUAS_DIR_ADDRESS_SPACE: break;
+            case GFUAS_DIR_ENTRY: break;
+            case GFUAS_DIR_TEXT: section = GFUAS_TEXT; break;
+            case GFUAS_DIR_DATA: section = GFUAS_DATA; break;
         }
 
         if (stmt->label != nullptr) {
-            gfu_uword relative_address = section == FUASM_TEXT
+            gfu_uword relative_address = section == GFUAS_TEXT
                 ? text_index : data_index + (text_instruction_count * 4);
             gfu_uword parent_label = ISEL_LABEL_NOPARENT;
 
@@ -948,7 +948,7 @@ static char* gfuas_assemble_ir_internal(gfuas_state* state, gfu_uword* rom_size)
             };
         }
 
-        if (stmt->mnemonic == FUASM_MNEM_INVALID) {
+        if (stmt->mnemonic == GFUAS_MNEM_INVALID) {
             stmt = stmt->next;
             continue;
         }
@@ -967,19 +967,19 @@ static char* gfuas_assemble_ir_internal(gfuas_state* state, gfu_uword* rom_size)
             }
         }
 
-        if (section == FUASM_TEXT) {
+        if (section == GFUAS_TEXT) {
             text_index += pattern.emit_count * sizeof(gfu_uword);
-        } else if (section == FUASM_DATA) {
+        } else if (section == GFUAS_DATA) {
             assertn(pattern.match_count == 1);
             assertn(pattern.emit_count == 1);
-            assertn(stmt->mnemonic == FUASM_MNEM_BYTES);
+            assertn(stmt->mnemonic == GFUAS_MNEM_BYTES);
             assertn(stmt->operand_count == 1);
             isel_emit emit = isel_emits[pattern.emit_index];
             assertn(emit.arguments[0].kind == ISEL_ARG_VAR);
             gfuas_expr expr = vars[emit.arguments[0].as.var_index];
-            if (expr.kind == FUASM_EXPR_BYTE_STRING) {
+            if (expr.kind == GFUAS_EXPR_BYTE_STRING) {
                 data_index += expr.as.byte_string.length;
-            } else if (expr.kind == FUASM_EXPR_IMM) {
+            } else if (expr.kind == GFUAS_EXPR_IMM) {
                 data_index += expr.as.immediate;
             } else {
                 diag_issue(DIAG_FATAL, NOSOURCE, "unhandled `bytes` case in data section.");
@@ -1025,26 +1025,26 @@ static char* gfuas_assemble_ir_internal(gfuas_state* state, gfu_uword* rom_size)
     data_index = 0;
     label_scope = ISEL_LABEL_NOPARENT;
 
-    section = FUASM_TEXT;
+    section = GFUAS_TEXT;
     for (gfuas_stmt* stmt = ir; stmt != nullptr; ) {
         switch (stmt->directive) {
             default: assertn(false && "Unhandled directive"); break;
-            case FUASM_DIR_INVALID: break;
-            case FUASM_DIR_ADDRESS_SPACE: break;
-            case FUASM_DIR_ENTRY: break;
-            case FUASM_DIR_TEXT: section = FUASM_TEXT; break;
-            case FUASM_DIR_DATA: section = FUASM_DATA; break;
+            case GFUAS_DIR_INVALID: break;
+            case GFUAS_DIR_ADDRESS_SPACE: break;
+            case GFUAS_DIR_ENTRY: break;
+            case GFUAS_DIR_TEXT: section = GFUAS_TEXT; break;
+            case GFUAS_DIR_DATA: section = GFUAS_DATA; break;
         }
 
         if (stmt->label != nullptr) {
             if (!stmt->is_label_local) {
-                gfu_uword relative_address = section == FUASM_TEXT
+                gfu_uword relative_address = section == GFUAS_TEXT
                     ? text_index : data_index + text_index;
                 label_scope = relative_address;
             }
         }
 
-        if (stmt->mnemonic == FUASM_MNEM_INVALID) {
+        if (stmt->mnemonic == GFUAS_MNEM_INVALID) {
             stmt = stmt->next;
             continue;
         }
@@ -1067,14 +1067,14 @@ static char* gfuas_assemble_ir_internal(gfuas_state* state, gfu_uword* rom_size)
             ? GFU_KSEG0_BASE + GFU_BIOS_RAM_SIZE
             : GFU_KSEG1_BASE + GFU_BIOS_ROM_BASE;
 
-        if (section == FUASM_TEXT) {
+        if (section == GFUAS_TEXT) {
             gfu_uword icount = gfuas_emit_isel(state, label_scope, text_index + addr_offset, stmt, rom_base + text_index, vars);
             if (icount == 0) {
                 free(rom_data);
                 return nullptr;
             }
             text_index += icount;
-        } else if (section == FUASM_DATA) {
+        } else if (section == GFUAS_DATA) {
             gfu_uword addr = (text_instruction_count * sizeof(gfu_uword)) + data_index;
             gfu_uword icount = gfuas_emit_isel(state, label_scope, addr + addr_offset, stmt, rom_base + addr, vars);
             if (icount == 0) {
@@ -1102,8 +1102,8 @@ static char* gfuas_assemble_internal(gfuas_state* state, gfu_uword* rom_size) {
         gfuas_parser parser = {
             .state = state,
             .source = source,
-            .tk.kind = FUASM_TK_INVALID,
-            .next.kind = FUASM_TK_INVALID,
+            .tk.kind = GFUAS_TK_INVALID,
+            .next.kind = GFUAS_TK_INVALID,
         };
 
         gfuas_userdata userdata = {
@@ -1113,12 +1113,12 @@ static char* gfuas_assemble_internal(gfuas_state* state, gfu_uword* rom_size) {
         gfuas_lexer_init(&userdata, &parser.lexer);
 
         parser.tk = gfuas_lexer_read(&parser.lexer);
-        while (parser.tk.kind != FUASM_TK_EOF) {
-            while (parser.tk.kind == FUASM_TK_ENDL) {
+        while (parser.tk.kind != GFUAS_TK_EOF) {
+            while (parser.tk.kind == GFUAS_TK_ENDL) {
                 gfuas_parser_advance(&parser);
             }
 
-            if (parser.tk.kind == FUASM_TK_EOF) break;
+            if (parser.tk.kind == GFUAS_TK_EOF) break;
 
             gfu_uword location  = parser.tk.location;
             gfuas_stmt* stmt = parse_statement(&parser);
@@ -1141,15 +1141,15 @@ static char* gfuas_assemble_internal(gfuas_state* state, gfu_uword* rom_size) {
 /* ===== Lexer Shit ===== */
 
 static const char* gfuas_token_kind_names[] = {
-    [FUASM_TK_INVALID] = "INVALID",
-    [FUASM_TK_EOF] = "EOF",
-#define X(Id) [FUASM_TK_##Id] = #Id,
-    FUASM_TOKEN_KINDS(X)
+    [GFUAS_TK_INVALID] = "INVALID",
+    [GFUAS_TK_EOF] = "EOF",
+#define X(Id) [GFUAS_TK_##Id] = #Id,
+    GFUAS_TOKEN_KINDS(X)
 #undef X
 };
 
 static void gfuas_token_dump(gfuas_token token) {
-    if (token.kind >= FUASM_TK_PRINTABLE_BEGIN && token.kind <= FUASM_TK_PRINTABLE_END) {
+    if (token.kind >= GFUAS_TK_PRINTABLE_BEGIN && token.kind <= GFUAS_TK_PRINTABLE_END) {
         fprintf(
             stderr,
             "(%d,%d):  %c",
@@ -1245,7 +1245,7 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
     etok_lexer_skip_white_space(lexer);
     gfuas_token token = {
         .source = source,
-        .kind = FUASM_TK_INVALID,
+        .kind = GFUAS_TK_INVALID,
         .location = gfuas_lexer_location(lexer),
         .begin = lexer->source_current,
         .line = (gfu_uword)lexer->line,
@@ -1253,7 +1253,7 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
     };
 
     if (etok_lexer_is_at_end(lexer)) {
-        token.kind = FUASM_TK_EOF;
+        token.kind = GFUAS_TK_EOF;
         token.end = token.begin;
         return token;
     }
@@ -1261,13 +1261,13 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
     int ch = lexer->ch;
     switch (ch) {
         case '\n': case '\0': {
-            token.kind = FUASM_TK_ENDL;
+            token.kind = GFUAS_TK_ENDL;
             etok_lexer_advance(lexer);
         } break;
 
         case '%': {
             etok_lexer_advance(lexer);
-            token.kind = FUASM_TK_DIRECTIVE;
+            token.kind = GFUAS_TK_DIRECTIVE;
 
             const char* name = lexer->source_current;
             while (!etok_lexer_is_at_end(lexer) && etok_lexer_is_ident_continue(lexer, lexer->ch)) {
@@ -1284,8 +1284,8 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
                 gfuas_directive directive;
                 const char* image;
             } directives[] = {
-#define X(Id, Image) { FUASM_DIR_##Id, Image },
-                FUASM_DIRECTIVES(X)
+#define X(Id, Image) { GFUAS_DIR_##Id, Image },
+                GFUAS_DIRECTIVES(X)
 #undef X
                 {0},
             };
@@ -1297,7 +1297,7 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
                 }
             }
 
-            if (token.as.directive == FUASM_DIR_INVALID) {
+            if (token.as.directive == GFUAS_DIR_INVALID) {
                 diag_issue(DIAG_ERROR, source, token.location, "Invalid directive.");
                 goto return_token;
             }
@@ -1329,7 +1329,7 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
                 gfuas_mnemonic mnemonic;
                 const char* image;
             } mnemonics[] = {
-#define MNEM(Id, Name) { FUASM_MNEM_##Id, Name },
+#define MNEM(Id, Name) { GFUAS_MNEM_##Id, Name },
 #include "x/mnemonics.h"
                 {0},
             };
@@ -1353,8 +1353,8 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
                 }
             }
 
-            if (token.as.mnemonic != FUASM_MNEM_INVALID) {
-                token.kind = FUASM_TK_MNEMONIC;
+            if (token.as.mnemonic != GFUAS_MNEM_INVALID) {
+                token.kind = GFUAS_TK_MNEMONIC;
                 break;
             }
 
@@ -1367,19 +1367,19 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
             }
 
             if (token.as._register != 255)  {
-                token.kind = FUASM_TK_REGISTER;
+                token.kind = GFUAS_TK_REGISTER;
                 break;
             }
 
             token.as._register = 0;
-            token.kind = *name == '.' ? FUASM_TK_LABEL_LOCAL : FUASM_TK_LABEL_GLOBAL;
+            token.kind = *name == '.' ? GFUAS_TK_LABEL_LOCAL : GFUAS_TK_LABEL_GLOBAL;
             token.as.label = gfuas_intern_string(state, name, (gfu_uword)length);
         } break;
 
         case '#': {
             etok_lexer_advance(lexer);
 
-            token.kind = FUASM_TK_IMMEDIATE;
+            token.kind = GFUAS_TK_IMMEDIATE;
             if (!gfuas_lexer_is_hex_digit(lexer->ch)) {
                 diag_issue(DIAG_ERROR, source, gfuas_lexer_location(lexer), "Expected a hex digit.");
                 goto return_token;
@@ -1401,7 +1401,7 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
                 etok_lexer_advance(lexer);
             }
 
-            token.kind = FUASM_TK_IMMEDIATE;
+            token.kind = GFUAS_TK_IMMEDIATE;
             token.as.immediate = (gfu_uword)immediate;
         } break;
 
@@ -1445,13 +1445,13 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
 
             etok_lexer_advance(lexer);
 
-            token.kind = FUASM_TK_BYTE_STRING;
+            token.kind = GFUAS_TK_BYTE_STRING;
             token.as.byte_string.data = byte_string;
             token.as.byte_string.length = length;
         } break;
 
         default: {
-            if (ch >= FUASM_TK_PRINTABLE_BEGIN && ch <= FUASM_TK_PRINTABLE_END) {
+            if (ch >= GFUAS_TK_PRINTABLE_BEGIN && ch <= GFUAS_TK_PRINTABLE_END) {
                 token.kind = ch;
                 etok_lexer_advance(lexer);
             } else {
@@ -1464,14 +1464,14 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
                     diag_issue(DIAG_ERROR, source, token.location, "Invalid or unexpected character in source text (0x%08X).", ch);
                 }
 
-                token.kind = FUASM_TK_INVALID_CHARACTER;
+                token.kind = GFUAS_TK_INVALID_CHARACTER;
                 etok_lexer_advance(lexer);
             }
         } break;
     }
 
 return_token:;
-    assertn(token.kind != FUASM_TK_INVALID);
+    assertn(token.kind != GFUAS_TK_INVALID);
     token.end = lexer->source_current;
     return token;
 }

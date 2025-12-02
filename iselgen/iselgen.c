@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
     for (gfu_uword i = 0; i < match_count; i++) {
         isel_match match = matches[i];
         fprintf(f, "    {\n");
-        fprintf(f, "        .mnemonic = FUASM_MNEM_%s,\n", defined_mnemonics[match.mnemonic].constant);
+        fprintf(f, "        .mnemonic = GFUAS_MNEM_%s,\n", defined_mnemonics[match.mnemonic].constant);
         if (match.operand_count > 0) {
             fprintf(f, "        .operand_count = %d,\n", match.operand_count);
             fprintf(f, "        .operands = {\n");

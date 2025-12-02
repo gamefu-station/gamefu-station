@@ -7,26 +7,26 @@
 #include "../gfu-opcodes/register.h"
 #include "../gfu-opcodes/syscall.h"
 
-#define FUASM_DIRECTIVES(X) \
+#define GFUAS_DIRECTIVES(X) \
     X(ADDRESS_SPACE, "address_space") \
     X(ENTRY, "entry") \
     X(TEXT, "text") \
     X(DATA, "data")
 
 typedef enum gfuas_mnemonic {
-    FUASM_MNEM_INVALID,
-#define MNEM(Id, Name) FUASM_MNEM_##Id,
+    GFUAS_MNEM_INVALID,
+#define MNEM(Id, Name) GFUAS_MNEM_##Id,
 #include "x/mnemonics.h"
 } gfuas_mnemonic;
 
 typedef enum gfuas_directive {
-    FUASM_DIR_INVALID,
-#define X(Id, Image) FUASM_DIR_##Id,
-    FUASM_DIRECTIVES(X)
+    GFUAS_DIR_INVALID,
+#define X(Id, Image) GFUAS_DIR_##Id,
+    GFUAS_DIRECTIVES(X)
 #undef X
 } gfuas_directive;
 
-#define FUASM_EXPR_KINDS(X) \
+#define GFUAS_EXPR_KINDS(X) \
     X(REG) \
     X(IMM) \
     X(IMM_UPPER) \
@@ -37,19 +37,19 @@ typedef enum gfuas_directive {
     X(BYTE_STRING)
 
 typedef enum gfuas_expr_kind {
-    FUASM_EXPR_INVALID,
-#define X(Id) FUASM_EXPR_##Id,
-    FUASM_EXPR_KINDS(X)
+    GFUAS_EXPR_INVALID,
+#define X(Id) GFUAS_EXPR_##Id,
+    GFUAS_EXPR_KINDS(X)
 #undef X
 } gfuas_expr_kind;
 
-#define FUASM_ADDR_KINDS(X) \
+#define GFUAS_ADDR_KINDS(X) \
     X(LABEL)
 
 typedef enum gfuas_addr_kind {
-    FUASM_ADDR_INVALID,
-#define X(Id) FUASM_ADDR_##Id,
-    FUASM_ADDR_KINDS(X)
+    GFUAS_ADDR_INVALID,
+#define X(Id) GFUAS_ADDR_##Id,
+    GFUAS_ADDR_KINDS(X)
 #undef X
 } gfuas_addr_kind;
 

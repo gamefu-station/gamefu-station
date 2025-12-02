@@ -1,7 +1,7 @@
 #define ISEL_MATCH_COUNT 143
 static isel_match isel_matches[144] = {
     {
-        .mnemonic = FUASM_MNEM_BYTES,
+        .mnemonic = GFUAS_MNEM_BYTES,
         .operand_count = 1,
         .operands = {
             {
@@ -13,7 +13,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_BYTES,
+        .mnemonic = GFUAS_MNEM_BYTES,
         .operand_count = 1,
         .operands = {
             {
@@ -25,10 +25,10 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_NOP,
+        .mnemonic = GFUAS_MNEM_NOP,
     },
     {
-        .mnemonic = FUASM_MNEM_J,
+        .mnemonic = GFUAS_MNEM_J,
         .operand_count = 1,
         .operands = {
             {
@@ -40,7 +40,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_JMP,
+        .mnemonic = GFUAS_MNEM_JMP,
         .operand_count = 1,
         .operands = {
             {
@@ -52,7 +52,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_JAL,
+        .mnemonic = GFUAS_MNEM_JAL,
         .operand_count = 1,
         .operands = {
             {
@@ -64,7 +64,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_JAL,
+        .mnemonic = GFUAS_MNEM_JAL,
         .operand_count = 1,
         .operands = {
             {
@@ -76,7 +76,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_CALL,
+        .mnemonic = GFUAS_MNEM_CALL,
         .operand_count = 1,
         .operands = {
             {
@@ -88,7 +88,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_CALL,
+        .mnemonic = GFUAS_MNEM_CALL,
         .operand_count = 1,
         .operands = {
             {
@@ -100,7 +100,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_BEQ,
+        .mnemonic = GFUAS_MNEM_BEQ,
         .operand_count = 3,
         .operands = {
             {
@@ -124,7 +124,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_BNE,
+        .mnemonic = GFUAS_MNEM_BNE,
         .operand_count = 3,
         .operands = {
             {
@@ -148,7 +148,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_BLEZ,
+        .mnemonic = GFUAS_MNEM_BLEZ,
         .operand_count = 2,
         .operands = {
             {
@@ -166,7 +166,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_BGTZ,
+        .mnemonic = GFUAS_MNEM_BGTZ,
         .operand_count = 2,
         .operands = {
             {
@@ -184,7 +184,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_ADDI,
+        .mnemonic = GFUAS_MNEM_ADDI,
         .operand_count = 3,
         .operands = {
             {
@@ -208,7 +208,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_ADD,
+        .mnemonic = GFUAS_MNEM_ADD,
         .operand_count = 3,
         .operands = {
             {
@@ -232,7 +232,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_ADDIU,
+        .mnemonic = GFUAS_MNEM_ADDIU,
         .operand_count = 3,
         .operands = {
             {
@@ -256,7 +256,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_ADDU,
+        .mnemonic = GFUAS_MNEM_ADDU,
         .operand_count = 3,
         .operands = {
             {
@@ -280,7 +280,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SLTI,
+        .mnemonic = GFUAS_MNEM_SLTI,
         .operand_count = 3,
         .operands = {
             {
@@ -304,7 +304,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SLT,
+        .mnemonic = GFUAS_MNEM_SLT,
         .operand_count = 3,
         .operands = {
             {
@@ -328,7 +328,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SLTIU,
+        .mnemonic = GFUAS_MNEM_SLTIU,
         .operand_count = 3,
         .operands = {
             {
@@ -352,7 +352,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SLTU,
+        .mnemonic = GFUAS_MNEM_SLTU,
         .operand_count = 3,
         .operands = {
             {
@@ -376,7 +376,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_ANDI,
+        .mnemonic = GFUAS_MNEM_ANDI,
         .operand_count = 3,
         .operands = {
             {
@@ -400,7 +400,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_AND,
+        .mnemonic = GFUAS_MNEM_AND,
         .operand_count = 3,
         .operands = {
             {
@@ -424,7 +424,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_ORI,
+        .mnemonic = GFUAS_MNEM_ORI,
         .operand_count = 3,
         .operands = {
             {
@@ -448,7 +448,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_OR,
+        .mnemonic = GFUAS_MNEM_OR,
         .operand_count = 3,
         .operands = {
             {
@@ -472,7 +472,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_XORI,
+        .mnemonic = GFUAS_MNEM_XORI,
         .operand_count = 3,
         .operands = {
             {
@@ -496,7 +496,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_XOR,
+        .mnemonic = GFUAS_MNEM_XOR,
         .operand_count = 3,
         .operands = {
             {
@@ -520,7 +520,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_LUI,
+        .mnemonic = GFUAS_MNEM_LUI,
         .operand_count = 2,
         .operands = {
             {
@@ -538,7 +538,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_TGEI,
+        .mnemonic = GFUAS_MNEM_TGEI,
         .operand_count = 2,
         .operands = {
             {
@@ -556,7 +556,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_TGE,
+        .mnemonic = GFUAS_MNEM_TGE,
         .operand_count = 2,
         .operands = {
             {
@@ -574,7 +574,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_TGEIU,
+        .mnemonic = GFUAS_MNEM_TGEIU,
         .operand_count = 2,
         .operands = {
             {
@@ -592,7 +592,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_TGEU,
+        .mnemonic = GFUAS_MNEM_TGEU,
         .operand_count = 2,
         .operands = {
             {
@@ -610,7 +610,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_TLTI,
+        .mnemonic = GFUAS_MNEM_TLTI,
         .operand_count = 2,
         .operands = {
             {
@@ -628,7 +628,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_TLT,
+        .mnemonic = GFUAS_MNEM_TLT,
         .operand_count = 2,
         .operands = {
             {
@@ -646,7 +646,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_TLTIU,
+        .mnemonic = GFUAS_MNEM_TLTIU,
         .operand_count = 2,
         .operands = {
             {
@@ -664,7 +664,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_TLTU,
+        .mnemonic = GFUAS_MNEM_TLTU,
         .operand_count = 2,
         .operands = {
             {
@@ -682,7 +682,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_TEQI,
+        .mnemonic = GFUAS_MNEM_TEQI,
         .operand_count = 2,
         .operands = {
             {
@@ -700,7 +700,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_TEQ,
+        .mnemonic = GFUAS_MNEM_TEQ,
         .operand_count = 2,
         .operands = {
             {
@@ -718,7 +718,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_TNEI,
+        .mnemonic = GFUAS_MNEM_TNEI,
         .operand_count = 2,
         .operands = {
             {
@@ -736,7 +736,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_TNE,
+        .mnemonic = GFUAS_MNEM_TNE,
         .operand_count = 2,
         .operands = {
             {
@@ -754,7 +754,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_LB,
+        .mnemonic = GFUAS_MNEM_LB,
         .operand_count = 2,
         .operands = {
             {
@@ -772,49 +772,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_LB,
-        .operand_count = 3,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "d",
-            },
-            {
-                .type = ISEL_TY_IMM,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "v",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = true,
-                .as.var = "l",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_LH,
-        .operand_count = 2,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "d",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_LH,
+        .mnemonic = GFUAS_MNEM_LB,
         .operand_count = 3,
         .operands = {
             {
@@ -838,7 +796,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_LWL,
+        .mnemonic = GFUAS_MNEM_LH,
         .operand_count = 2,
         .operands = {
             {
@@ -856,7 +814,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_LWL,
+        .mnemonic = GFUAS_MNEM_LH,
         .operand_count = 3,
         .operands = {
             {
@@ -880,7 +838,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_LW,
+        .mnemonic = GFUAS_MNEM_LWL,
         .operand_count = 2,
         .operands = {
             {
@@ -898,7 +856,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_LW,
+        .mnemonic = GFUAS_MNEM_LWL,
         .operand_count = 3,
         .operands = {
             {
@@ -922,25 +880,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_LW,
-        .operand_count = 2,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "d",
-            },
-            {
-                .type = ISEL_TY_IMM,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "v",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_LBU,
+        .mnemonic = GFUAS_MNEM_LW,
         .operand_count = 2,
         .operands = {
             {
@@ -958,7 +898,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_LBU,
+        .mnemonic = GFUAS_MNEM_LW,
         .operand_count = 3,
         .operands = {
             {
@@ -982,7 +922,25 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_LHU,
+        .mnemonic = GFUAS_MNEM_LW,
+        .operand_count = 2,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "d",
+            },
+            {
+                .type = ISEL_TY_IMM,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "v",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_LBU,
         .operand_count = 2,
         .operands = {
             {
@@ -1000,7 +958,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_LHU,
+        .mnemonic = GFUAS_MNEM_LBU,
         .operand_count = 3,
         .operands = {
             {
@@ -1024,7 +982,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_LWR,
+        .mnemonic = GFUAS_MNEM_LHU,
         .operand_count = 2,
         .operands = {
             {
@@ -1042,7 +1000,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_LWR,
+        .mnemonic = GFUAS_MNEM_LHU,
         .operand_count = 3,
         .operands = {
             {
@@ -1066,7 +1024,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SB,
+        .mnemonic = GFUAS_MNEM_LWR,
         .operand_count = 2,
         .operands = {
             {
@@ -1084,7 +1042,49 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SB,
+        .mnemonic = GFUAS_MNEM_LWR,
+        .operand_count = 3,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "d",
+            },
+            {
+                .type = ISEL_TY_IMM,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "v",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = true,
+                .as.var = "l",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_SB,
+        .operand_count = 2,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "d",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_SB,
         .operand_count = 3,
         .operands = {
             {
@@ -1108,7 +1108,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SH,
+        .mnemonic = GFUAS_MNEM_SH,
         .operand_count = 2,
         .operands = {
             {
@@ -1126,7 +1126,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SH,
+        .mnemonic = GFUAS_MNEM_SH,
         .operand_count = 2,
         .operands = {
             {
@@ -1144,7 +1144,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SH,
+        .mnemonic = GFUAS_MNEM_SH,
         .operand_count = 2,
         .operands = {
             {
@@ -1162,7 +1162,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SH,
+        .mnemonic = GFUAS_MNEM_SH,
         .operand_count = 2,
         .operands = {
             {
@@ -1180,7 +1180,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SH,
+        .mnemonic = GFUAS_MNEM_SH,
         .operand_count = 3,
         .operands = {
             {
@@ -1204,7 +1204,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SH,
+        .mnemonic = GFUAS_MNEM_SH,
         .operand_count = 3,
         .operands = {
             {
@@ -1228,7 +1228,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SWL,
+        .mnemonic = GFUAS_MNEM_SWL,
         .operand_count = 2,
         .operands = {
             {
@@ -1246,7 +1246,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SWL,
+        .mnemonic = GFUAS_MNEM_SWL,
         .operand_count = 3,
         .operands = {
             {
@@ -1270,7 +1270,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SW,
+        .mnemonic = GFUAS_MNEM_SW,
         .operand_count = 2,
         .operands = {
             {
@@ -1288,7 +1288,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SW,
+        .mnemonic = GFUAS_MNEM_SW,
         .operand_count = 2,
         .operands = {
             {
@@ -1306,7 +1306,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SW,
+        .mnemonic = GFUAS_MNEM_SW,
         .operand_count = 3,
         .operands = {
             {
@@ -1330,7 +1330,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SW,
+        .mnemonic = GFUAS_MNEM_SW,
         .operand_count = 3,
         .operands = {
             {
@@ -1354,7 +1354,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SW,
+        .mnemonic = GFUAS_MNEM_SW,
         .operand_count = 2,
         .operands = {
             {
@@ -1372,7 +1372,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SWR,
+        .mnemonic = GFUAS_MNEM_SWR,
         .operand_count = 2,
         .operands = {
             {
@@ -1390,7 +1390,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SWR,
+        .mnemonic = GFUAS_MNEM_SWR,
         .operand_count = 3,
         .operands = {
             {
@@ -1414,7 +1414,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_BLTZ,
+        .mnemonic = GFUAS_MNEM_BLTZ,
         .operand_count = 2,
         .operands = {
             {
@@ -1432,7 +1432,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_BGEZ,
+        .mnemonic = GFUAS_MNEM_BGEZ,
         .operand_count = 2,
         .operands = {
             {
@@ -1450,7 +1450,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_BLTZAL,
+        .mnemonic = GFUAS_MNEM_BLTZAL,
         .operand_count = 2,
         .operands = {
             {
@@ -1468,7 +1468,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_BGEZAL,
+        .mnemonic = GFUAS_MNEM_BGEZAL,
         .operand_count = 2,
         .operands = {
             {
@@ -1486,10 +1486,10 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_BREAK,
+        .mnemonic = GFUAS_MNEM_BREAK,
     },
     {
-        .mnemonic = FUASM_MNEM_BREAK,
+        .mnemonic = GFUAS_MNEM_BREAK,
         .operand_count = 1,
         .operands = {
             {
@@ -1501,10 +1501,10 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SDBBP,
+        .mnemonic = GFUAS_MNEM_SDBBP,
     },
     {
-        .mnemonic = FUASM_MNEM_SDBBP,
+        .mnemonic = GFUAS_MNEM_SDBBP,
         .operand_count = 1,
         .operands = {
             {
@@ -1516,7 +1516,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SLL,
+        .mnemonic = GFUAS_MNEM_SLL,
         .operand_count = 3,
         .operands = {
             {
@@ -1540,7 +1540,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SRL,
+        .mnemonic = GFUAS_MNEM_SRL,
         .operand_count = 3,
         .operands = {
             {
@@ -1564,7 +1564,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SRA,
+        .mnemonic = GFUAS_MNEM_SRA,
         .operand_count = 3,
         .operands = {
             {
@@ -1588,7 +1588,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SLLV,
+        .mnemonic = GFUAS_MNEM_SLLV,
         .operand_count = 3,
         .operands = {
             {
@@ -1612,7 +1612,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SLL,
+        .mnemonic = GFUAS_MNEM_SLL,
         .operand_count = 3,
         .operands = {
             {
@@ -1636,7 +1636,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SRLV,
+        .mnemonic = GFUAS_MNEM_SRLV,
         .operand_count = 3,
         .operands = {
             {
@@ -1660,7 +1660,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SRL,
+        .mnemonic = GFUAS_MNEM_SRL,
         .operand_count = 3,
         .operands = {
             {
@@ -1684,7 +1684,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SRAV,
+        .mnemonic = GFUAS_MNEM_SRAV,
         .operand_count = 3,
         .operands = {
             {
@@ -1708,7 +1708,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SRA,
+        .mnemonic = GFUAS_MNEM_SRA,
         .operand_count = 3,
         .operands = {
             {
@@ -1732,7 +1732,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_JR,
+        .mnemonic = GFUAS_MNEM_JR,
         .operand_count = 1,
         .operands = {
             {
@@ -1744,10 +1744,10 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_RET,
+        .mnemonic = GFUAS_MNEM_RET,
     },
     {
-        .mnemonic = FUASM_MNEM_JALR,
+        .mnemonic = GFUAS_MNEM_JALR,
         .operand_count = 1,
         .operands = {
             {
@@ -1759,7 +1759,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_JALR,
+        .mnemonic = GFUAS_MNEM_JALR,
         .operand_count = 2,
         .operands = {
             {
@@ -1777,7 +1777,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MOVZ,
+        .mnemonic = GFUAS_MNEM_MOVZ,
         .operand_count = 3,
         .operands = {
             {
@@ -1801,7 +1801,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MOVZI,
+        .mnemonic = GFUAS_MNEM_MOVZI,
         .operand_count = 3,
         .operands = {
             {
@@ -1825,7 +1825,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MOVE,
+        .mnemonic = GFUAS_MNEM_MOVE,
         .operand_count = 2,
         .operands = {
             {
@@ -1843,7 +1843,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MOVN,
+        .mnemonic = GFUAS_MNEM_MOVN,
         .operand_count = 3,
         .operands = {
             {
@@ -1867,7 +1867,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MOVNI,
+        .mnemonic = GFUAS_MNEM_MOVNI,
         .operand_count = 3,
         .operands = {
             {
@@ -1891,10 +1891,10 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SYSCALL,
+        .mnemonic = GFUAS_MNEM_SYSCALL,
     },
     {
-        .mnemonic = FUASM_MNEM_MFHI,
+        .mnemonic = GFUAS_MNEM_MFHI,
         .operand_count = 1,
         .operands = {
             {
@@ -1906,7 +1906,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MTHI,
+        .mnemonic = GFUAS_MNEM_MTHI,
         .operand_count = 1,
         .operands = {
             {
@@ -1918,7 +1918,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MFLO,
+        .mnemonic = GFUAS_MNEM_MFLO,
         .operand_count = 1,
         .operands = {
             {
@@ -1930,7 +1930,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MTLO,
+        .mnemonic = GFUAS_MNEM_MTLO,
         .operand_count = 1,
         .operands = {
             {
@@ -1942,7 +1942,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MADD,
+        .mnemonic = GFUAS_MNEM_MADD,
         .operand_count = 2,
         .operands = {
             {
@@ -1960,7 +1960,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MADDU,
+        .mnemonic = GFUAS_MNEM_MADDU,
         .operand_count = 2,
         .operands = {
             {
@@ -1978,7 +1978,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MSUB,
+        .mnemonic = GFUAS_MNEM_MSUB,
         .operand_count = 2,
         .operands = {
             {
@@ -1996,7 +1996,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MSUBU,
+        .mnemonic = GFUAS_MNEM_MSUBU,
         .operand_count = 2,
         .operands = {
             {
@@ -2014,7 +2014,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MULT,
+        .mnemonic = GFUAS_MNEM_MULT,
         .operand_count = 2,
         .operands = {
             {
@@ -2032,7 +2032,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MULTU,
+        .mnemonic = GFUAS_MNEM_MULTU,
         .operand_count = 2,
         .operands = {
             {
@@ -2050,7 +2050,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_DIV,
+        .mnemonic = GFUAS_MNEM_DIV,
         .operand_count = 2,
         .operands = {
             {
@@ -2068,7 +2068,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_DIVU,
+        .mnemonic = GFUAS_MNEM_DIVU,
         .operand_count = 2,
         .operands = {
             {
@@ -2086,7 +2086,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MUL,
+        .mnemonic = GFUAS_MNEM_MUL,
         .operand_count = 3,
         .operands = {
             {
@@ -2110,7 +2110,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MUL,
+        .mnemonic = GFUAS_MNEM_MUL,
         .operand_count = 3,
         .operands = {
             {
@@ -2134,7 +2134,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_ADD,
+        .mnemonic = GFUAS_MNEM_ADD,
         .operand_count = 3,
         .operands = {
             {
@@ -2158,7 +2158,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_ADD,
+        .mnemonic = GFUAS_MNEM_ADD,
         .operand_count = 2,
         .operands = {
             {
@@ -2176,7 +2176,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_ADDU,
+        .mnemonic = GFUAS_MNEM_ADDU,
         .operand_count = 3,
         .operands = {
             {
@@ -2200,7 +2200,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SUB,
+        .mnemonic = GFUAS_MNEM_SUB,
         .operand_count = 3,
         .operands = {
             {
@@ -2224,7 +2224,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_SUBI,
+        .mnemonic = GFUAS_MNEM_SUBI,
         .operand_count = 3,
         .operands = {
             {
@@ -2238,360 +2238,6 @@ static isel_match isel_matches[144] = {
                 .is_constant = false,
                 .is_base = false,
                 .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_IMM,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "v",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_SUBU,
-        .operand_count = 3,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "d",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "r",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_AND,
-        .operand_count = 3,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "d",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "r",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_OR,
-        .operand_count = 3,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "d",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "r",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_XOR,
-        .operand_count = 3,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "d",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "r",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_NOR,
-        .operand_count = 3,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "d",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "r",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_CLZ,
-        .operand_count = 2,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "d",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_CLO,
-        .operand_count = 2,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "d",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_SLT,
-        .operand_count = 3,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "d",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "r",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_SGT,
-        .operand_count = 3,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "d",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "r",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_SLTU,
-        .operand_count = 3,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "d",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "r",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_TGE,
-        .operand_count = 2,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "r",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_TGEU,
-        .operand_count = 2,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "r",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_TLT,
-        .operand_count = 2,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "r",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_TLTU,
-        .operand_count = 2,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "r",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_TEQ,
-        .operand_count = 2,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "r",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_TNE,
-        .operand_count = 2,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "l",
-            },
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "r",
-            },
-        },
-    },
-    {
-        .mnemonic = FUASM_MNEM_LI,
-        .operand_count = 2,
-        .operands = {
-            {
-                .type = ISEL_TY_REG,
-                .is_constant = false,
-                .is_base = false,
-                .as.var = "d",
             },
             {
                 .type = ISEL_TY_IMM,
@@ -2602,7 +2248,361 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_LA,
+        .mnemonic = GFUAS_MNEM_SUBU,
+        .operand_count = 3,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "d",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "r",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_AND,
+        .operand_count = 3,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "d",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "r",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_OR,
+        .operand_count = 3,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "d",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "r",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_XOR,
+        .operand_count = 3,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "d",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "r",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_NOR,
+        .operand_count = 3,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "d",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "r",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_CLZ,
+        .operand_count = 2,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "d",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_CLO,
+        .operand_count = 2,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "d",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_SLT,
+        .operand_count = 3,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "d",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "r",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_SGT,
+        .operand_count = 3,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "d",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "r",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_SLTU,
+        .operand_count = 3,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "d",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "r",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_TGE,
+        .operand_count = 2,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "r",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_TGEU,
+        .operand_count = 2,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "r",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_TLT,
+        .operand_count = 2,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "r",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_TLTU,
+        .operand_count = 2,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "r",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_TEQ,
+        .operand_count = 2,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "r",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_TNE,
+        .operand_count = 2,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "l",
+            },
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "r",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_LI,
+        .operand_count = 2,
+        .operands = {
+            {
+                .type = ISEL_TY_REG,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "d",
+            },
+            {
+                .type = ISEL_TY_IMM,
+                .is_constant = false,
+                .is_base = false,
+                .as.var = "v",
+            },
+        },
+    },
+    {
+        .mnemonic = GFUAS_MNEM_LA,
         .operand_count = 2,
         .operands = {
             {
@@ -2620,7 +2620,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_STAL,
+        .mnemonic = GFUAS_MNEM_STAL,
         .operand_count = 1,
         .operands = {
             {
@@ -2632,7 +2632,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_STDAL,
+        .mnemonic = GFUAS_MNEM_STDAL,
         .operand_count = 1,
         .operands = {
             {
@@ -2644,7 +2644,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_PUSH,
+        .mnemonic = GFUAS_MNEM_PUSH,
         .operand_count = 1,
         .operands = {
             {
@@ -2656,7 +2656,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_POP,
+        .mnemonic = GFUAS_MNEM_POP,
         .operand_count = 1,
         .operands = {
             {
@@ -2668,7 +2668,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MFC0,
+        .mnemonic = GFUAS_MNEM_MFC0,
         .operand_count = 2,
         .operands = {
             {
@@ -2686,7 +2686,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MTC0,
+        .mnemonic = GFUAS_MNEM_MTC0,
         .operand_count = 2,
         .operands = {
             {
@@ -2704,7 +2704,7 @@ static isel_match isel_matches[144] = {
         },
     },
     {
-        .mnemonic = FUASM_MNEM_MTC0,
+        .mnemonic = GFUAS_MNEM_MTC0,
         .operand_count = 2,
         .operands = {
             {
