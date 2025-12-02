@@ -9,44 +9,22 @@
 
 #include "mnemonics.h"
 
-#define GFUAS_DIRECTIVES(X) \
-    X(ADDRESS_SPACE, "address_space") \
-    X(ENTRY, "entry") \
-    X(TEXT, "text") \
-    X(DATA, "data")
-
 typedef enum gfuas_directive {
     GFUAS_DIR_INVALID,
-#define X(Id, Image) GFUAS_DIR_##Id,
-    GFUAS_DIRECTIVES(X)
-#undef X
+#define DIR(Id, Image) GFUAS_DIR_##Id,
+#include "x/directives.h"
 } gfuas_directive;
-
-#define GFUAS_EXPR_KINDS(X) \
-    X(REG) \
-    X(IMM) \
-    X(IMM_UPPER) \
-    X(IMM_LOWER) \
-    X(ADDR) \
-    X(ADDR_UPPER) \
-    X(ADDR_LOWER) \
-    X(BYTE_STRING)
 
 typedef enum gfuas_expr_kind {
     GFUAS_EXPR_INVALID,
-#define X(Id) GFUAS_EXPR_##Id,
-    GFUAS_EXPR_KINDS(X)
-#undef X
+#define EXPR(Id) GFUAS_EXPR_##Id,
+#include "x/exprs.h"
 } gfuas_expr_kind;
-
-#define GFUAS_ADDR_KINDS(X) \
-    X(LABEL)
 
 typedef enum gfuas_addr_kind {
     GFUAS_ADDR_INVALID,
 #define X(Id) GFUAS_ADDR_##Id,
-    GFUAS_ADDR_KINDS(X)
-#undef X
+#include "x/addr_kinds.h"
 } gfuas_addr_kind;
 
 typedef struct gfuas_addr {
