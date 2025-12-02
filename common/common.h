@@ -46,8 +46,8 @@
 
 #define nullptr NULL
 
-#define GFU_STR_(X) #X
-#define GFU_STR(X) GFU_STR_(X)
+#define PPSTR_(X) #X
+#define PPSTR(X) PPSTR_(X)
 
 #ifdef GFU_NDEBUG
 #  define assert(Cond, Message) do { } while (0)
@@ -56,19 +56,19 @@
 #else /* !GFU_NDEBUG */
 #  define assertn(Cond) do { \
         if (!(Cond)) { \
-            (void)fprintf(stderr, __FILE__ ":" GFU_STR(__LINE__) ": Assertion '" #Cond "' failed.\n"); \
+            (void)fprintf(stderr, __FILE__ ":" PPSTR(__LINE__) ": Assertion '" #Cond "' failed.\n"); \
             abort(); \
         } \
     } while (0)
 #  define assert(Cond, Message) do { \
         if (!(Cond)) { \
-            (void)fprintf(stderr, __FILE__ ":" GFU_STR(__LINE__) ": Assertion '" #Cond "' failed:\n    " Message "\n"); \
+            (void)fprintf(stderr, __FILE__ ":" PPSTR(__LINE__) ": Assertion '" #Cond "' failed:\n    " Message "\n"); \
             abort(); \
         } \
     } while (0)
 #  define assertf(Cond, Message, ...) do { \
         if (!(Cond)) { \
-            (void)fprintf(stderr, __FILE__ ":" GFU_STR(__LINE__) ": Assertion '" #Cond "' failed:\n    " Message "\n", __VA_ARGS__); \
+            (void)fprintf(stderr, __FILE__ ":" PPSTR(__LINE__) ": Assertion '" #Cond "' failed:\n    " Message "\n", __VA_ARGS__); \
             abort(); \
         } \
     } while (0)
