@@ -362,7 +362,7 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword pc, gfu_uword code) {
 
     switch (_iOp_) {
         default: {
-            gfu_assertf(false, "Unimplemented opcode %02X.", (unsigned char)(_iOp_));
+            assertf(false, "Unimplemented opcode %02X.", (unsigned char)(_iOp_));
         } break;
 
         case GFU_OP_J: { // 0x02  j addr $t
@@ -557,7 +557,7 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword pc, gfu_uword code) {
         case GFU_OP_SPECIAL: {
             switch (_iFn_) {
                 default: {
-                    gfu_assertf(false, "Unimplemented register function %02X.", (unsigned char)(_iFn_));
+                    assertf(false, "Unimplemented register function %02X.", (unsigned char)(_iFn_));
                 } break;
 
                 case GFU_OPFN_SLL: { // 0x00  sll reg $d, reg $l, imm $s
@@ -772,7 +772,7 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword pc, gfu_uword code) {
         case GFU_OP_COP0: {
             switch (_iFn_) {
                 default: {
-                    gfu_assertf(false, "Unimplemented COP0 function %02X.", (unsigned char)(_iFn_));
+                    assertf(false, "Unimplemented COP0 function %02X.", (unsigned char)(_iFn_));
                 } break;
 
                 case GFU_C0FN_MF: {
@@ -841,9 +841,9 @@ static void gfusx_dumpstack(gfusx_t* vm) {
     }
 
     gfu_uword* stack_top = (gfu_uword*)gfusx_memory_get_rptr(vm, sp);
-    gfu_assert(stack_top != nullptr, "Stack pointer should have been in range.");
+    assert(stack_top != nullptr, "Stack pointer should have been in range.");
     gfu_uword* stack_bottom = (gfu_uword*)gfusx_memory_get_rptr(vm, GFU_KSEG0_BASE + GFU_WRAM_BASE + GFU_WRAM_SIZE);
-    gfu_assert(stack_top != nullptr, "Stack pointer should have been in range.");
+    assert(stack_top != nullptr, "Stack pointer should have been in range.");
 
     if (gfusx_memory_read_hwreg_half(vm, GFU_RAM_SIZE_ADDR & 0xFFFF) == GFU_RAM_SIZE_LARGE) {
         stack_bottom += GFU_MAIN1_RAM_SIZE;
@@ -881,7 +881,7 @@ void gfusx_exec_block(gfusx_t* vm) {
         bool jumped = gfusx_step(vm, pc, code);
 
         gfu_ulong end_cycle_count = vm->cpu.cycle;
-        gfu_assert(end_cycle_count > begin_cycle_count, "Missing cycle counting on some instructions.");
+        assert(end_cycle_count > begin_cycle_count, "Missing cycle counting on some instructions.");
 
         if (jumped) {
             gfusx_branch_test(vm);

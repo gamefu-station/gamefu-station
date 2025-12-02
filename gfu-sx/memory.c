@@ -9,7 +9,7 @@
 #include "../gfu-sx/default_bios.h"
 
 bool gfusx_memory_init(gfusx_t* vm) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
+    assert(vm != nullptr, "Where is the VM?");
 
     gfu_ubyte* wram = nullptr;
     gfu_ubyte* bios = nullptr;
@@ -79,7 +79,7 @@ error:;
 }
 
 void gfusx_memory_reset(gfusx_t* vm) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
+    assert(vm != nullptr, "Where is the VM?");
 
     gfu_ubyte* wram = vm->memory.wram;
     gfu_ubyte* bios = vm->memory.bios;
@@ -88,23 +88,23 @@ void gfusx_memory_reset(gfusx_t* vm) {
     gfu_ubyte** rlut = vm->memory.rlut;
     gfu_ubyte** wlut = vm->memory.wlut;
 
-    gfu_assert(wram != nullptr, "Where is WRAM?");
-    gfu_assert(bios != nullptr, "Where is BIOS ROM?");
-    gfu_assert(hard != nullptr, "Where are the hardware registers?");
+    assert(wram != nullptr, "Where is WRAM?");
+    assert(bios != nullptr, "Where is BIOS ROM?");
+    assert(hard != nullptr, "Where are the hardware registers?");
 
-    gfu_assert(rlut != nullptr, "Where is the RLUT?");
-    gfu_assert(wlut != nullptr, "Where is the WLUT?");
+    assert(rlut != nullptr, "Where is the RLUT?");
+    assert(wlut != nullptr, "Where is the WLUT?");
 
     memset(wram, 0, GFU_WRAM_SIZE);
     memset(bios, 0, GFU_BIOS_ROM_SIZE);
 
     // Load the default BIOS into its place in ROM.
-    gfu_assert(gfusx_default_bios_len <= GFU_BIOS_ROM_SIZE, "Default BIOS is way too big, somehow.");
+    assert(gfusx_default_bios_len <= GFU_BIOS_ROM_SIZE, "Default BIOS is way too big, somehow.");
     memcpy(bios, gfusx_default_bios + sizeof(gfuobj_header_t), (size_t)gfusx_default_bios_len - sizeof(gfuobj_header_t));
 }
 
 void gfusx_memory_deinit(gfusx_t* vm) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
+    assert(vm != nullptr, "Where is the VM?");
 
     free(vm->memory.wram);
     free(vm->memory.bios);
@@ -115,7 +115,7 @@ void gfusx_memory_deinit(gfusx_t* vm) {
 }
 
 void gfusx_memory_set_luts(gfusx_t* vm) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
+    assert(vm != nullptr, "Where is the VM?");
 
     gfu_ubyte* wram = vm->memory.wram;
     gfu_ubyte* bios = vm->memory.bios;
@@ -124,12 +124,12 @@ void gfusx_memory_set_luts(gfusx_t* vm) {
     gfu_ubyte** rlut = vm->memory.rlut;
     gfu_ubyte** wlut = vm->memory.wlut;
 
-    gfu_assert(wram != nullptr, "Where is WRAM?");
-    gfu_assert(bios != nullptr, "Where is BIOS ROM?");
-    gfu_assert(hard != nullptr, "Where are the hardware registers?");
+    assert(wram != nullptr, "Where is WRAM?");
+    assert(bios != nullptr, "Where is BIOS ROM?");
+    assert(hard != nullptr, "Where are the hardware registers?");
 
-    gfu_assert(rlut != nullptr, "Where is the RLUT?");
-    gfu_assert(wlut != nullptr, "Where is the WLUT?");
+    assert(rlut != nullptr, "Where is the RLUT?");
+    assert(wlut != nullptr, "Where is the WLUT?");
 
     // WRAM sizse is controled by the RAM_SIZE I/O port and re-mapped based on its value.
     // By default it is the "small" size unless the "large" size is specified.
@@ -156,11 +156,11 @@ void gfusx_memory_set_luts(gfusx_t* vm) {
 }
 
 gfu_ubyte gfusx_memory_read_byte(gfusx_t* vm, gfu_uword addr) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
+    assert(vm != nullptr, "Where is the VM?");
     vm->cpu.cycle += 1;
 
     gfu_ubyte** rlut = vm->memory.rlut;
-    gfu_assert(rlut != nullptr, "Where is the RLUT?");
+    assert(rlut != nullptr, "Where is the RLUT?");
 
     const gfu_uword page = addr >> 16;
     const gfu_ubyte* page_ptr = rlut[page];
@@ -177,7 +177,7 @@ gfu_ubyte gfusx_memory_read_byte(gfusx_t* vm, gfu_uword addr) {
     ) {
         if ((addr & 0xFFFF) < GFU_EXP1_SCRATCH_SIZE) {
             const gfu_ubyte* hard = vm->memory.hard;
-            gfu_assert(hard != nullptr, "Where are the hardware registers?");
+            assert(hard != nullptr, "Where are the hardware registers?");
             const gfu_uword offset = (addr & 0xFFFF) & (GFU_EXP1_SCRATCH_SIZE - 1);
             const gfu_ubyte* hard_ptr = hard + offset;
             return *hard_ptr;
@@ -192,11 +192,11 @@ gfu_ubyte gfusx_memory_read_byte(gfusx_t* vm, gfu_uword addr) {
 }
 
 gfu_uhalf gfusx_memory_read_half(gfusx_t* vm, gfu_uword addr) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
+    assert(vm != nullptr, "Where is the VM?");
     vm->cpu.cycle += 1;
 
     gfu_ubyte** rlut = vm->memory.rlut;
-    gfu_assert(rlut != nullptr, "Where is the RLUT?");
+    assert(rlut != nullptr, "Where is the RLUT?");
 
     gfu_uword page = addr >> 16;
     gfu_ubyte* page_ptr = rlut[page];
@@ -213,7 +213,7 @@ gfu_uhalf gfusx_memory_read_half(gfusx_t* vm, gfu_uword addr) {
     ) {
         if ((addr & 0xFFFF) < GFU_EXP1_SCRATCH_SIZE) {
             gfu_ubyte* hard = vm->memory.hard;
-            gfu_assert(hard != nullptr, "Where are the hardware registers?");
+            assert(hard != nullptr, "Where are the hardware registers?");
             gfu_uword offset = (addr & 0xFFFE) & (GFU_EXP1_SCRATCH_SIZE - 1);
             gfu_uhalf* hard_ptr = cast(gfu_uhalf*, hard + offset);
             return SWAP16(*hard_ptr);
@@ -228,13 +228,13 @@ gfu_uhalf gfusx_memory_read_half(gfusx_t* vm, gfu_uword addr) {
 }
 
 static gfu_uword gfusx_memory_read_word_impl(gfusx_t* vm, gfu_uword addr) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
+    assert(vm != nullptr, "Where is the VM?");
     // NOTE(echoe): This is a special internal implementation for read.
     // Let the caller decide if we should cost a cycle.
     // vm->cpu.cycle += 1;
 
     gfu_ubyte** rlut = vm->memory.rlut;
-    gfu_assert(rlut != nullptr, "Where is the RLUT?");
+    assert(rlut != nullptr, "Where is the RLUT?");
 
     gfu_uword page = addr >> 16;
     gfu_ubyte* page_ptr = rlut[page];
@@ -251,7 +251,7 @@ static gfu_uword gfusx_memory_read_word_impl(gfusx_t* vm, gfu_uword addr) {
     ) {
         if ((addr & 0xFFFF) < GFU_EXP1_SCRATCH_SIZE) {
             gfu_ubyte* hard = vm->memory.hard;
-            gfu_assert(hard != nullptr, "Where are the hardware registers?");
+            assert(hard != nullptr, "Where are the hardware registers?");
             gfu_uword offset = (addr & 0xFFFC) & (GFU_EXP1_SCRATCH_SIZE - 1);
             gfu_uword* hard_ptr = cast(gfu_uword*, hard + offset);
             return SWAP32(*hard_ptr);
@@ -266,22 +266,22 @@ static gfu_uword gfusx_memory_read_word_impl(gfusx_t* vm, gfu_uword addr) {
 }
 
 gfu_uword gfusx_memory_read_word(gfusx_t* vm, gfu_uword addr) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
+    assert(vm != nullptr, "Where is the VM?");
     vm->cpu.cycle += 1;
     return gfusx_memory_read_word_impl(vm, addr);
 }
 
 gfu_uword gfusx_memory_read_inst(gfusx_t* vm, gfu_uword addr) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
+    assert(vm != nullptr, "Where is the VM?");
     return gfusx_memory_read_word_impl(vm, addr);
 }
 
 void gfusx_memory_write_byte(gfusx_t* vm, gfu_uword addr, gfu_ubyte value) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
+    assert(vm != nullptr, "Where is the VM?");
     vm->cpu.cycle += 1;
 
     gfu_ubyte** wlut = vm->memory.wlut;
-    gfu_assert(wlut != nullptr, "Where is the WLUT?");
+    assert(wlut != nullptr, "Where is the WLUT?");
 
     gfu_uword page = addr >> 16;
     gfu_ubyte* page_ptr = wlut[page];
@@ -299,7 +299,7 @@ void gfusx_memory_write_byte(gfusx_t* vm, gfu_uword addr, gfu_ubyte value) {
     ) {
         if ((addr & 0xFFFF) < GFU_EXP1_SCRATCH_SIZE) {
             gfu_ubyte* hard = vm->memory.hard;
-            gfu_assert(hard != nullptr, "Where are the hardware registers?");
+            assert(hard != nullptr, "Where are the hardware registers?");
             gfu_uword offset = (addr & 0xFFFF) & (GFU_EXP1_SCRATCH_SIZE - 1);
             gfu_ubyte* hard_ptr = hard + offset;
             *hard_ptr = value;
@@ -311,11 +311,11 @@ void gfusx_memory_write_byte(gfusx_t* vm, gfu_uword addr, gfu_ubyte value) {
 }
 
 void gfusx_memory_write_half(gfusx_t* vm, gfu_uword addr, gfu_uhalf value) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
+    assert(vm != nullptr, "Where is the VM?");
     vm->cpu.cycle += 1;
 
     gfu_ubyte** wlut = vm->memory.wlut;
-    gfu_assert(wlut != nullptr, "Where is the WLUT?");
+    assert(wlut != nullptr, "Where is the WLUT?");
 
     gfu_uword page = addr >> 16;
     gfu_ubyte* page_ptr = wlut[page];
@@ -333,7 +333,7 @@ void gfusx_memory_write_half(gfusx_t* vm, gfu_uword addr, gfu_uhalf value) {
     ) {
         if ((addr & 0xFFFF) < GFU_EXP1_SCRATCH_SIZE) {
             gfu_ubyte* hard = vm->memory.hard;
-            gfu_assert(hard != nullptr, "Where are the hardware registers?");
+            assert(hard != nullptr, "Where are the hardware registers?");
             gfu_uword offset = (addr & 0xFFFE) & (GFU_EXP1_SCRATCH_SIZE - 1);
             gfu_uhalf* hard_ptr = cast(gfu_uhalf*, hard + offset);
             *hard_ptr = value;
@@ -345,11 +345,11 @@ void gfusx_memory_write_half(gfusx_t* vm, gfu_uword addr, gfu_uhalf value) {
 }
 
 void gfusx_memory_write_word(gfusx_t* vm, gfu_uword addr, gfu_uword value) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
+    assert(vm != nullptr, "Where is the VM?");
     vm->cpu.cycle += 1;
 
     gfu_ubyte** wlut = vm->memory.wlut;
-    gfu_assert(wlut != nullptr, "Where is the WLUT?");
+    assert(wlut != nullptr, "Where is the WLUT?");
 
     gfu_uword page = addr >> 16;
     gfu_ubyte* page_ptr = wlut[page];
@@ -367,7 +367,7 @@ void gfusx_memory_write_word(gfusx_t* vm, gfu_uword addr, gfu_uword value) {
     ) {
         if ((addr & 0xFFFF) < GFU_EXP1_SCRATCH_SIZE) {
             gfu_ubyte* hard = vm->memory.hard;
-            gfu_assert(hard != nullptr, "Where are the hardware registers?");
+            assert(hard != nullptr, "Where are the hardware registers?");
             gfu_uword offset = (addr & 0xFFFE) & (GFU_EXP1_SCRATCH_SIZE - 1);
             gfu_uword* hard_ptr = cast(gfu_uword*, hard + offset);
             *hard_ptr = value;
@@ -379,76 +379,76 @@ void gfusx_memory_write_word(gfusx_t* vm, gfu_uword addr, gfu_uword value) {
 }
 
 gfu_ubyte gfusx_memory_read_hwreg_byte(gfusx_t* vm, gfu_uhalf reg) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
-    gfu_assert((reg & ~(GFU_EXP1_HWREG_SIZE - 1)) == 0, "Hardware register out of range.");
+    assert(vm != nullptr, "Where is the VM?");
+    assert((reg & ~(GFU_EXP1_HWREG_SIZE - 1)) == 0, "Hardware register out of range.");
 
     gfu_ubyte* hard = vm->memory.hard;
-    gfu_assert(hard != nullptr, "Where are the hardware registers?");
+    assert(hard != nullptr, "Where are the hardware registers?");
 
     gfu_ubyte* hard_ptr = hard + reg;
     return *hard_ptr;
 }
 
 gfu_uhalf gfusx_memory_read_hwreg_half(gfusx_t* vm, gfu_uhalf reg) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
-    gfu_assert((reg & ~(GFU_EXP1_HWREG_SIZE - 1)) == 0, "Hardware register out of range.");
+    assert(vm != nullptr, "Where is the VM?");
+    assert((reg & ~(GFU_EXP1_HWREG_SIZE - 1)) == 0, "Hardware register out of range.");
 
     gfu_ubyte* hard = vm->memory.hard;
-    gfu_assert(hard != nullptr, "Where are the hardware registers?");
+    assert(hard != nullptr, "Where are the hardware registers?");
 
     gfu_uhalf* hard_ptr = cast(gfu_uhalf*, hard + (reg & 0xFFFE));
     return SWAP16(*hard_ptr);
 }
 
 gfu_uword gfusx_memory_read_hwreg_word(gfusx_t* vm, gfu_uhalf reg) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
-    gfu_assert((reg & ~(GFU_EXP1_HWREG_SIZE - 1)) == 0, "Hardware register out of range.");
+    assert(vm != nullptr, "Where is the VM?");
+    assert((reg & ~(GFU_EXP1_HWREG_SIZE - 1)) == 0, "Hardware register out of range.");
 
     gfu_ubyte* hard = vm->memory.hard;
-    gfu_assert(hard != nullptr, "Where are the hardware registers?");
+    assert(hard != nullptr, "Where are the hardware registers?");
 
     gfu_uword* hard_ptr = cast(gfu_uword*, hard + (reg & 0xFFFC));
     return SWAP32(*hard_ptr);
 }
 
 void gfusx_memory_write_hwreg_byte(gfusx_t* vm, gfu_uhalf reg, gfu_ubyte value) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
-    gfu_assert((reg & ~(GFU_EXP1_HWREG_SIZE - 1)) == 0, "Hardware register out of range.");
+    assert(vm != nullptr, "Where is the VM?");
+    assert((reg & ~(GFU_EXP1_HWREG_SIZE - 1)) == 0, "Hardware register out of range.");
 
     gfu_ubyte* hard = vm->memory.hard;
-    gfu_assert(hard != nullptr, "Where are the hardware registers?");
+    assert(hard != nullptr, "Where are the hardware registers?");
 
     gfu_ubyte* hard_ptr = hard + reg;
     *hard_ptr = value;
 }
 
 void gfusx_memory_write_hwreg_half(gfusx_t* vm, gfu_uhalf reg, gfu_uhalf value) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
-    gfu_assert((reg & ~(GFU_EXP1_HWREG_SIZE - 1)) == 0, "Hardware register out of range.");
+    assert(vm != nullptr, "Where is the VM?");
+    assert((reg & ~(GFU_EXP1_HWREG_SIZE - 1)) == 0, "Hardware register out of range.");
 
     gfu_ubyte* hard = vm->memory.hard;
-    gfu_assert(hard != nullptr, "Where are the hardware registers?");
+    assert(hard != nullptr, "Where are the hardware registers?");
 
     gfu_uhalf* hard_ptr = cast(gfu_uhalf*, hard + (reg & 0xFFFE));
     *hard_ptr = SWAP16(value);
 }
 
 void gfusx_memory_write_hwreg_word(gfusx_t* vm, gfu_uhalf reg, gfu_uword value) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
-    gfu_assert((reg & ~(GFU_EXP1_HWREG_SIZE - 1)) == 0, "Hardware register out of range.");
+    assert(vm != nullptr, "Where is the VM?");
+    assert((reg & ~(GFU_EXP1_HWREG_SIZE - 1)) == 0, "Hardware register out of range.");
 
     gfu_ubyte* hard = vm->memory.hard;
-    gfu_assert(hard != nullptr, "Where are the hardware registers?");
+    assert(hard != nullptr, "Where are the hardware registers?");
 
     gfu_uword* hard_ptr = cast(gfu_uword*, hard + (reg & 0xFFFC));
     *hard_ptr = SWAP32(value);
 }
 
 gfu_ubyte* gfusx_memory_get_rptr(gfusx_t* vm, gfu_uword addr) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
+    assert(vm != nullptr, "Where is the VM?");
 
     gfu_ubyte** rlut = vm->memory.rlut;
-    gfu_assert(rlut != nullptr, "Where is the RLUT?");
+    assert(rlut != nullptr, "Where is the RLUT?");
 
     gfu_uword page = addr >> 16;
     gfu_ubyte* page_ptr = rlut[page];
@@ -464,7 +464,7 @@ gfu_ubyte* gfusx_memory_get_rptr(gfusx_t* vm, gfu_uword addr) {
     ) {
         if ((addr & 0xFFFF) < GFU_EXP1_SCRATCH_SIZE) {
             gfu_ubyte* hard = vm->memory.hard;
-            gfu_assert(hard != nullptr, "Where are the hardware registers?");
+            assert(hard != nullptr, "Where are the hardware registers?");
             gfu_uword offset = (addr & 0xFFFF) & (GFU_EXP1_SCRATCH_SIZE - 1);
             return hard + offset;
         }
@@ -478,10 +478,10 @@ gfu_ubyte* gfusx_memory_get_rptr(gfusx_t* vm, gfu_uword addr) {
 }
 
 gfu_ubyte* gfusx_memory_get_wptr(gfusx_t* vm, gfu_uword addr) {
-    gfu_assert(vm != nullptr, "Where is the VM?");
+    assert(vm != nullptr, "Where is the VM?");
 
     gfu_ubyte** wlut = vm->memory.wlut;
-    gfu_assert(wlut != nullptr, "Where is the WLUT?");
+    assert(wlut != nullptr, "Where is the WLUT?");
 
     gfu_uword page = addr >> 16;
     gfu_ubyte* page_ptr = wlut[page];
@@ -497,7 +497,7 @@ gfu_ubyte* gfusx_memory_get_wptr(gfusx_t* vm, gfu_uword addr) {
     ) {
         if ((addr & 0xFFFF) < GFU_EXP1_SCRATCH_SIZE) {
             gfu_ubyte* hard = vm->memory.hard;
-            gfu_assert(hard != nullptr, "Where are the hardware registers?");
+            assert(hard != nullptr, "Where are the hardware registers?");
             gfu_uword offset = (addr & 0xFFFF) & (GFU_EXP1_SCRATCH_SIZE - 1);
             return hard + offset;
         }

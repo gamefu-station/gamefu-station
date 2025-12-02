@@ -10,6 +10,10 @@
 #  include "Unsupported version of C. C23 deprecates some earlier C standard features and we don't want to ifdef them."
 #endif
 
+#ifndef NDEBUG
+#  define NDEBUG
+#endif
+
 #ifndef GAMEFU_COMMON_COMMON_H_
 #define GAMEFU_COMMON_COMMON_H_
 
@@ -46,24 +50,23 @@
 #define GFU_STR(X) GFU_STR_(X)
 
 #ifdef GFU_NDEBUG
-#  define gfu_assert(Cond, Message) do { } while (0)
-#  define gfu_assertf(Cond, Message, ...) do { } while (0)
+#  define assert(Cond, Message) do { } while (0)
+#  define assertf(Cond, Message, ...) do { } while (0)
 #  define static_assert(Cond, Message)
 #else /* !GFU_NDEBUG */
-#  include <assert.h>
-#  define gfu_assertn(Cond) do { \
+#  define assertn(Cond) do { \
         if (!(Cond)) { \
             (void)fprintf(stderr, __FILE__ ":" GFU_STR(__LINE__) ": Assertion '" #Cond "' failed.\n"); \
             abort(); \
         } \
     } while (0)
-#  define gfu_assert(Cond, Message) do { \
+#  define assert(Cond, Message) do { \
         if (!(Cond)) { \
             (void)fprintf(stderr, __FILE__ ":" GFU_STR(__LINE__) ": Assertion '" #Cond "' failed:\n    " Message "\n"); \
             abort(); \
         } \
     } while (0)
-#  define gfu_assertf(Cond, Message, ...) do { \
+#  define assertf(Cond, Message, ...) do { \
         if (!(Cond)) { \
             (void)fprintf(stderr, __FILE__ ":" GFU_STR(__LINE__) ": Assertion '" #Cond "' failed:\n    " Message "\n", __VA_ARGS__); \
             abort(); \
