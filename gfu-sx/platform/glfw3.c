@@ -1,13 +1,13 @@
-#include "prologue.h"
-#include "platform.h"
-#include "vm.h"
+#include "../prologue.h"
+#include "../platform.h"
+#include "../vm.h"
 
 #include <errno.h>
 #include <stdio.h>
 
 #define GLAD_GLES2_IMPLEMENTATION
 #define GLAD_GLES2_USE_SYSTEM_EGL
-#include "gles2.h"
+#include "../gles2.h"
 #undef GLAD_GLES2_IMPLEMENTATION
 #undef GLAD_GLES2_USE_SYSTEM_EGL
 

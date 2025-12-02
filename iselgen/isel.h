@@ -6,7 +6,7 @@
 #include "../gfu-opcodes/instruction.h"
 #include "../gfu-opcodes/register.h"
 
-#include "../gfu-as/mnemonics.h"
+// #include "../gfu-as/mnemonics.h"
 
 typedef enum isel_type {
     ISEL_TY_INVALID,
@@ -27,7 +27,7 @@ typedef struct isel_operand {
 } isel_operand, isel_operand_t;
 
 typedef struct isel_match {
-    gfuas_mnemonic mnemonic;
+    gfu_word mnemonic;
     gfu_uword operand_count;
     isel_operand_t operands[3];
 } isel_match, isel_match_t;

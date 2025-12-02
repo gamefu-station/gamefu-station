@@ -1,5 +1,5 @@
-#include "prologue.h"
-#include "platform.h"
+#include "../prologue.h"
+#include "../platform.h"
 
 #include <synchapi.h>
 

@@ -440,7 +440,7 @@ static gfu_uword gfuas_match_isel(const gfuas_stmt* stmt) {
             if (mi > 0 && match_stmt->label != nullptr) goto not_match;
 
             isel_match match = isel_matches[pattern.match_index + mi];
-            if (match.mnemonic != stmt->mnemonic) goto not_match;
+            if ((gfuas_mnemonic)match.mnemonic != stmt->mnemonic) goto not_match;
             if (match.operand_count != stmt->operand_count) goto not_match;
 
             for (gfu_uword oi = 0; oi < match.operand_count; oi++) {
