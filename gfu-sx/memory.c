@@ -1,14 +1,14 @@
 #include "../common/common.h"
 
-#include "../gfu-bfd/system.h"
-
 #include "../gfu-bfd/object.h"
+#include "../gfu-bfd/system.h"
 
 #include "prologue.h"
 #include "memory.h"
 #include "vm.h"
 
-#include "../gfu-sx/default_bios.h"
+#include "default_bios.h"
+#include "hardware.h"
 
 bool gfusx_memory_init(gfusx_t* vm) {
     assert(vm != nullptr, "Where is the VM?");
