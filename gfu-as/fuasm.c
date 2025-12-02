@@ -47,16 +47,6 @@ typedef struct gfuas_state {
     bool is_entry_set;
 } gfuas_state;
 
-#define GFUAS_TOKEN_KINDS(X) \
-    X(ENDL) \
-    X(DIRECTIVE) \
-    X(LABEL_GLOBAL) \
-    X(LABEL_LOCAL) \
-    X(MNEMONIC) \
-    X(REGISTER) \
-    X(IMMEDIATE) \
-    X(BYTE_STRING)
-
 typedef enum gfuas_token_kind {
     GFUAS_TK_INVALID = 0x00FFFFFF,
     GFUAS_TK_EOF = 0,
@@ -68,9 +58,8 @@ typedef enum gfuas_token_kind {
 
     _gfuas_tk_multibyte_offset = ETOK_MULTIBYTE_BEGIN,
 
-#define X(Id) GFUAS_TK_##Id,
-    GFUAS_TOKEN_KINDS(X)
-#undef X
+#define TK(Id) GFUAS_TK_##Id,
+#include "x/tokens.h"
 } gfuas_token_kind;
 
 typedef struct gfuas_token {
@@ -1143,9 +1132,8 @@ static char* gfuas_assemble_internal(gfuas_state* state, gfu_uword* rom_size) {
 static const char* gfuas_token_kind_names[] = {
     [GFUAS_TK_INVALID] = "INVALID",
     [GFUAS_TK_EOF] = "EOF",
-#define X(Id) [GFUAS_TK_##Id] = #Id,
-    GFUAS_TOKEN_KINDS(X)
-#undef X
+#define TK(Id) [GFUAS_TK_##Id] = #Id,
+#include "x/tokens.h"
 };
 
 static void gfuas_token_dump(gfuas_token token) {
@@ -1284,9 +1272,8 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
                 gfuas_directive directive;
                 const char* image;
             } directives[] = {
-#define X(Id, Image) { GFUAS_DIR_##Id, Image },
-                GFUAS_DIRECTIVES(X)
-#undef X
+#define DIR(Id, Image) { GFUAS_DIR_##Id, Image },
+#include "x/directives.h"
                 {0},
             };
 

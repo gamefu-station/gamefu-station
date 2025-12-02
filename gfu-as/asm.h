@@ -23,7 +23,7 @@ typedef enum gfuas_expr_kind {
 
 typedef enum gfuas_addr_kind {
     GFUAS_ADDR_INVALID,
-#define X(Id) GFUAS_ADDR_##Id,
+#define ADDR_KIND(Id) GFUAS_ADDR_##Id,
 #include "x/addr_kinds.h"
 } gfuas_addr_kind;
 
