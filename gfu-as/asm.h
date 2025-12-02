@@ -13,42 +13,18 @@
     X(TEXT, "text") \
     X(DATA, "data")
 
-typedef enum fuasm_mnemonic {
+typedef enum gfuas_mnemonic {
     FUASM_MNEM_INVALID,
 #define MNEM(Id, Name) FUASM_MNEM_##Id,
 #include "x/mnemonics.h"
-} fuasm_mnemonic, fuasm_mnemonic_t;
+} gfuas_mnemonic;
 
-typedef enum fuasm_directive {
+typedef enum gfuas_directive {
     FUASM_DIR_INVALID,
 #define X(Id, Image) FUASM_DIR_##Id,
     FUASM_DIRECTIVES(X)
 #undef X
-} fuasm_directive, fuasm_directive_t;
-
-typedef union fuasm_inst {
-    gfu_uword raw;
-    struct {
-        gfu_uword function : 6;
-        gfu_uword shift : 5;
-        gfu_uword r : 5;
-        gfu_uword l : 5;
-        gfu_uword d : 5;
-        gfu_uword opcode : 6;
-    } reg;
-    struct {
-        gfu_uword value : 16;
-        gfu_uword l : 5;
-        gfu_uword d : 5;
-        gfu_uword opcode : 6;
-    } imm;
-    struct {
-        gfu_uword value : 26;
-        gfu_uword opcode : 6;
-    } addr;
-} fuasm_inst, fuasm_inst_t;
-
-static_assert(sizeof(fuasm_inst_t) == sizeof(gfu_uword), "Ensure that the union of bitfields does not change the size of the instruction type.");
+} gfuas_directive;
 
 #define FUASM_EXPR_KINDS(X) \
     X(REG) \
@@ -60,62 +36,62 @@ static_assert(sizeof(fuasm_inst_t) == sizeof(gfu_uword), "Ensure that the union 
     X(ADDR_LOWER) \
     X(BYTE_STRING)
 
-typedef enum fuasm_expr_kind {
+typedef enum gfuas_expr_kind {
     FUASM_EXPR_INVALID,
 #define X(Id) FUASM_EXPR_##Id,
     FUASM_EXPR_KINDS(X)
 #undef X
-} fuasm_expr_kind, fuasm_expr_kind_t;
+} gfuas_expr_kind;
 
 #define FUASM_ADDR_KINDS(X) \
     X(LABEL)
 
-typedef enum fuasm_addr_kind {
+typedef enum gfuas_addr_kind {
     FUASM_ADDR_INVALID,
 #define X(Id) FUASM_ADDR_##Id,
     FUASM_ADDR_KINDS(X)
 #undef X
-} fuasm_addr_kind, fuasm_addr_kind_t;
+} gfuas_addr_kind;
 
-typedef struct fuasm_addr {
-    fuasm_addr_kind_t kind;
+typedef struct gfuas_addr {
+    gfuas_addr_kind kind;
     source source;
     gfu_uword location;
     union {
         const char* label;
     } as;
-} fuasm_addr, fuasm_addr_t;
+} gfuas_addr;
 
-typedef struct fuasm_expr {
-    fuasm_expr_kind_t kind;
+typedef struct gfuas_expr {
+    gfuas_expr_kind kind;
     source source;
     gfu_uword location;
     bool is_base;
     union {
         gfu_gpr _register;
         gfu_uword immediate;
-        fuasm_addr_t address;
+        gfuas_addr address;
         struct {
             const char* data;
             gfu_uword length;
         } byte_string;
     } as;
-} fuasm_expr, fuasm_expr_t;
+} gfuas_expr;
 
-typedef struct fuasm_stmt {
-    struct fuasm_stmt* next;
+typedef struct gfuas_stmt {
+    struct gfuas_stmt* next;
     source source;
     gfu_uword location;
-    fuasm_directive_t directive;
+    gfuas_directive directive;
     const char* label;
     bool is_label_local;
-    fuasm_mnemonic_t mnemonic;
+    gfuas_mnemonic mnemonic;
     gfu_uword operand_count;
-    fuasm_expr_t operands[3];
+    gfuas_expr operands[3];
     gfu_uword pattern_index;
-} fuasm_stmt, fuasm_stmt_t;
+} gfuas_stmt;
 
-char* fuasm_assemble(source source, gfu_uword* rom_size);
-char* fuasm_assemble_ir(fuasm_stmt_t* ir, gfu_uword* rom_size);
+char* gfuas_assemble(source source, gfu_uword* rom_size);
+char* gfuas_assemble_ir(gfuas_stmt* ir, gfu_uword* rom_size);
 
 #endif /* GAMEFU_ASM_H_ */

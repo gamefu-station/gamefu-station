@@ -6,9 +6,6 @@
 #include "../gfu-opcodes/register.h"
 #include "../gfu-opcodes/syscall.h"
 
-// TODO(local): this should totally be things in opcodes, right? maybe? we'll see
-#include "../gfu-as/asm.h"
-
 #include "prologue.h"
 #include "chip.h"
 #include "memory.h"
@@ -46,7 +43,7 @@ int main(int argc, char** argv) {
             return_defer(1);
         }
     } else {
-        fuasm_inst inst = {0};
+        gfu_inst inst = {0};
 
         inst.reg.function = GFU_OPFN_OR;
         inst.reg.d = GFU_GPR_R0;

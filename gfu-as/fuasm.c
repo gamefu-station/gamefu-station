@@ -20,21 +20,21 @@
 
 #define VERSION "0.0.1.0"
 
-typedef struct fuasm_options {
+typedef struct gfuas_options {
     const char* program;
     bool verbose;
     source* sources;
     gfu_uword source_count;
     const char* output;
-} fuasm_options;
+} gfuas_options;
 
-typedef struct fuasm_state {
-    fuasm_options options;
+typedef struct gfuas_state {
+    gfuas_options options;
 
     arena string_arena;
     arena stmt_arena;
 
-    fuasm_stmt* ir;
+    gfuas_stmt* ir;
     struct address {
         const char* name;
         gfu_uword address;
@@ -45,7 +45,7 @@ typedef struct fuasm_state {
     gfu_uword address_space;
     const char* entry_name;
     bool is_entry_set;
-} fuasm_state;
+} gfuas_state;
 
 #define FUASM_TOKEN_KINDS(X) \
     X(ENDL) \
@@ -57,7 +57,7 @@ typedef struct fuasm_state {
     X(IMMEDIATE) \
     X(BYTE_STRING)
 
-typedef enum fuasm_token_kind {
+typedef enum gfuas_token_kind {
     FUASM_TK_INVALID = 0x00FFFFFF,
     FUASM_TK_EOF = 0,
 
@@ -66,22 +66,22 @@ typedef enum fuasm_token_kind {
 
     FUASM_TK_INVALID_CHARACTER = ETOK_INVALID_CHARACTER,
 
-    _fuasm_tk_multibyte_offset = ETOK_MULTIBYTE_BEGIN,
+    _gfuas_tk_multibyte_offset = ETOK_MULTIBYTE_BEGIN,
 
 #define X(Id) FUASM_TK_##Id,
     FUASM_TOKEN_KINDS(X)
 #undef X
-} fuasm_token_kind;
+} gfuas_token_kind;
 
-typedef struct fuasm_token {
+typedef struct gfuas_token {
     source source;
-    fuasm_token_kind kind;
+    gfuas_token_kind kind;
     gfu_uword location;
     const char *begin, *end;
     gfu_uword line, column;
     union {
-        fuasm_directive directive;
-        fuasm_mnemonic mnemonic;
+        gfuas_directive directive;
+        gfuas_mnemonic mnemonic;
         gfu_gpr _register;
         gfu_uword immediate;
         const char* label;
@@ -90,52 +90,52 @@ typedef struct fuasm_token {
             gfu_uword length;
         } byte_string;
     } as;
-} fuasm_token;
+} gfuas_token;
 
-typedef struct fuasm_userdata {
-    fuasm_state* state;
+typedef struct gfuas_userdata {
+    gfuas_state* state;
     source source;
-} fuasm_userdata;
+} gfuas_userdata;
 
-typedef struct fuasm_parser {
-    fuasm_state* state;
+typedef struct gfuas_parser {
+    gfuas_state* state;
     source source;
     etok_lexer lexer;
-    fuasm_token tk, next;
-} fuasm_parser;
+    gfuas_token tk, next;
+} gfuas_parser;
 
-#define PDATA ((fuasm_userdata) {parser->state, parser->source})
+#define PDATA ((gfuas_userdata) {parser->state, parser->source})
 
-typedef enum fuasm_section {
+typedef enum gfuas_section {
     FUASM_TEXT,
     FUASM_DATA,
-} fuasm_section;
+} gfuas_section;
 
 static void show_help(void);
 static void show_version(void);
-static bool fuasm_options_parse(int argc, char** argv, fuasm_options* options);
-static void print_verbose(fuasm_state* state, const char* format, ...);
+static bool gfuas_options_parse(int argc, char** argv, gfuas_options* options);
+static void print_verbose(gfuas_state* state, const char* format, ...);
 
-static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size);
-static char* fuasm_assemble_internal(fuasm_state* state, gfu_uword* rom_size);
+static char* gfuas_assemble_ir_internal(gfuas_state* state, gfu_uword* rom_size);
+static char* gfuas_assemble_internal(gfuas_state* state, gfu_uword* rom_size);
 
-static void fuasm_lexer_init(fuasm_userdata* userdata, etok_lexer* lexer);
-static fuasm_token fuasm_lexer_read(etok_lexer* lexer);
-static void fuasm_token_dump(fuasm_token token);
+static void gfuas_lexer_init(gfuas_userdata* userdata, etok_lexer* lexer);
+static gfuas_token gfuas_lexer_read(etok_lexer* lexer);
+static void gfuas_token_dump(gfuas_token token);
 
-int fuasm_driver_main(int argc, char** argv) {
+int gfuas_driver_main(int argc, char** argv) {
     int result = 0;
 
     FILE* f = nullptr;
 
     diag_color_output(isatty(fileno(stderr)));
 
-    fuasm_state state = {
+    gfuas_state state = {
         .address_space = GFUOBJ_ADDRSPACE_USER,
         .entry_name = "_start",
     };
 
-    if (!fuasm_options_parse(argc, argv, &state.options)) {
+    if (!gfuas_options_parse(argc, argv, &state.options)) {
         return_defer(1);
     }
 
@@ -167,7 +167,7 @@ int fuasm_driver_main(int argc, char** argv) {
     print_verbose(&state, "Generating '%s'", output_name);
 
     gfu_uword rom_size;
-    char* rom_data = fuasm_assemble_internal(&state, &rom_size);
+    char* rom_data = gfuas_assemble_internal(&state, &rom_size);
     if (rom_data == nullptr) return_defer(1);
 
     errno = 0;
@@ -201,10 +201,10 @@ defer:;
     return result;
 }
 
-int fuasm_driver_fuzz(const char* text, size_t length) {
+int gfuas_driver_fuzz(const char* text, size_t length) {
     int result = 0;
 
-    fuasm_state state = {
+    gfuas_state state = {
         .address_space = GFUOBJ_ADDRSPACE_USER,
         .entry_name = "_start",
     };
@@ -221,7 +221,7 @@ int fuasm_driver_fuzz(const char* text, size_t length) {
     arena_init(&state.stmt_arena, 32 * 1024 * 1024);
 
     gfu_uword rom_size;
-    char* rom_data = fuasm_assemble_internal(&state, &rom_size);
+    char* rom_data = gfuas_assemble_internal(&state, &rom_size);
 
 defer:;
     free(rom_data);
@@ -232,8 +232,8 @@ defer:;
     return result;
 }
 
-char* fuasm_assemble_ir(fuasm_stmt* ir, gfu_uword* rom_size) {
-    fuasm_state state = {
+char* gfuas_assemble_ir(gfuas_stmt* ir, gfu_uword* rom_size) {
+    gfuas_state state = {
         .ir = ir,
     };
 
@@ -248,7 +248,7 @@ char* fuasm_assemble_ir(fuasm_stmt* ir, gfu_uword* rom_size) {
     arena_init(&state.string_arena, 32 * 1024 * 1024);
     arena_init(&state.stmt_arena, 32 * 1024 * 1024);
 
-    char* rom_data = fuasm_assemble_ir_internal(&state, rom_size);
+    char* rom_data = gfuas_assemble_ir_internal(&state, rom_size);
 
     free(state.options.sources);
     arena_deinit(&state.stmt_arena);
@@ -256,8 +256,8 @@ char* fuasm_assemble_ir(fuasm_stmt* ir, gfu_uword* rom_size) {
     return rom_data;
 }
 
-char* fuasm_assemble(source source, gfu_uword* rom_size) {
-    fuasm_state state = {0};
+char* gfuas_assemble(source source, gfu_uword* rom_size) {
+    gfuas_state state = {0};
 
     state.options.source_count = 1;
     state.options.sources = calloc(1, sizeof *state.options.sources);
@@ -266,7 +266,7 @@ char* fuasm_assemble(source source, gfu_uword* rom_size) {
     arena_init(&state.string_arena, 32 * 1024 * 1024);
     arena_init(&state.stmt_arena, 32 * 1024 * 1024);
 
-    char* rom_data = fuasm_assemble_internal(&state, rom_size);
+    char* rom_data = gfuas_assemble_internal(&state, rom_size);
 
     free(state.options.sources);
     arena_deinit(&state.stmt_arena);
@@ -275,7 +275,7 @@ char* fuasm_assemble(source source, gfu_uword* rom_size) {
     return rom_data;
 }
 
-static const char* fuasm_intern_string(fuasm_state* state, const char* s, gfu_uword length) {
+static const char* gfuas_intern_string(gfuas_state* state, const char* s, gfu_uword length) {
     for (char* strings = state->string_arena.memory; strings < state->string_arena.memory + state->string_arena.allocated; ) {
         size_t existing_length = strlen(strings);
         if (existing_length == (size_t)length && 0 == strncmp(strings, s, (size_t)length)) {
@@ -319,7 +319,7 @@ static void show_version(void) {
     );
 }
 
-static bool fuasm_options_parse(int argc, char** argv, fuasm_options* options) {
+static bool gfuas_options_parse(int argc, char** argv, gfuas_options* options) {
     bool result = true;
     options->program = SHIFT;
 
@@ -376,7 +376,7 @@ static bool fuasm_options_parse(int argc, char** argv, fuasm_options* options) {
 
 #undef SHIFT
 
-static void print_verbose(fuasm_state* state, const char* format, ...) {
+static void print_verbose(gfuas_state* state, const char* format, ...) {
     if (!state->options.verbose) return;
     va_list v;
     va_start(v, format);
@@ -388,7 +388,7 @@ static void print_verbose(fuasm_state* state, const char* format, ...) {
 #define ISEL_LABEL_NOPARENT 0xFFFFFFFFu
 #define ISEL_LABEL_NOT_FOUND 0xFFFFFFFEu
 
-static gfu_uword fuasm_lookup_address_raw(fuasm_state* state, gfu_uword parent, source source, gfu_uword location, const char* name) {
+static gfu_uword gfuas_lookup_address_raw(gfuas_state* state, gfu_uword parent, source source, gfu_uword location, const char* name) {
     assertn(state != nullptr);
 
     size_t name_length = strlen(name);
@@ -412,15 +412,15 @@ static gfu_uword fuasm_lookup_address_raw(fuasm_state* state, gfu_uword parent, 
     return ISEL_LABEL_NOT_FOUND;
 }
 
-static gfu_uword fuasm_lookup_address(fuasm_state* state, gfu_uword parent, fuasm_token token) {
-    return fuasm_lookup_address_raw(state, parent, token.source, token.location, token.as.label);
+static gfu_uword gfuas_lookup_address(gfuas_state* state, gfu_uword parent, gfuas_token token) {
+    return gfuas_lookup_address_raw(state, parent, token.source, token.location, token.as.label);
 }
 
 /* ===== ISel Shit ===== */
 
 #include "isel_tables.c"
 
-static isel_type fuasm_expr_kind_to_isel_type(fuasm_expr expr) {
+static isel_type gfuas_expr_kindo_isel_type(gfuas_expr expr) {
     switch (expr.kind) {
         default: return ISEL_TY_INVALID;
 
@@ -440,11 +440,11 @@ static isel_type fuasm_expr_kind_to_isel_type(fuasm_expr expr) {
     }
 }
 
-static gfu_uword fuasm_match_isel(const fuasm_stmt* stmt) {
+static gfu_uword gfuas_match_isel(const gfuas_stmt* stmt) {
     for (gfu_uword pi = 0; pi < ISEL_PATTERN_COUNT; pi++) {
         isel_pattern pattern = isel_patterns[pi];
 
-        const fuasm_stmt* match_stmt = stmt;
+        const gfuas_stmt* match_stmt = stmt;
         for (gfu_uword mi = 0; mi < pattern.match_count; mi++, match_stmt = match_stmt->next) {
             if (match_stmt == nullptr) goto not_match;
             if (mi > 0 && match_stmt->label != nullptr) goto not_match;
@@ -455,10 +455,10 @@ static gfu_uword fuasm_match_isel(const fuasm_stmt* stmt) {
 
             for (gfu_uword oi = 0; oi < match.operand_count; oi++) {
                 isel_operand op = match.operands[oi];
-                fuasm_expr expr = stmt->operands[oi];
+                gfuas_expr expr = stmt->operands[oi];
 
                 if (op.is_base != expr.is_base) goto not_match;
-                if (op.type != fuasm_expr_kind_to_isel_type(expr)) {
+                if (op.type != gfuas_expr_kindo_isel_type(expr)) {
                     goto not_match;
                 }
 
@@ -474,7 +474,7 @@ static gfu_uword fuasm_match_isel(const fuasm_stmt* stmt) {
     return 0xFFFFFFFF;
 }
 
-static bool fuasm_eval_expr(fuasm_state* state, gfu_uword label_scope, source source, fuasm_expr expr, gfu_uword* result) {
+static bool gfuas_eval_expr(gfuas_state* state, gfu_uword label_scope, source source, gfuas_expr expr, gfu_uword* result) {
 #define R(Value) do { *result = (Value); return true; } while (0)
     switch (expr.kind) {
         case FUASM_EXPR_INVALID: R(0);
@@ -489,7 +489,7 @@ static bool fuasm_eval_expr(fuasm_state* state, gfu_uword label_scope, source so
         case FUASM_EXPR_ADDR:
         case FUASM_EXPR_ADDR_LOWER:
         case FUASM_EXPR_ADDR_UPPER: {
-            gfu_uword addr = fuasm_lookup_address_raw(state, label_scope, expr.source, expr.as.address.location, expr.as.address.as.label);
+            gfu_uword addr = gfuas_lookup_address_raw(state, label_scope, expr.source, expr.as.address.location, expr.as.address.as.label);
             if (addr == ISEL_LABEL_NOT_FOUND) return false;
 
             if (expr.kind == FUASM_EXPR_ADDR_LOWER) {
@@ -504,11 +504,11 @@ static bool fuasm_eval_expr(fuasm_state* state, gfu_uword label_scope, source so
     return false;
 }
 
-static gfu_uword fuasm_emit_isel(fuasm_state* state, gfu_uword label_scope, gfu_uword addr, const fuasm_stmt* ir, char* rom, const fuasm_expr* vars) {
+static gfu_uword gfuas_emit_isel(gfuas_state* state, gfu_uword label_scope, gfu_uword addr, const gfuas_stmt* ir, char* rom, const gfuas_expr* vars) {
     isel_pattern pattern = isel_patterns[ir->pattern_index];
 
     if (ir->mnemonic == FUASM_MNEM_BYTES) {
-        fuasm_expr expr = vars[isel_emits[pattern.emit_index].arguments[0].as.var_index];
+        gfuas_expr expr = vars[isel_emits[pattern.emit_index].arguments[0].as.var_index];
         if (expr.kind == FUASM_EXPR_BYTE_STRING) {
             memcpy(rom, expr.as.byte_string.data, (size_t)expr.as.byte_string.length);
             return expr.as.byte_string.length;
@@ -535,37 +535,37 @@ static gfu_uword fuasm_emit_isel(fuasm_state* state, gfu_uword label_scope, gfu_
 
                 case ISEL_ARG_VAR:
                 case ISEL_ARG_VAR_LOWER: {
-                    fuasm_expr expr = vars[arg.as.var_index];
-                    if (!fuasm_eval_expr(state, label_scope, expr.source, expr, &args[i]))
+                    gfuas_expr expr = vars[arg.as.var_index];
+                    if (!gfuas_eval_expr(state, label_scope, expr.source, expr, &args[i]))
                         return 0;
                     args[i] &= 0xFFFF;
                 } break;
 
                 case ISEL_ARG_VAR_UPPER: {
-                    fuasm_expr expr = vars[arg.as.var_index];
-                    if (!fuasm_eval_expr(state, label_scope, expr.source, expr, &args[i]))
+                    gfuas_expr expr = vars[arg.as.var_index];
+                    if (!gfuas_eval_expr(state, label_scope, expr.source, expr, &args[i]))
                         return 0;
                     args[i] = (args[i] >> 16) & 0xFFFF;
                 } break;
 
                 case ISEL_ARG_VAR_ADDR: {
-                    fuasm_expr expr = vars[arg.as.var_index];
-                    if (!fuasm_eval_expr(state, label_scope, expr.source, expr, &args[i]))
+                    gfuas_expr expr = vars[arg.as.var_index];
+                    if (!gfuas_eval_expr(state, label_scope, expr.source, expr, &args[i]))
                         return 0;
                     args[i] = (args[i] & 0x0FFFFFFC) >> 2;
                 } break;
 
                 case ISEL_ARG_VAR_NEGATE: {
-                    fuasm_expr expr = vars[arg.as.var_index];
-                    if (!fuasm_eval_expr(state, label_scope, expr.source, expr, &args[i]))
+                    gfuas_expr expr = vars[arg.as.var_index];
+                    if (!gfuas_eval_expr(state, label_scope, expr.source, expr, &args[i]))
                         return 0;
                     args[i] = (gfu_uword)(-(gfu_word)args[i]);
                 } break;
 
                 case ISEL_ARG_VAR_OFFS: {
-                    fuasm_expr expr = vars[arg.as.var_index];
+                    gfuas_expr expr = vars[arg.as.var_index];
                     gfu_uword to;
-                    if (!fuasm_eval_expr(state, label_scope, expr.source, expr, &to))
+                    if (!gfuas_eval_expr(state, label_scope, expr.source, expr, &to))
                         return 0;
                     gfu_uword from = addr + sizeof(gfu_uword);
                     args[i] = (gfu_half)(((to - from) & 0x0003FFFC) >> 2);
@@ -591,7 +591,7 @@ static gfu_uword fuasm_emit_isel(fuasm_state* state, gfu_uword label_scope, gfu_
             }
         }
 
-        fuasm_inst* inst = (fuasm_inst*)rom;
+        gfu_inst* inst = (gfu_inst*)rom;
         switch (emit.kind) {
             case ISEL_EMIT_INVALID: break;
             case ISEL_EMIT_BYTES: break;
@@ -632,35 +632,35 @@ static gfu_uword fuasm_emit_isel(fuasm_state* state, gfu_uword label_scope, gfu_
 
 /* ===== Parser Shit ===== */
 
-static bool fuasm_parser_is_at_end(fuasm_parser* parser) {
+static bool gfuas_parser_is_at_end(gfuas_parser* parser) {
     return parser->tk.kind == FUASM_TK_EOF;
 }
 
-static fuasm_token fuasm_parser_peek(fuasm_parser* parser) {
+static gfuas_token gfuas_parser_peek(gfuas_parser* parser) {
     if (parser->next.kind == FUASM_TK_INVALID) {
-        parser->next = fuasm_lexer_read(&parser->lexer);
+        parser->next = gfuas_lexer_read(&parser->lexer);
     }
     return parser->next;
 }
 
-static void fuasm_parser_advance(fuasm_parser* parser) {
+static void gfuas_parser_advance(gfuas_parser* parser) {
     if (parser->tk.kind == FUASM_TK_EOF) return;
     if (parser->next.kind != FUASM_TK_INVALID) {
         parser->tk = parser->next;
-        parser->next = (fuasm_token) { .kind = FUASM_TK_INVALID };
-    } else parser->tk = fuasm_lexer_read(&parser->lexer);
+        parser->next = (gfuas_token) { .kind = FUASM_TK_INVALID };
+    } else parser->tk = gfuas_lexer_read(&parser->lexer);
     assertn(parser->next.kind == FUASM_TK_INVALID);
 }
 
-static bool fuasm_parser_try(fuasm_parser* parser, fuasm_token_kind kind) {
+static bool gfuas_parserry(gfuas_parser* parser, gfuas_token_kind kind) {
     if (parser->tk.kind != kind) return false;
-    fuasm_parser_advance(parser);
+    gfuas_parser_advance(parser);
     return true;
 }
 
-static bool fuasm_parser_expect(fuasm_parser* parser, fuasm_token_kind kind, const char* what, fuasm_token* token) {
+static bool gfuas_parser_expect(gfuas_parser* parser, gfuas_token_kind kind, const char* what, gfuas_token* token) {
     if (parser->tk.kind != kind) {
-        // fuasm_token_dump(parser->tk);
+        // gfuas_token_dump(parser->tk);
         if (kind >= FUASM_TK_PRINTABLE_BEGIN && kind <= FUASM_TK_PRINTABLE_END) {
             diag_issue(DIAG_FATAL, parser->source, parser->tk.location, "Expected '%c'.", kind);
         } else {
@@ -671,12 +671,12 @@ static bool fuasm_parser_expect(fuasm_parser* parser, fuasm_token_kind kind, con
     }
 
     if (token != nullptr) *token = parser->tk;
-    fuasm_parser_advance(parser);
+    gfuas_parser_advance(parser);
     return true;
 }
 
-static bool fuasm_parse_expr(fuasm_parser* parser, fuasm_expr* out_expr) {
-    fuasm_expr expr = {0};
+static bool gfuas_parse_expr(gfuas_parser* parser, gfuas_expr* out_expr) {
+    gfuas_expr expr = {0};
     expr.source = parser->source;
     expr.location = parser->tk.location;
 
@@ -685,26 +685,26 @@ static bool fuasm_parse_expr(fuasm_parser* parser, fuasm_expr* out_expr) {
         expr.as.address.kind = FUASM_ADDR_LABEL;
         expr.as.address.location = parser->tk.location;
         expr.as.address.as.label = parser->tk.as.label;
-        fuasm_parser_advance(parser);
+        gfuas_parser_advance(parser);
     } else if (parser->tk.kind == FUASM_TK_REGISTER) {
         expr.kind = FUASM_EXPR_REG;
         expr.as._register = parser->tk.as._register;
-        fuasm_parser_advance(parser);
+        gfuas_parser_advance(parser);
     } else if (parser->tk.kind == FUASM_TK_IMMEDIATE) {
         expr.kind = FUASM_EXPR_IMM;
         expr.as.immediate = parser->tk.as.immediate;
-        fuasm_parser_advance(parser);
+        gfuas_parser_advance(parser);
     } else if (parser->tk.kind == FUASM_TK_BYTE_STRING) {
         expr.kind = FUASM_EXPR_BYTE_STRING;
         expr.as.byte_string.data = parser->tk.as.byte_string.data;
         expr.as.byte_string.length = parser->tk.as.byte_string.length;
-        fuasm_parser_advance(parser);
+        gfuas_parser_advance(parser);
     } else if (parser->tk.kind == '-') {
-        fuasm_parser_advance(parser);
+        gfuas_parser_advance(parser);
         if (parser->tk.kind == FUASM_TK_IMMEDIATE) {
             expr.kind = FUASM_EXPR_IMM;
             expr.as.immediate = (gfu_uword)(-(gfu_word)parser->tk.as.immediate);
-            fuasm_parser_advance(parser);
+            gfuas_parser_advance(parser);
         } else {
             diag_issue(DIAG_ERROR, parser->source, expr.location, "Expected an immediate to negate.");
             return false;
@@ -718,21 +718,21 @@ static bool fuasm_parse_expr(fuasm_parser* parser, fuasm_expr* out_expr) {
     return true;
 }
 
-static fuasm_stmt* parse_statement(fuasm_parser* parser) {
+static gfuas_stmt* parse_statement(gfuas_parser* parser) {
     static bool is_first = true;
 
-    fuasm_state* state = parser->state;
+    gfuas_state* state = parser->state;
     source source = parser->source;
 
     assertn(parser->tk.kind != FUASM_TK_ENDL && parser->tk.kind != FUASM_TK_EOF);
 
-    fuasm_stmt* stmt = arena_alloc(&state->stmt_arena, sizeof *stmt);
+    gfuas_stmt* stmt = arena_alloc(&state->stmt_arena, sizeof *stmt);
     stmt->source = source;
     stmt->location = parser->tk.location;
 
     if (parser->tk.kind == FUASM_TK_DIRECTIVE) {
         stmt->directive = parser->tk.as.directive;
-        fuasm_parser_advance(parser);
+        gfuas_parser_advance(parser);
 
         if (stmt->directive == FUASM_DIR_ADDRESS_SPACE) {
             if (!is_first) {
@@ -742,10 +742,10 @@ static fuasm_stmt* parse_statement(fuasm_parser* parser) {
 
             if (parser->tk.kind == FUASM_TK_LABEL_GLOBAL && 0 == strcmp("bios", parser->tk.as.label)) {
                 state->address_space = GFUOBJ_ADDRSPACE_BIOS;
-                fuasm_parser_advance(parser);
+                gfuas_parser_advance(parser);
             } else if (parser->tk.kind == FUASM_TK_LABEL_GLOBAL && 0 == strcmp("user", parser->tk.as.label)) {
                 state->address_space = GFUOBJ_ADDRSPACE_USER;
-                fuasm_parser_advance(parser);
+                gfuas_parser_advance(parser);
             } else {
                 diag_issue(DIAG_ERROR, source, parser->tk.location, "Expected 'bios' or 'user'.");
                 return nullptr;
@@ -756,8 +756,8 @@ static fuasm_stmt* parse_statement(fuasm_parser* parser) {
                 return nullptr;
             }
 
-            fuasm_token entry_name_token;
-            if (!fuasm_parser_expect(parser, FUASM_TK_LABEL_GLOBAL, "a global label", &entry_name_token)) {
+            gfuas_token entry_name_token;
+            if (!gfuas_parser_expect(parser, FUASM_TK_LABEL_GLOBAL, "a global label", &entry_name_token)) {
                 return nullptr;
             }
 
@@ -770,17 +770,17 @@ static fuasm_stmt* parse_statement(fuasm_parser* parser) {
 
     if (
         (parser->tk.kind == FUASM_TK_LABEL_GLOBAL || parser->tk.kind == FUASM_TK_LABEL_LOCAL) &&
-        fuasm_parser_peek(parser).kind == ':'
+        gfuas_parser_peek(parser).kind == ':'
     ) {
         stmt->label = parser->tk.as.label;
         stmt->is_label_local = parser->tk.kind == FUASM_TK_LABEL_LOCAL;
-        fuasm_parser_advance(parser); // label
-        fuasm_parser_advance(parser); // colon
+        gfuas_parser_advance(parser); // label
+        gfuas_parser_advance(parser); // colon
     }
 
     if (parser->tk.kind == FUASM_TK_MNEMONIC) {
         stmt->mnemonic = parser->tk.as.mnemonic;
-        fuasm_parser_advance(parser);
+        gfuas_parser_advance(parser);
 
         if (parser->tk.kind == FUASM_TK_ENDL || parser->tk.kind == FUASM_TK_EOF) {
             goto stmt_end;
@@ -792,8 +792,8 @@ static fuasm_stmt* parse_statement(fuasm_parser* parser) {
                 return nullptr;
             }
 
-            fuasm_expr* expr = &stmt->operands[stmt->operand_count++];
-            if (!fuasm_parse_expr(parser, expr)) {
+            gfuas_expr* expr = &stmt->operands[stmt->operand_count++];
+            if (!gfuas_parse_expr(parser, expr)) {
                 return nullptr;
             }
 
@@ -808,26 +808,26 @@ static fuasm_stmt* parse_statement(fuasm_parser* parser) {
                     return nullptr;
                 }
 
-                fuasm_parser_advance(parser);
-                fuasm_expr base_expr = {
+                gfuas_parser_advance(parser);
+                gfuas_expr base_expr = {
                     .kind = FUASM_EXPR_REG,
                     .is_base = true,
                     .location = parser->tk.location,
                 };
 
-                fuasm_token tk;
-                if (!fuasm_parser_expect(parser, FUASM_TK_REGISTER, "a register name", &tk)) {
+                gfuas_token tk;
+                if (!gfuas_parser_expect(parser, FUASM_TK_REGISTER, "a register name", &tk)) {
                     return nullptr;
                 }
 
                 base_expr.as._register = tk.as._register;
                 stmt->operands[stmt->operand_count++] = base_expr;
 
-                if (!fuasm_parser_expect(parser, ')', nullptr, nullptr)) {
+                if (!gfuas_parser_expect(parser, ')', nullptr, nullptr)) {
                     return nullptr;
                 }
             }
-        } while (fuasm_parser_try(parser, ','));
+        } while (gfuas_parserry(parser, ','));
     }
 
 stmt_end:;
@@ -839,22 +839,22 @@ stmt_end:;
     }
 
     while (parser->tk.kind != FUASM_TK_ENDL) {
-        fuasm_parser_advance(parser);
+        gfuas_parser_advance(parser);
     }
 
     assertn(parser->tk.kind == FUASM_TK_ENDL);
-    fuasm_parser_advance(parser);
+    gfuas_parser_advance(parser);
 
     return stmt;
 }
 
-static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size) {
-    fuasm_stmt* const ir = state->ir;
-    fuasm_section section = FUASM_TEXT;
+static char* gfuas_assemble_ir_internal(gfuas_state* state, gfu_uword* rom_size) {
+    gfuas_stmt* const ir = state->ir;
+    gfuas_section section = FUASM_TEXT;
 
     /* Step 0: Collect label count */
 
-    for (fuasm_stmt* stmt = ir; stmt != nullptr; stmt = stmt->next) {
+    for (gfuas_stmt* stmt = ir; stmt != nullptr; stmt = stmt->next) {
         if (stmt->label != nullptr) {
             state->label_count++;
         }
@@ -867,7 +867,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
     gfu_uword text_instruction_count = 0;
 
     section = FUASM_TEXT;
-    for (fuasm_stmt* stmt = ir; stmt != nullptr; ) {
+    for (gfuas_stmt* stmt = ir; stmt != nullptr; ) {
         switch (stmt->directive) {
             default: assertn(false && "Unhandled directive"); break;
             case FUASM_DIR_INVALID: break;
@@ -882,7 +882,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
             continue;
         }
 
-        stmt->pattern_index = fuasm_match_isel(stmt);
+        stmt->pattern_index = gfuas_match_isel(stmt);
         if (stmt->pattern_index == 0xFFFFFFFF) {
             diag_issue(DIAG_ERROR, stmt->source, stmt->location, "Invalid instruction format.");
             return nullptr;
@@ -917,7 +917,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
     gfu_uword label_scope = ISEL_LABEL_NOPARENT;
 
     section = FUASM_TEXT;
-    for (fuasm_stmt* stmt = ir; stmt != nullptr; ) {
+    for (gfuas_stmt* stmt = ir; stmt != nullptr; ) {
         switch (stmt->directive) {
             default: assertn(false && "Unhandled directive"); break;
             case FUASM_DIR_INVALID: break;
@@ -954,9 +954,9 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
         }
 
         isel_pattern pattern = isel_patterns[stmt->pattern_index];
-        fuasm_expr vars[pattern.var_count];
+        gfuas_expr vars[pattern.var_count];
 
-        const fuasm_stmt* match_stmt = stmt;
+        const gfuas_stmt* match_stmt = stmt;
         for (gfu_uword mi = 0, var_index = 0; mi < pattern.match_count; mi++, match_stmt = match_stmt->next) {
             isel_match match = isel_matches[pattern.match_index + mi];
             for (gfu_uword oi = 0; oi < match.operand_count; oi++) {
@@ -976,7 +976,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
             assertn(stmt->operand_count == 1);
             isel_emit emit = isel_emits[pattern.emit_index];
             assertn(emit.arguments[0].kind == ISEL_ARG_VAR);
-            fuasm_expr expr = vars[emit.arguments[0].as.var_index];
+            gfuas_expr expr = vars[emit.arguments[0].as.var_index];
             if (expr.kind == FUASM_EXPR_BYTE_STRING) {
                 data_index += expr.as.byte_string.length;
             } else if (expr.kind == FUASM_EXPR_IMM) {
@@ -1000,7 +1000,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
 
     /* Step 3: Generate the final ROM binary */
 
-    gfu_uword start_label_address = fuasm_lookup_address_raw(state, ISEL_LABEL_NOPARENT, (struct source){0}, 0, state->entry_name);
+    gfu_uword start_label_address = gfuas_lookup_address_raw(state, ISEL_LABEL_NOPARENT, (struct source){0}, 0, state->entry_name);
     if (start_label_address == 0xFFFFFFFFu) {
         diag_issue(DIAG_ERROR, NOSOURCE, "No '_start' label found.");
         return nullptr;
@@ -1026,7 +1026,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
     label_scope = ISEL_LABEL_NOPARENT;
 
     section = FUASM_TEXT;
-    for (fuasm_stmt* stmt = ir; stmt != nullptr; ) {
+    for (gfuas_stmt* stmt = ir; stmt != nullptr; ) {
         switch (stmt->directive) {
             default: assertn(false && "Unhandled directive"); break;
             case FUASM_DIR_INVALID: break;
@@ -1050,9 +1050,9 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
         }
 
         isel_pattern pattern = isel_patterns[stmt->pattern_index];
-        fuasm_expr vars[pattern.var_count];
+        gfuas_expr vars[pattern.var_count];
 
-        const fuasm_stmt* match_stmt = stmt;
+        const gfuas_stmt* match_stmt = stmt;
         for (gfu_uword mi = 0, var_index = 0; mi < pattern.match_count; mi++, match_stmt = match_stmt->next) {
             isel_match match = isel_matches[pattern.match_index + mi];
             for (gfu_uword oi = 0; oi < match.operand_count; oi++) {
@@ -1068,7 +1068,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
             : GFU_KSEG1_BASE + GFU_BIOS_ROM_BASE;
 
         if (section == FUASM_TEXT) {
-            gfu_uword icount = fuasm_emit_isel(state, label_scope, text_index + addr_offset, stmt, rom_base + text_index, vars);
+            gfu_uword icount = gfuas_emit_isel(state, label_scope, text_index + addr_offset, stmt, rom_base + text_index, vars);
             if (icount == 0) {
                 free(rom_data);
                 return nullptr;
@@ -1076,7 +1076,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
             text_index += icount;
         } else if (section == FUASM_DATA) {
             gfu_uword addr = (text_instruction_count * sizeof(gfu_uword)) + data_index;
-            gfu_uword icount = fuasm_emit_isel(state, label_scope, addr + addr_offset, stmt, rom_base + addr, vars);
+            gfu_uword icount = gfuas_emit_isel(state, label_scope, addr + addr_offset, stmt, rom_base + addr, vars);
             if (icount == 0) {
                 free(rom_data);
                 return nullptr;
@@ -1092,36 +1092,36 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
     return rom_data;
 }
 
-static char* fuasm_assemble_internal(fuasm_state* state, gfu_uword* rom_size) {
-    fuasm_stmt* head = nullptr;
-    fuasm_stmt* tail = nullptr;
+static char* gfuas_assemble_internal(gfuas_state* state, gfu_uword* rom_size) {
+    gfuas_stmt* head = nullptr;
+    gfuas_stmt* tail = nullptr;
 
     for (gfu_uword i = 0; i < state->options.source_count; i++) {
         source source = state->options.sources[i];
 
-        fuasm_parser parser = {
+        gfuas_parser parser = {
             .state = state,
             .source = source,
             .tk.kind = FUASM_TK_INVALID,
             .next.kind = FUASM_TK_INVALID,
         };
 
-        fuasm_userdata userdata = {
+        gfuas_userdata userdata = {
             .state = state,
             .source = source,
         };
-        fuasm_lexer_init(&userdata, &parser.lexer);
+        gfuas_lexer_init(&userdata, &parser.lexer);
 
-        parser.tk = fuasm_lexer_read(&parser.lexer);
+        parser.tk = gfuas_lexer_read(&parser.lexer);
         while (parser.tk.kind != FUASM_TK_EOF) {
             while (parser.tk.kind == FUASM_TK_ENDL) {
-                fuasm_parser_advance(&parser);
+                gfuas_parser_advance(&parser);
             }
 
             if (parser.tk.kind == FUASM_TK_EOF) break;
 
             gfu_uword location  = parser.tk.location;
-            fuasm_stmt* stmt = parse_statement(&parser);
+            gfuas_stmt* stmt = parse_statement(&parser);
             if (stmt == nullptr) return nullptr;
             assertn(location != parser.tk.location);
 
@@ -1135,12 +1135,12 @@ static char* fuasm_assemble_internal(fuasm_state* state, gfu_uword* rom_size) {
     }
 
     state->ir = head;
-    return fuasm_assemble_ir_internal(state, rom_size);
+    return gfuas_assemble_ir_internal(state, rom_size);
 }
 
 /* ===== Lexer Shit ===== */
 
-static const char* fuasm_token_kind_names[] = {
+static const char* gfuas_token_kind_names[] = {
     [FUASM_TK_INVALID] = "INVALID",
     [FUASM_TK_EOF] = "EOF",
 #define X(Id) [FUASM_TK_##Id] = #Id,
@@ -1148,7 +1148,7 @@ static const char* fuasm_token_kind_names[] = {
 #undef X
 };
 
-static void fuasm_token_dump(fuasm_token token) {
+static void gfuas_token_dump(gfuas_token token) {
     if (token.kind >= FUASM_TK_PRINTABLE_BEGIN && token.kind <= FUASM_TK_PRINTABLE_END) {
         fprintf(
             stderr,
@@ -1163,7 +1163,7 @@ static void fuasm_token_dump(fuasm_token token) {
             "(%d,%d): [%s]  %.*s",
             token.line,
             token.column,
-            fuasm_token_kind_names[token.kind],
+            gfuas_token_kind_names[token.kind],
             (int)(token.end - token.begin),
             token.begin
         );
@@ -1172,12 +1172,12 @@ static void fuasm_token_dump(fuasm_token token) {
     fputc('\n', stderr);
 }
 
-static gfu_uword fuasm_lexer_location(etok_lexer* lexer) {
+static gfu_uword gfuas_lexer_location(etok_lexer* lexer) {
     return (gfu_uword)(lexer->source_current - lexer->source_begin);
 }
 
-static void fuasm_etok_error_callback(void* userdata, const char* source_name, const char* source_text, const char* where, uint64_t line, uint64_t column, const char* format, ...) {
-    fuasm_userdata* data = userdata;
+static void gfuas_etok_error_callback(void* userdata, const char* source_name, const char* source_text, const char* where, uint64_t line, uint64_t column, const char* format, ...) {
+    gfuas_userdata* data = userdata;
 
     va_list v;
     va_start(v, format);
@@ -1185,7 +1185,7 @@ static void fuasm_etok_error_callback(void* userdata, const char* source_name, c
     va_end(v);
 }
 
-static bool fuasm_etok_comment_consumer(etok_lexer* lexer) {
+static bool gfuas_etok_comment_consumer(etok_lexer* lexer) {
     if (lexer->ch != ';') return false;
 
     while (!etok_lexer_is_at_end(lexer) && lexer->ch != '\n') {
@@ -1195,58 +1195,58 @@ static bool fuasm_etok_comment_consumer(etok_lexer* lexer) {
     return true;
 }
 
-static bool fuasm_is_white_space(void* userdata, int ch) {
+static bool gfuas_is_white_space(void* userdata, int ch) {
     return ch == ' ' || ch == '\f' || ch == '\r' || ch == '\t' || ch == '\v';
 }
 
-static bool fuasm_is_ident_begin(void* userdata, int ch) {
+static bool gfuas_is_ident_begin(void* userdata, int ch) {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '.' || ch == '_';
 }
 
-static bool fuasm_is_ident_continue(void* userdata, int ch) {
+static bool gfuas_is_ident_continue(void* userdata, int ch) {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '.' || ch == '_';
 }
 
-static int fuasm_get_hex_digit_value(int ch) {
+static int gfuas_get_hex_digit_value(int ch) {
     if (ch >= '0' && ch <= '9') return ch - '0';
     if (ch >= 'a' && ch <= 'f') return 10 + (ch - 'a');
     if (ch >= 'A' && ch <= 'F') return 10 + (ch - 'A');
     return -1;
 }
 
-static bool fuasm_lexer_is_hex_digit(int ch) {
-    return fuasm_get_hex_digit_value(ch) >= 0;
+static bool gfuas_lexer_is_hex_digit(int ch) {
+    return gfuas_get_hex_digit_value(ch) >= 0;
 }
 
-static void fuasm_lexer_init(fuasm_userdata* userdata, etok_lexer* lexer) {
+static void gfuas_lexer_init(gfuas_userdata* userdata, etok_lexer* lexer) {
     etok_lexer_init(lexer, userdata->source.name, userdata->source.text, userdata->source.text + userdata->source.length);
 
     lexer->userdata = userdata;
-    lexer->error_callback = fuasm_etok_error_callback;
-    lexer->comment_consumer = fuasm_etok_comment_consumer;
-    lexer->white_space_predicate = fuasm_is_white_space;
-    lexer->ident_begin_predicate = fuasm_is_ident_begin;
-    lexer->ident_continue_predicate = fuasm_is_ident_continue;
+    lexer->error_callback = gfuas_etok_error_callback;
+    lexer->comment_consumer = gfuas_etok_comment_consumer;
+    lexer->white_space_predicate = gfuas_is_white_space;
+    lexer->ident_begin_predicate = gfuas_is_ident_begin;
+    lexer->ident_continue_predicate = gfuas_is_ident_continue;
 
     etok_lexer_advance(lexer);
 }
 
-static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
-    if (lexer == nullptr) return (fuasm_token) {0};
+static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
+    if (lexer == nullptr) return (gfuas_token) {0};
 
     assertn(lexer->userdata != nullptr);
-    fuasm_userdata* userdata = lexer->userdata;
+    gfuas_userdata* userdata = lexer->userdata;
 
-    fuasm_state* state = userdata->state;
+    gfuas_state* state = userdata->state;
     assertn(state != nullptr);
 
     source source = userdata->source;
 
     etok_lexer_skip_white_space(lexer);
-    fuasm_token token = {
+    gfuas_token token = {
         .source = source,
         .kind = FUASM_TK_INVALID,
-        .location = fuasm_lexer_location(lexer),
+        .location = gfuas_lexer_location(lexer),
         .begin = lexer->source_current,
         .line = (gfu_uword)lexer->line,
         .column = (gfu_uword)lexer->column,
@@ -1281,7 +1281,7 @@ static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
             }
 
             static struct {
-                fuasm_directive directive;
+                gfuas_directive directive;
                 const char* image;
             } directives[] = {
 #define X(Id, Image) { FUASM_DIR_##Id, Image },
@@ -1326,7 +1326,7 @@ static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
             size_t length = (size_t)(lexer->source_current - name);
 
             static struct {
-                fuasm_mnemonic mnemonic;
+                gfuas_mnemonic mnemonic;
                 const char* image;
             } mnemonics[] = {
 #define MNEM(Id, Name) { FUASM_MNEM_##Id, Name },
@@ -1373,20 +1373,20 @@ static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
 
             token.as._register = 0;
             token.kind = *name == '.' ? FUASM_TK_LABEL_LOCAL : FUASM_TK_LABEL_GLOBAL;
-            token.as.label = fuasm_intern_string(state, name, (gfu_uword)length);
+            token.as.label = gfuas_intern_string(state, name, (gfu_uword)length);
         } break;
 
         case '#': {
             etok_lexer_advance(lexer);
 
             token.kind = FUASM_TK_IMMEDIATE;
-            if (!fuasm_lexer_is_hex_digit(lexer->ch)) {
-                diag_issue(DIAG_ERROR, source, fuasm_lexer_location(lexer), "Expected a hex digit.");
+            if (!gfuas_lexer_is_hex_digit(lexer->ch)) {
+                diag_issue(DIAG_ERROR, source, gfuas_lexer_location(lexer), "Expected a hex digit.");
                 goto return_token;
             }
 
-            while (!etok_lexer_is_at_end(lexer) && fuasm_lexer_is_hex_digit(lexer->ch)) {
-                token.as.immediate = (16 * token.as.immediate) + fuasm_get_hex_digit_value(lexer->ch);
+            while (!etok_lexer_is_at_end(lexer) && gfuas_lexer_is_hex_digit(lexer->ch)) {
+                token.as.immediate = (16 * token.as.immediate) + gfuas_get_hex_digit_value(lexer->ch);
                 etok_lexer_advance(lexer);
             }
         } break;
@@ -1425,8 +1425,8 @@ static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
                     etok_lexer_advance(lexer);
                     int digits[2];
                     for (int i = 0; i < 2; i++) {
-                        if (etok_lexer_is_at_end(lexer) || lexer->ch == '\n' || lexer->ch == '"' || (digits[i] = fuasm_get_hex_digit_value(lexer->ch), digits[i] < 0)) {
-                            diag_issue(DIAG_ERROR, source, fuasm_lexer_location(lexer), "Expected hex digit in escape sequence.");
+                        if (etok_lexer_is_at_end(lexer) || lexer->ch == '\n' || lexer->ch == '"' || (digits[i] = gfuas_get_hex_digit_value(lexer->ch), digits[i] < 0)) {
+                            diag_issue(DIAG_ERROR, source, gfuas_lexer_location(lexer), "Expected hex digit in escape sequence.");
                             digits[i] = 0;
                         }
                         etok_lexer_advance(lexer);

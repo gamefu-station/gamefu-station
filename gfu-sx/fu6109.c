@@ -86,7 +86,7 @@ static const char* intnames[] = {
 #undef X
 };
 
-static void gfusx_trace_disasm(gfusx_t* vm, gfu_uword addr, fuasm_inst inst) {
+static void gfusx_trace_disasm(gfusx_t* vm, gfu_uword addr, gfu_inst inst) {
     if (!vm->trace) return;
 
     fprintf(stderr, "%08X:   op=%02X (%s), ", addr, inst.addr.opcode, opnames[inst.addr.opcode]);
@@ -357,7 +357,7 @@ static void gfusx_test_sw_interrupts(gfusx_t* vm) {
 }
 
 static bool gfusx_step(gfusx_t* vm, gfu_uword pc, gfu_uword code) {
-    fuasm_inst inst = { .raw = code };
+    gfu_inst inst = { .raw = code };
     gfusx_trace_disasm(vm, pc, inst);
 
     switch (_iOp_) {

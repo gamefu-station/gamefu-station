@@ -2,6 +2,7 @@
 #define GAMEFU_SYSTEM_INSTRUCTION_H_
 
 #include "../common/common.h"
+
 #include "register.h"
 
 #define GFU_OP(X) \
@@ -111,5 +112,29 @@ typedef enum gfu_opc0fn {
     GFU_C0FN(X)
 #undef X
 } gfu_c0fn;
+
+typedef union gfu_inst {
+    gfu_uword raw;
+    struct {
+        gfu_uword function : 6;
+        gfu_uword shift : 5;
+        gfu_uword r : 5;
+        gfu_uword l : 5;
+        gfu_uword d : 5;
+        gfu_uword opcode : 6;
+    } reg;
+    struct {
+        gfu_uword value : 16;
+        gfu_uword l : 5;
+        gfu_uword d : 5;
+        gfu_uword opcode : 6;
+    } imm;
+    struct {
+        gfu_uword value : 26;
+        gfu_uword opcode : 6;
+    } addr;
+} gfu_inst;
+
+static_assert(sizeof(gfu_inst) == sizeof(gfu_uword), "Ensure that the union of bitfields does not change the size of the instruction type.");
 
 #endif /* GAMEFU_SYSTEM_INSTRUCTION_H_ */

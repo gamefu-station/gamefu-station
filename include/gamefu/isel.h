@@ -6,7 +6,7 @@
 #include "../gfu-opcodes/instruction.h"
 #include "../gfu-opcodes/register.h"
 
-// TODO(local): this should totally be things in opcodes, right? maybe? we'll see
+// need this for mnemonics
 #include "../gfu-as/asm.h"
 
 typedef enum isel_type {
@@ -28,7 +28,7 @@ typedef struct isel_operand {
 } isel_operand, isel_operand_t;
 
 typedef struct isel_match {
-    fuasm_mnemonic_t mnemonic;
+    gfuas_mnemonic mnemonic;
     gfu_uword operand_count;
     isel_operand_t operands[3];
 } isel_match, isel_match_t;
