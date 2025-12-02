@@ -35,7 +35,9 @@ bin/o/gfu-opcodes/%.o: gfu-opcodes/%.c $(COMMON_H) $(OPCODES_H)
 ISELGEN_O=$(patsubst iselgen/%.c,bin/o/iselgen/%.o,$(wildcard iselgen/*.c))
 ISELGEN_H=$(wildcard iselgen/include/**/*.h)
 bin/iselgen: $(ISELGEN_O)
+	@mkdir -p bin
 	cc -o $@ $< $(CFLAGS)
+	@echo "> Built ISEL generator utility"
 
 bin/o/iselgen/%.o: iselgen/%.c $(COMMON_H) $(OPCODES_H) $(ISELGEN_H)
 	@mkdir -p bin/o/iselgen
