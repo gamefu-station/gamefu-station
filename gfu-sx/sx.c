@@ -96,25 +96,3 @@ static bool gfusx_parse_options(int argc, char** argv, gfusx_options_t* options)
 }
 
 #undef SHIFT
-
-// #include "../gfu-common/diagnostic.c"
-// #include "../gfu-common/source.c"
-// #include "../gfu-common/arena.c"
-
-// #include "chip.c"
-// #include "fu6109.c"
-// #include "hardware.c"
-// #include "memory.c"
-// #include "vm.c"
-
-#if defined(GFUSX_PLATFORM_GLFW)
-#  include "platform/glfw3.c"
-#else
-#  include "null.c"
-#endif
-
-#if defined(_WIN32)
-#  include "platform/win32.c"
-#elif defined(__linux__)
-#  include "platform/linux.c"
-#endif
