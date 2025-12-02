@@ -97,9 +97,9 @@ static bool gfusx_parse_options(int argc, char** argv, gfusx_options_t* options)
 
 #undef SHIFT
 
-#include "../gfu-common/diagnostic.c"
-#include "../gfu-common/source.c"
-#include "../gfu-common/arena.c"
+// #include "../gfu-common/diagnostic.c"
+// #include "../gfu-common/source.c"
+// #include "../gfu-common/arena.c"
 
 // #include "chip.c"
 // #include "fu6109.c"

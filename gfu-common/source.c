@@ -37,7 +37,8 @@ bool load_source_from_file(const char* path, source* source) {
     char* text = calloc((size_t)(length + 1), sizeof *text);
 
     errno = 0;
-    (void)fread(text, 1, (size_t)length, f);
+    size_t nread = fread(text, 1, (size_t)length, f);
+    assertn(nread == (size_t)length);
     if (ferror(f)) {
         diag_pause_error_flush();
         diag_issue(DIAG_ERROR, NOSOURCE, "Failed to read source file '%s': %s.", path, strerror(errno));

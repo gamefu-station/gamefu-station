@@ -39,12 +39,12 @@ if [ "$gfusx_platform" = "GLFW" ]; then
     gfusx_platform_lib=bin/libglfw3.a
     if [ ! -f bin/libglfw3.a ]; then
         echo "Building GLFW3..."
-        cc -o bin/glfw3.o -c gfu-sx/glfw3/glfw3.c -Wno-macro-redefined -D_GNU_SOURCE -Ivendor/glfw3/include
-        cc -o bin/glfw3_linux.o -c gfu-sx/glfw3/glfw3_linux.c -Wno-macro-redefined -D_GNU_SOURCE -Ivendor/glfw3/include
-        cc -o bin/glfw3_null.o -c gfu-sx/glfw3/glfw3_null.c -Wno-macro-redefined -D_GNU_SOURCE -Ivendor/glfw3/include
-        cc -o bin/glfw3_osmesa.o -c gfu-sx/glfw3/glfw3_osmesa.c -Wno-macro-redefined -D_GNU_SOURCE -Ivendor/glfw3/include
-        cc -o bin/glfw3_wl.o -c gfu-sx/glfw3/glfw3_wl.c -Wno-macro-redefined -D_GNU_SOURCE -Ivendor/glfw3/include
-        cc -o bin/glfw3_x11.o -c gfu-sx/glfw3/glfw3_x11.c -Wno-macro-redefined -D_GNU_SOURCE -Ivendor/glfw3/include
+        cc -o bin/glfw3.o -c gfu-sx/glfw3/glfw3.c -Wno-macro-redefined -Ivendor/glfw3/include
+        cc -o bin/glfw3_linux.o -c gfu-sx/glfw3/glfw3_linux.c -Wno-macro-redefined -Ivendor/glfw3/include
+        cc -o bin/glfw3_null.o -c gfu-sx/glfw3/glfw3_null.c -Wno-macro-redefined -Ivendor/glfw3/include
+        cc -o bin/glfw3_osmesa.o -c gfu-sx/glfw3/glfw3_osmesa.c -Wno-macro-redefined -Ivendor/glfw3/include
+        cc -o bin/glfw3_wl.o -c gfu-sx/glfw3/glfw3_wl.c -Wno-macro-redefined -Ivendor/glfw3/include
+        cc -o bin/glfw3_x11.o -c gfu-sx/glfw3/glfw3_x11.c -Wno-macro-redefined -Ivendor/glfw3/include
         ar rcs bin/libglfw3.a bin/glfw3.o bin/glfw3_linux.o bin/glfw3_null.o bin/glfw3_osmesa.o bin/glfw3_wl.o bin/glfw3_x11.o
         rm bin/glfw3.o bin/glfw3_linux.o bin/glfw3_null.o bin/glfw3_osmesa.o bin/glfw3_wl.o bin/glfw3_x11.o
     fi
