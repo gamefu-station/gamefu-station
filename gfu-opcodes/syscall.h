@@ -1,7 +1,7 @@
 #ifndef GAMEFU_OPCODES_SYSCALL_H_
 #define GAMEFU_OPCODES_SYSCALL_H_
 
-#include "../common/common.h"
+#include <gamefu/common.h>
 
 #define GFU_SYSCALL(X) \
     X(RESERVED00, 0x00) \

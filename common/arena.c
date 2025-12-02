@@ -1,4 +1,4 @@
-#include "../common/common.h"
+#include <gamefu/common.h>
 
 void arena_init(arena* a, gfu_uword capacity) {
     if (a == nullptr) return;

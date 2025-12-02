@@ -1,4 +1,4 @@
-#include "../common/common.h"
+#include <gamefu/common.h>
 
 typedef struct readobj_options {
     const char* program_name;

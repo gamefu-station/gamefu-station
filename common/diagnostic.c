@@ -1,4 +1,4 @@
-#include "common.h"
+#include <gamefu/common.h>
 
 static const char* level_names[] = {
     "Ignored",

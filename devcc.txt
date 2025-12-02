@@ -1,4 +1,16 @@
 -Iinclude
+-Icommon/include
+-Igfu-ar/include
+-Igfu-as/include
+-Igfu-bfd/include
+-Igfu-cc/include
+-Igfu-hx/include
+-Igfu-ld/include
+-Igfu-objdump/include
+-Igfu-opcodes/include
+-Igfu-readobj/include
+-Igfu-sx/include
+-Iiselgen/include
 -std=c99
 -Wall
 -Wextra

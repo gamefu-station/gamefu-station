@@ -1,4 +1,4 @@
-#include "../common/common.h"
+#include <gamefu/common.h>
 
 #include "../gfu-bfd/system.h"
 

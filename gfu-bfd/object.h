@@ -1,7 +1,7 @@
 #ifndef GAMEFU_BFD_OBJECT_H_
 #define GAMEFU_BFD_OBJECT_H_
 
-#include "../common/common.h"
+#include <gamefu/common.h>
 
 #include "system.h"
 

@@ -1,4 +1,4 @@
-#include "../common/common.h"
+#include <gamefu/common.h>
 
 bool load_source_from_file(const char* path, source* source) {
     bool result = true;

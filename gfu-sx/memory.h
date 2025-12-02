@@ -1,7 +1,7 @@
 #ifndef GFUSX_MEMORY_H_
 #define GFUSX_MEMORY_H_
 
-#include "../common/common.h"
+#include <gamefu/common.h>
 
 #include "prologue.h"
 

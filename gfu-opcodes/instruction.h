@@ -1,7 +1,7 @@
 #ifndef GAMEFU_OPCODES_INSTRUCTION_H_
 #define GAMEFU_OPCODES_INSTRUCTION_H_
 
-#include "../common/common.h"
+#include <gamefu/common.h>
 
 #include "register.h"
 

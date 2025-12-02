@@ -1,7 +1,7 @@
 #ifndef GFUSX_PROLOGUE_H_
 #define GFUSX_PROLOGUE_H_
 
-#include "../common/common.h"
+#include <gamefu/common.h>
 
 typedef struct gfusx gfusx_t;
 

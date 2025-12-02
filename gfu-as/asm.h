@@ -1,7 +1,7 @@
 #ifndef GAMEFU_GFUAS_ASM_H_
 #define GAMEFU_GFUAS_ASM_H_
 
-#include "../common/common.h"
+#include <gamefu/common.h>
 
 #include "../gfu-opcodes/instruction.h"
 #include "../gfu-opcodes/register.h"

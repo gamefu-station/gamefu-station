@@ -1,7 +1,7 @@
 #ifndef GAMEFU_OPCODES_REGISTER_H_
 #define GAMEFU_OPCODES_REGISTER_H_
 
-#include "../common/common.h"
+#include <gamefu/common.h>
 
 typedef enum gfu_gpr {
 #define GPR(Id, Image) GFU_GPR_##Id,

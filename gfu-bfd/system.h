@@ -1,7 +1,7 @@
 #ifndef GAMEFU_BFD_SYSTEM_H_
 #define GAMEFU_BFD_SYSTEM_H_
 
-#include "../common/common.h"
+#include <gamefu/common.h>
 
 #define GFU_FU6109_ICACHE_SIZE 0x1000
 
