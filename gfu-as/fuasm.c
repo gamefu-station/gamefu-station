@@ -28,8 +28,8 @@ typedef struct fuasm_options {
 typedef struct fuasm_state {
     fuasm_options options;
 
-    gfu_arena string_arena;
-    gfu_arena stmt_arena;
+    arena string_arena;
+    arena stmt_arena;
 
     fuasm_stmt* ir;
     struct address {
@@ -136,8 +136,8 @@ int fuasm_driver_main(int argc, char** argv) {
         return_defer(1);
     }
 
-    gfu_arena_init(&state.string_arena, 32 * 1024 * 1024);
-    gfu_arena_init(&state.stmt_arena, 32 * 1024 * 1024);
+    arena_init(&state.string_arena, 32 * 1024 * 1024);
+    arena_init(&state.stmt_arena, 32 * 1024 * 1024);
 
     const char* output_name = state.options.output;
     if (output_name == nullptr) {
@@ -156,7 +156,7 @@ int fuasm_driver_main(int argc, char** argv) {
             last_dot = source_name + strlen(source_name);
         }
 
-        char* new_output_name = gfu_arena_alloc(&state.string_arena, (size_t)(last_dot - source_name) + 5);
+        char* new_output_name = arena_alloc(&state.string_arena, (size_t)(last_dot - source_name) + 5);
         sprintf(new_output_name, "%.*s.gfu", (int)(last_dot - source_name), source_name);
         output_name = new_output_name;
     }
@@ -192,8 +192,8 @@ defer:;
 
     free(state.options.sources);
 
-    gfu_arena_deinit(&state.stmt_arena);
-    gfu_arena_deinit(&state.string_arena);
+    arena_deinit(&state.stmt_arena);
+    arena_deinit(&state.string_arena);
 
     return result;
 }
@@ -214,8 +214,8 @@ int fuasm_driver_fuzz(const char* text, size_t length) {
         .length = (gfu_word)length,
     };
 
-    gfu_arena_init(&state.string_arena, 32 * 1024 * 1024);
-    gfu_arena_init(&state.stmt_arena, 32 * 1024 * 1024);
+    arena_init(&state.string_arena, 32 * 1024 * 1024);
+    arena_init(&state.stmt_arena, 32 * 1024 * 1024);
 
     gfu_uword rom_size;
     char* rom_data = fuasm_assemble_internal(&state, &rom_size);
@@ -224,8 +224,8 @@ defer:;
     free(rom_data);
     free(state.addresses);
     free(state.options.sources);
-    gfu_arena_deinit(&state.stmt_arena);
-    gfu_arena_deinit(&state.string_arena);
+    arena_deinit(&state.stmt_arena);
+    arena_deinit(&state.string_arena);
     return result;
 }
 
@@ -242,14 +242,14 @@ char* fuasm_assemble_ir(fuasm_stmt* ir, gfu_uword* rom_size) {
         .length = 1,
     };
 
-    gfu_arena_init(&state.string_arena, 32 * 1024 * 1024);
-    gfu_arena_init(&state.stmt_arena, 32 * 1024 * 1024);
+    arena_init(&state.string_arena, 32 * 1024 * 1024);
+    arena_init(&state.stmt_arena, 32 * 1024 * 1024);
 
     char* rom_data = fuasm_assemble_ir_internal(&state, rom_size);
 
     free(state.options.sources);
-    gfu_arena_deinit(&state.stmt_arena);
-    gfu_arena_deinit(&state.string_arena);
+    arena_deinit(&state.stmt_arena);
+    arena_deinit(&state.string_arena);
     return rom_data;
 }
 
@@ -260,14 +260,14 @@ char* fuasm_assemble(source source, gfu_uword* rom_size) {
     state.options.sources = calloc(1, sizeof *state.options.sources);
     state.options.sources[0] = source;
 
-    gfu_arena_init(&state.string_arena, 32 * 1024 * 1024);
-    gfu_arena_init(&state.stmt_arena, 32 * 1024 * 1024);
+    arena_init(&state.string_arena, 32 * 1024 * 1024);
+    arena_init(&state.stmt_arena, 32 * 1024 * 1024);
 
     char* rom_data = fuasm_assemble_internal(&state, rom_size);
 
     free(state.options.sources);
-    gfu_arena_deinit(&state.stmt_arena);
-    gfu_arena_deinit(&state.string_arena);
+    arena_deinit(&state.stmt_arena);
+    arena_deinit(&state.string_arena);
 
     return rom_data;
 }
@@ -283,7 +283,7 @@ static const char* fuasm_intern_string(fuasm_state* state, const char* s, gfu_uw
         strings += existing_length + 1;
     }
 
-    char* new_string = gfu_arena_alloc(&state->string_arena, length + 1);
+    char* new_string = arena_alloc(&state->string_arena, length + 1);
     memcpy(new_string, s, (size_t)length);
     new_string[length] = 0;
     return new_string;
@@ -386,13 +386,13 @@ static void print_verbose(fuasm_state* state, const char* format, ...) {
 #define ISEL_LABEL_NOT_FOUND 0xFFFFFFFEu
 
 static gfu_uword fuasm_lookup_address_raw(fuasm_state* state, gfu_uword parent, source source, gfu_uword location, const char* name) {
-    fu_assert(state != nullptr);
+    gfu_assertn(state != nullptr);
 
     size_t name_length = strlen(name);
 
     for (gfu_uword i = 0; i < state->label_count; i++) {
         const char* addr_name = state->addresses[i].name;
-        fu_assert(addr_name != nullptr);
+        gfu_assertn(addr_name != nullptr);
 
         bool is_valid_scope = state->addresses[i].parent == ISEL_LABEL_NOPARENT ||
             parent == state->addresses[i].parent;
@@ -459,7 +459,7 @@ static gfu_uword fuasm_match_isel(const fuasm_stmt* stmt) {
                     goto not_match;
                 }
 
-                fu_assert(!op.is_constant);
+                gfu_assertn(!op.is_constant);
             }
         }
 
@@ -646,7 +646,7 @@ static void fuasm_parser_advance(fuasm_parser* parser) {
         parser->tk = parser->next;
         parser->next = (fuasm_token) { .kind = FUASM_TK_INVALID };
     } else parser->tk = fuasm_lexer_read(&parser->lexer);
-    fu_assert(parser->next.kind == FUASM_TK_INVALID);
+    gfu_assertn(parser->next.kind == FUASM_TK_INVALID);
 }
 
 static bool fuasm_parser_try(fuasm_parser* parser, fuasm_token_kind kind) {
@@ -721,9 +721,9 @@ static fuasm_stmt* parse_statement(fuasm_parser* parser) {
     fuasm_state* state = parser->state;
     source source = parser->source;
 
-    fu_assert(parser->tk.kind != FUASM_TK_ENDL && parser->tk.kind != FUASM_TK_EOF);
+    gfu_assertn(parser->tk.kind != FUASM_TK_ENDL && parser->tk.kind != FUASM_TK_EOF);
 
-    fuasm_stmt* stmt = gfu_arena_alloc(&state->stmt_arena, sizeof *stmt);
+    fuasm_stmt* stmt = arena_alloc(&state->stmt_arena, sizeof *stmt);
     stmt->source = source;
     stmt->location = parser->tk.location;
 
@@ -839,7 +839,7 @@ stmt_end:;
         fuasm_parser_advance(parser);
     }
 
-    fu_assert(parser->tk.kind == FUASM_TK_ENDL);
+    gfu_assertn(parser->tk.kind == FUASM_TK_ENDL);
     fuasm_parser_advance(parser);
 
     return stmt;
@@ -866,7 +866,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
     section = FUASM_TEXT;
     for (fuasm_stmt* stmt = ir; stmt != nullptr; ) {
         switch (stmt->directive) {
-            default: fu_assert(false && "Unhandled directive"); break;
+            default: gfu_assertn(false && "Unhandled directive"); break;
             case FUASM_DIR_INVALID: break;
             case FUASM_DIR_ADDRESS_SPACE: break;
             case FUASM_DIR_ENTRY: break;
@@ -886,7 +886,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
         }
 
         isel_pattern pattern = isel_patterns[stmt->pattern_index];
-        fu_assert(pattern.match_count > 0);
+        gfu_assertn(pattern.match_count > 0);
 
         if (section == FUASM_TEXT) {
             text_instruction_count += pattern.emit_count;
@@ -901,7 +901,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
                 return nullptr;
             }
 
-            fu_assert(stmt != nullptr);
+            gfu_assertn(stmt != nullptr);
             stmt = stmt->next;
         }
     }
@@ -916,7 +916,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
     section = FUASM_TEXT;
     for (fuasm_stmt* stmt = ir; stmt != nullptr; ) {
         switch (stmt->directive) {
-            default: fu_assert(false && "Unhandled directive"); break;
+            default: gfu_assertn(false && "Unhandled directive"); break;
             case FUASM_DIR_INVALID: break;
             case FUASM_DIR_ADDRESS_SPACE: break;
             case FUASM_DIR_ENTRY: break;
@@ -967,12 +967,12 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
         if (section == FUASM_TEXT) {
             text_index += pattern.emit_count * sizeof(gfu_uword);
         } else if (section == FUASM_DATA) {
-            fu_assert(pattern.match_count == 1);
-            fu_assert(pattern.emit_count == 1);
-            fu_assert(stmt->mnemonic == FUASM_MNEM_BYTES);
-            fu_assert(stmt->operand_count == 1);
+            gfu_assertn(pattern.match_count == 1);
+            gfu_assertn(pattern.emit_count == 1);
+            gfu_assertn(stmt->mnemonic == FUASM_MNEM_BYTES);
+            gfu_assertn(stmt->operand_count == 1);
             isel_emit emit = isel_emits[pattern.emit_index];
-            fu_assert(emit.arguments[0].kind == ISEL_ARG_VAR);
+            gfu_assertn(emit.arguments[0].kind == ISEL_ARG_VAR);
             fuasm_expr expr = vars[emit.arguments[0].as.var_index];
             if (expr.kind == FUASM_EXPR_BYTE_STRING) {
                 data_index += expr.as.byte_string.length;
@@ -988,7 +988,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
         }
     }
 
-    fu_assert(text_index == text_instruction_count * sizeof(gfu_uword));
+    gfu_assertn(text_index == text_instruction_count * sizeof(gfu_uword));
 
     print_verbose(state, "Label count: %d", state->label_count);
     print_verbose(state, "Instruction byte count: %d", text_index);
@@ -1025,7 +1025,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size)
     section = FUASM_TEXT;
     for (fuasm_stmt* stmt = ir; stmt != nullptr; ) {
         switch (stmt->directive) {
-            default: fu_assert(false && "Unhandled directive"); break;
+            default: gfu_assertn(false && "Unhandled directive"); break;
             case FUASM_DIR_INVALID: break;
             case FUASM_DIR_ADDRESS_SPACE: break;
             case FUASM_DIR_ENTRY: break;
@@ -1120,7 +1120,7 @@ static char* fuasm_assemble_internal(fuasm_state* state, gfu_uword* rom_size) {
             gfu_uword location  = parser.tk.location;
             fuasm_stmt* stmt = parse_statement(&parser);
             if (stmt == nullptr) return nullptr;
-            fu_assert(location != parser.tk.location);
+            gfu_assertn(location != parser.tk.location);
 
             if (head == nullptr) {
                 head = tail = stmt;
@@ -1231,11 +1231,11 @@ static void fuasm_lexer_init(fuasm_userdata* userdata, etok_lexer* lexer) {
 static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
     if (lexer == nullptr) return (fuasm_token) {0};
 
-    fu_assert(lexer->userdata != nullptr);
+    gfu_assertn(lexer->userdata != nullptr);
     fuasm_userdata* userdata = lexer->userdata;
 
     fuasm_state* state = userdata->state;
-    fu_assert(state != nullptr);
+    gfu_assertn(state != nullptr);
 
     source source = userdata->source;
 
@@ -1414,7 +1414,7 @@ static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
                 max_length++;
             }
 
-            char* byte_string = gfu_arena_alloc(&state->string_arena, max_length);
+            char* byte_string = arena_alloc(&state->string_arena, max_length);
             gfu_uword length = 0;
 
             while (!etok_lexer_is_at_end(lexer) && lexer->ch != '\n' && lexer->ch != '"') {
@@ -1468,7 +1468,7 @@ static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
     }
 
 return_token:;
-    fu_assert(token.kind != FUASM_TK_INVALID);
+    gfu_assertn(token.kind != FUASM_TK_INVALID);
     token.end = lexer->source_current;
     return token;
 }

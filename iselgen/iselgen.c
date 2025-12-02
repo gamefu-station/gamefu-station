@@ -82,10 +82,10 @@ static void isel_parse_pattern(isel_parser* parser);
 
 static source isel_source = {0};
 
-static gfu_arena isel_string_arena = {0};
-static gfu_arena isel_match_arena = {0};
-static gfu_arena isel_emit_arena = {0};
-static gfu_arena isel_pattern_arena = {0};
+static arena isel_string_arena = {0};
+static arena isel_match_arena = {0};
+static arena isel_emit_arena = {0};
+static arena isel_pattern_arena = {0};
 
 static struct mnemonic {
     char mnemonic[16];
@@ -160,16 +160,16 @@ int main(int argc, char** argv) {
         .length = isel_len,
     };
 
-    gfu_arena_init(&isel_string_arena, 256);
+    arena_init(&isel_string_arena, 256);
     isel_string_arena.alignment = sizeof(gfu_uword);
 
-    gfu_arena_init(&isel_match_arena, 32 * 1024);
+    arena_init(&isel_match_arena, 32 * 1024);
     isel_match_arena.alignment = sizeof(gfu_uword);
 
-    gfu_arena_init(&isel_emit_arena, 32 * 1024);
+    arena_init(&isel_emit_arena, 32 * 1024);
     isel_emit_arena.alignment = sizeof(gfu_uword);
 
-    gfu_arena_init(&isel_pattern_arena, 16 * 1024);
+    arena_init(&isel_pattern_arena, 16 * 1024);
     isel_pattern_arena.alignment = sizeof(gfu_uword);
 
     isel_parser parser = {0};
@@ -289,10 +289,10 @@ int main(int argc, char** argv) {
 
 defer:;
     if (f != nullptr) fclose(f);
-    gfu_arena_deinit(&isel_pattern_arena);
-    gfu_arena_deinit(&isel_emit_arena);
-    gfu_arena_deinit(&isel_match_arena);
-    gfu_arena_deinit(&isel_string_arena);
+    arena_deinit(&isel_pattern_arena);
+    arena_deinit(&isel_emit_arena);
+    arena_deinit(&isel_match_arena);
+    arena_deinit(&isel_string_arena);
     return result;
 }
 
@@ -362,7 +362,7 @@ static gfu_c0fn isel_parser_expect_cop0_function(isel_parser* parser) {
 }
 
 static void isel_parse_match(isel_parser* parser) {
-    isel_match* match = gfu_arena_alloc(&isel_match_arena, sizeof *match);
+    isel_match* match = arena_alloc(&isel_match_arena, sizeof *match);
 
     match->mnemonic = isel_parser_expect(parser, ISEL_TK_MNEMONIC, "a mnemonic").as.mnemonic;
     if (!isel_parser_is_at_end(parser) && parser->tk.kind != ISEL_TK_EMITS && parser->tk.kind != ISEL_TK_MNEMONIC) {
@@ -460,7 +460,7 @@ static void isel_parse_emit_argument(isel_parser* parser, isel_argument* argumen
 }
 
 static void isel_parse_emit(isel_parser* parser, const char** vars, gfu_uword var_count) {
-    isel_emit* emit = gfu_arena_alloc(&isel_emit_arena, sizeof *emit);
+    isel_emit* emit = arena_alloc(&isel_emit_arena, sizeof *emit);
 
     emit->kind = isel_parser_expect_emit_kind(parser);
     (void)isel_parser_expect(parser, '(', nullptr);
@@ -493,7 +493,7 @@ static void isel_parse_emit(isel_parser* parser, const char** vars, gfu_uword va
 static void isel_parse_pattern(isel_parser* parser) {
     gfu_uword location = parser->tk.location;
 
-    isel_pattern* pattern = gfu_arena_alloc(&isel_pattern_arena, sizeof *pattern);
+    isel_pattern* pattern = arena_alloc(&isel_pattern_arena, sizeof *pattern);
     isel_match* matches = (isel_match*)&isel_match_arena.memory[isel_match_arena.allocated];
 
     isel_parser_expect(parser, ISEL_TK_MATCH, "'match'");
@@ -770,7 +770,7 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
             }
 
             if (varname == nullptr) {
-                varname = gfu_arena_alloc(&isel_string_arena, (gfu_uword)length + 1);
+                varname = arena_alloc(&isel_string_arena, (gfu_uword)length + 1);
                 memcpy(varname, name, length);
                 varname[length] = 0;
             }
@@ -896,7 +896,7 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
         } break;
     }
 
-    fu_assert(token.kind != ISEL_TK_INVALID);
+    gfu_assert(token.kind != ISEL_TK_INVALID, "Did not properly populate token info");
     token.end = lexer->source_current;
     return token;
 }
