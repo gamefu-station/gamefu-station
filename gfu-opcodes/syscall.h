@@ -1,5 +1,5 @@
-#ifndef GAMEFU_SYSTEM_SYSCALL_H_
-#define GAMEFU_SYSTEM_SYSCALL_H_
+#ifndef GAMEFU_OPCODES_SYSCALL_H_
+#define GAMEFU_OPCODES_SYSCALL_H_
 
 #include "../common/common.h"
 
@@ -14,4 +14,4 @@ typedef enum gfu_syscall {
 #undef X
 } gfu_syscall_t;
 
-#endif /* GAMEFU_SYSTEM_SYSCALL_H_ */
+#endif /* GAMEFU_OPCODES_SYSCALL_H_ */
