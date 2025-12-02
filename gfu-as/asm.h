@@ -1,5 +1,5 @@
-#ifndef GAMEFU_ASM_H_
-#define GAMEFU_ASM_H_
+#ifndef GAMEFU_GFUAS_ASM_H_
+#define GAMEFU_GFUAS_ASM_H_
 
 #include "../common/common.h"
 
@@ -7,17 +7,13 @@
 #include "../gfu-opcodes/register.h"
 #include "../gfu-opcodes/syscall.h"
 
+#include "mnemonics.h"
+
 #define GFUAS_DIRECTIVES(X) \
     X(ADDRESS_SPACE, "address_space") \
     X(ENTRY, "entry") \
     X(TEXT, "text") \
     X(DATA, "data")
-
-typedef enum gfuas_mnemonic {
-    GFUAS_MNEM_INVALID,
-#define MNEM(Id, Name) GFUAS_MNEM_##Id,
-#include "x/mnemonics.h"
-} gfuas_mnemonic;
 
 typedef enum gfuas_directive {
     GFUAS_DIR_INVALID,
@@ -94,4 +90,4 @@ typedef struct gfuas_stmt {
 char* gfuas_assemble(source source, gfu_uword* rom_size);
 char* gfuas_assemble_ir(gfuas_stmt* ir, gfu_uword* rom_size);
 
-#endif /* GAMEFU_ASM_H_ */
+#endif /* GAMEFU_GFUAS_ASM_H_ */
