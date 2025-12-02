@@ -2,7 +2,7 @@
 #define GAMEFU_SYSTEM_INSTRUCTION_H_
 
 #include "../common/common.h"
-#include <gamefu/system/register.h>
+#include "register.h"
 
 #define GFU_OP(X) \
     X(SPECIAL, 0x00) \

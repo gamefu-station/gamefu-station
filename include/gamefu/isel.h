@@ -2,8 +2,8 @@
 #define GAMEFU_ISEL_H_
 
 #include "../common/common.h"
-#include <gamefu/system/instruction.h>
-#include <gamefu/system/register.h>
+#include "../gfu-opcodes/instruction.h"
+#include "../gfu-opcodes/register.h"
 
 #include "gamefu.h"
 #include "asm.h"

@@ -1,5 +1,5 @@
 #include "../common/common.h"
-#include <gamefu/system/register.h>
+#include "register.h"
 
 static struct {
     gfu_gpr_t gpr;

@@ -3,9 +3,9 @@
 
 #include "../common/common.h"
 #include <gamefu/source.h>
-#include <gamefu/system/instruction.h>
-#include <gamefu/system/register.h>
-#include <gamefu/system/syscall.h>
+#include "../gfu-opcodes/instruction.h"
+#include "../gfu-opcodes/register.h"
+#include "../gfu-opcodes/syscall.h"
 
 #define FUASM_DIRECTIVES(X) \
     X(ADDRESS_SPACE, "address_space") \

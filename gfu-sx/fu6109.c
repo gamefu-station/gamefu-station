@@ -1,7 +1,7 @@
 #include "../common/common.h"
 #include <gamefu/asm.h>
-#include <gamefu/system/register.h>
-#include <gamefu/system/syscall.h>
+#include "../gfu-opcodes/register.h"
+#include "../gfu-opcodes/syscall.h"
 
 #include <gfusx/prologue.h>
 #include <gfusx/fu6109.h>
