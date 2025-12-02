@@ -2,7 +2,7 @@
 #define GAMEFU_GAMEFU_H_
 
 #include "../common/common.h"
-#include <gamefu/memory.h>
+#include <gamefu/arena.h>
 #include <gamefu/system.h>
 #include <gamefu/object.h>
 

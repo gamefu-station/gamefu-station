@@ -2,7 +2,7 @@
 #define GFUSX_MEMORY_H_
 
 #include "../common/common.h"
-#include <gamefu/memory.h>
+#include <gamefu/arena.h>
 
 #include <gfusx/prologue.h>
 

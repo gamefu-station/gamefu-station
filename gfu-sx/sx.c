@@ -99,7 +99,7 @@ static bool gfusx_parse_options(int argc, char** argv, gfusx_options_t* options)
 
 #include "../lib/diagnostic.c"
 #include "../lib/source.c"
-#include "../lib/memory.c"
+#include "../lib/arena.c"
 
 #include "chip.c"
 #include "fu6109.c"

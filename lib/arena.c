@@ -1,5 +1,5 @@
 #include "../common/common.h"
-#include <gamefu/memory.h>
+#include <gamefu/arena.h>
 
 #include <errno.h>
 #include <stdlib.h>

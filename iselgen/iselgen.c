@@ -1,6 +1,6 @@
 #include "../common/common.h"
 
-#include <gamefu/memory.h>
+#include <gamefu/arena.h>
 #include <gamefu/diagnostic.h>
 
 #include <gamefu/asm.h>
@@ -905,5 +905,5 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
 }
 
 #include "../lib/diagnostic.c"
-#include "../lib/memory.c"
+#include "../lib/arena.c"
 #include "../lib/source.c"

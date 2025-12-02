@@ -1,6 +1,6 @@
 #include "../common/common.h"
 
-#include <gamefu/memory.h>
+#include <gamefu/arena.h>
 #include <gamefu/diagnostic.h>
 #include <gamefu/source.h>
 
@@ -1478,5 +1478,5 @@ return_token:;
 }
 
 #include "../lib/diagnostic.c"
-#include "../lib/memory.c"
+#include "../lib/arena.c"
 #include "../lib/source.c"
