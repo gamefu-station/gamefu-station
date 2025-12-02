@@ -208,7 +208,7 @@ int main(int argc, char** argv) {
     fprintf(f, "\n#undef MNEM\n");
 
     fclose(f);
-    f = fopen("./lib/isel_tables.c", "w");
+    f = fopen("./gfu-as/isel_tables.c", "w");
 
     fprintf(f, "#define ISEL_MATCH_COUNT %d\n", match_count);
     fprintf(f, "static isel_match isel_matches[%d] = {\n", match_count + 1);

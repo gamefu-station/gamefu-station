@@ -1477,6 +1477,6 @@ return_token:;
     return token;
 }
 
-#include "diagnostic.c"
-#include "memory.c"
-#include "source.c"
+#include "../lib/diagnostic.c"
+#include "../lib/memory.c"
+#include "../lib/source.c"
