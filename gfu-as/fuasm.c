@@ -1,9 +1,5 @@
 #include "../common/common.h"
 
-#include <gamefu/arena.h>
-#include <gamefu/diagnostic.h>
-#include <gamefu/source.h>
-
 #include <gamefu/asm.h>
 #include <gamefu/isel.h>
 
@@ -1477,6 +1473,6 @@ return_token:;
     return token;
 }
 
-#include "../lib/diagnostic.c"
-#include "../lib/arena.c"
-#include "../lib/source.c"
+#include "../common/diagnostic.c"
+#include "../common/arena.c"
+#include "../common/source.c"

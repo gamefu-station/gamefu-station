@@ -1,7 +1,5 @@
 #include "../common/common.h"
 
-#include <errno.h>
-
 #include <gamefu/asm.h>
 #include "../gfu-opcodes/register.h"
 #include "../gfu-opcodes/syscall.h"

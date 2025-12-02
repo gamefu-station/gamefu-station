@@ -1,6 +1,6 @@
 #include "../common/common.h"
+
 #include <gamefu/asm.h>
-#include <gamefu/diagnostic.h>
 #include <gamefu/object.h>
 
 #include <gfusx/prologue.h>
@@ -8,9 +8,6 @@
 #include <gfusx/memory.h>
 #include <gfusx/platform.h>
 #include <gfusx/vm.h>
-
-#include <errno.h>
-#include <stdio.h>
 
 typedef struct gfusx_options {
     const char* program_name;
@@ -97,9 +94,9 @@ static bool gfusx_parse_options(int argc, char** argv, gfusx_options_t* options)
 
 #undef SHIFT
 
-#include "../lib/diagnostic.c"
-#include "../lib/source.c"
-#include "../lib/arena.c"
+#include "../common/diagnostic.c"
+#include "../common/source.c"
+#include "../common/arena.c"
 
 #include "chip.c"
 #include "fu6109.c"

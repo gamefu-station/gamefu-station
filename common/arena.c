@@ -1,8 +1,4 @@
 #include "../common/common.h"
-#include <gamefu/arena.h>
-
-#include <errno.h>
-#include <stdlib.h>
 
 void gfu_arena_init(gfu_arena_t* arena, gfu_uword_t capacity) {
     if (arena == nullptr) return;

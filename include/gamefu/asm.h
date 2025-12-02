@@ -2,7 +2,6 @@
 #define GAMEFU_ASM_H_
 
 #include "../common/common.h"
-#include <gamefu/source.h>
 #include "../gfu-opcodes/instruction.h"
 #include "../gfu-opcodes/register.h"
 #include "../gfu-opcodes/syscall.h"

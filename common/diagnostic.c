@@ -1,6 +1,4 @@
-#include <stdarg.h>
-
-#include "gamefu/diagnostic.h"
+#include "common.h"
 
 static const char* level_names[] = {
     "Ignored",

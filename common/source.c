@@ -1,9 +1,4 @@
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "gamefu/source.h"
+#include "../common/common.h"
 
 bool load_source_from_file(const char* path, source* source) {
     bool result = true;
