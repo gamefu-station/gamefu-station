@@ -12,6 +12,6 @@ typedef enum gfu_syscall {
 #define X(Id, Value) GFU_SYS_##Id = (Value),
     GFU_SYSCALL(X)
 #undef X
-} gfu_syscall_t;
+} gfu_syscall;
 
 #endif /* GAMEFU_OPCODES_SYSCALL_H_ */

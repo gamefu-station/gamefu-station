@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
 
     if (!gfusx_vm_init(&vm)) return_defer(1);
 
-    gfu_ubyte_t* ram_ptr = gfusx_memory_get_wptr(&vm, GFU_KSEG1_BASE + GFU_WRAM_BASE + GFU_BIOS_RAM_SIZE);
+    gfu_ubyte* ram_ptr = gfusx_memory_get_wptr(&vm, GFU_KSEG1_BASE + GFU_WRAM_BASE + GFU_BIOS_RAM_SIZE);
     if (options.rom_path != nullptr) {
         if (!gfusx_chip_insert_rom_file(&vm, options.rom_path)) {
             return_defer(1);
@@ -45,11 +45,11 @@ int main(int argc, char** argv) {
         inst.reg.function = GFU_OPFN_OR;
         inst.reg.d = GFU_GPR_R0;
         inst.reg.l = inst.reg.r = 0;
-        *(cast(gfu_uword_t*, ram_ptr)) = inst.raw;
+        *(cast(gfu_uword*, ram_ptr)) = inst.raw;
         ram_ptr += 4;
 
         inst.reg.function = GFU_OPFN_SYSCALL;
-        *(cast(gfu_uword_t*, ram_ptr)) = inst.raw;
+        *(cast(gfu_uword*, ram_ptr)) = inst.raw;
         ram_ptr += 4;
     }
 

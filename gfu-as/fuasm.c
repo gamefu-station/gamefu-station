@@ -21,25 +21,25 @@ typedef struct fuasm_options {
     const char* program;
     bool verbose;
     source* sources;
-    gfu_uword_t source_count;
+    gfu_uword source_count;
     const char* output;
 } fuasm_options;
 
 typedef struct fuasm_state {
     fuasm_options options;
 
-    gfu_arena_t string_arena;
-    gfu_arena_t stmt_arena;
+    gfu_arena string_arena;
+    gfu_arena stmt_arena;
 
     fuasm_stmt* ir;
     struct address {
         const char* name;
-        gfu_uword_t address;
-        gfu_uword_t parent;
+        gfu_uword address;
+        gfu_uword parent;
     }* addresses;
-    gfu_uword_t label_count;
+    gfu_uword label_count;
 
-    gfu_uword_t address_space;
+    gfu_uword address_space;
     const char* entry_name;
     bool is_entry_set;
 } fuasm_state;
@@ -73,18 +73,18 @@ typedef enum fuasm_token_kind {
 typedef struct fuasm_token {
     source source;
     fuasm_token_kind kind;
-    gfu_uword_t location;
+    gfu_uword location;
     const char *begin, *end;
-    gfu_uword_t line, column;
+    gfu_uword line, column;
     union {
         fuasm_directive directive;
         fuasm_mnemonic mnemonic;
-        gfu_gpr_t _register;
-        gfu_uword_t immediate;
+        gfu_gpr _register;
+        gfu_uword immediate;
         const char* label;
         struct {
             const char* data;
-            gfu_uword_t length;
+            gfu_uword length;
         } byte_string;
     } as;
 } fuasm_token;
@@ -113,8 +113,8 @@ static void show_version(void);
 static bool fuasm_options_parse(int argc, char** argv, fuasm_options* options);
 static void print_verbose(fuasm_state* state, const char* format, ...);
 
-static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_size);
-static char* fuasm_assemble_internal(fuasm_state* state, gfu_uword_t* rom_size);
+static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size);
+static char* fuasm_assemble_internal(fuasm_state* state, gfu_uword* rom_size);
 
 static void fuasm_lexer_init(fuasm_userdata* userdata, etok_lexer* lexer);
 static fuasm_token fuasm_lexer_read(etok_lexer* lexer);
@@ -163,7 +163,7 @@ int fuasm_driver_main(int argc, char** argv) {
 
     print_verbose(&state, "Generating '%s'", output_name);
 
-    gfu_uword_t rom_size;
+    gfu_uword rom_size;
     char* rom_data = fuasm_assemble_internal(&state, &rom_size);
     if (rom_data == nullptr) return_defer(1);
 
@@ -186,7 +186,7 @@ defer:;
     if (f != nullptr) fclose(f);
     free(state.addresses);
 
-    for (gfu_uword_t i = 0; i < state.options.source_count; i++) {
+    for (gfu_uword i = 0; i < state.options.source_count; i++) {
         free((char*)state.options.sources[i].text);
     }
 
@@ -211,13 +211,13 @@ int fuasm_driver_fuzz(const char* text, size_t length) {
     state.options.sources[0] = (struct source) {
         .name = "<fuzz-input>",
         .text = text,
-        .length = (gfu_word_t)length,
+        .length = (gfu_word)length,
     };
 
     gfu_arena_init(&state.string_arena, 32 * 1024 * 1024);
     gfu_arena_init(&state.stmt_arena, 32 * 1024 * 1024);
 
-    gfu_uword_t rom_size;
+    gfu_uword rom_size;
     char* rom_data = fuasm_assemble_internal(&state, &rom_size);
 
 defer:;
@@ -229,7 +229,7 @@ defer:;
     return result;
 }
 
-char* fuasm_assemble_ir(fuasm_stmt* ir, gfu_uword_t* rom_size) {
+char* fuasm_assemble_ir(fuasm_stmt* ir, gfu_uword* rom_size) {
     fuasm_state state = {
         .ir = ir,
     };
@@ -253,7 +253,7 @@ char* fuasm_assemble_ir(fuasm_stmt* ir, gfu_uword_t* rom_size) {
     return rom_data;
 }
 
-char* fuasm_assemble(source source, gfu_uword_t* rom_size) {
+char* fuasm_assemble(source source, gfu_uword* rom_size) {
     fuasm_state state = {0};
 
     state.options.source_count = 1;
@@ -272,7 +272,7 @@ char* fuasm_assemble(source source, gfu_uword_t* rom_size) {
     return rom_data;
 }
 
-static const char* fuasm_intern_string(fuasm_state* state, const char* s, gfu_uword_t length) {
+static const char* fuasm_intern_string(fuasm_state* state, const char* s, gfu_uword length) {
     for (char* strings = state->string_arena.memory; strings < state->string_arena.memory + state->string_arena.allocated; ) {
         size_t existing_length = strlen(strings);
         if (existing_length == (size_t)length && 0 == strncmp(strings, s, (size_t)length)) {
@@ -350,7 +350,7 @@ static bool fuasm_options_parse(int argc, char** argv, fuasm_options* options) {
     }
 
     options->sources = calloc(options->source_count, sizeof *options->sources);
-    gfu_uword_t source_index = 0;
+    gfu_uword source_index = 0;
 
     while (argc > 0) {
         const char* option = SHIFT;
@@ -385,12 +385,12 @@ static void print_verbose(fuasm_state* state, const char* format, ...) {
 #define ISEL_LABEL_NOPARENT 0xFFFFFFFFu
 #define ISEL_LABEL_NOT_FOUND 0xFFFFFFFEu
 
-static gfu_uword_t fuasm_lookup_address_raw(fuasm_state* state, gfu_uword_t parent, source source, gfu_uword_t location, const char* name) {
+static gfu_uword fuasm_lookup_address_raw(fuasm_state* state, gfu_uword parent, source source, gfu_uword location, const char* name) {
     fu_assert(state != nullptr);
 
     size_t name_length = strlen(name);
 
-    for (gfu_uword_t i = 0; i < state->label_count; i++) {
+    for (gfu_uword i = 0; i < state->label_count; i++) {
         const char* addr_name = state->addresses[i].name;
         fu_assert(addr_name != nullptr);
 
@@ -409,7 +409,7 @@ static gfu_uword_t fuasm_lookup_address_raw(fuasm_state* state, gfu_uword_t pare
     return ISEL_LABEL_NOT_FOUND;
 }
 
-static gfu_uword_t fuasm_lookup_address(fuasm_state* state, gfu_uword_t parent, fuasm_token token) {
+static gfu_uword fuasm_lookup_address(fuasm_state* state, gfu_uword parent, fuasm_token token) {
     return fuasm_lookup_address_raw(state, parent, token.source, token.location, token.as.label);
 }
 
@@ -437,12 +437,12 @@ static isel_type fuasm_expr_kind_to_isel_type(fuasm_expr expr) {
     }
 }
 
-static gfu_uword_t fuasm_match_isel(const fuasm_stmt* stmt) {
-    for (gfu_uword_t pi = 0; pi < ISEL_PATTERN_COUNT; pi++) {
+static gfu_uword fuasm_match_isel(const fuasm_stmt* stmt) {
+    for (gfu_uword pi = 0; pi < ISEL_PATTERN_COUNT; pi++) {
         isel_pattern pattern = isel_patterns[pi];
 
         const fuasm_stmt* match_stmt = stmt;
-        for (gfu_uword_t mi = 0; mi < pattern.match_count; mi++, match_stmt = match_stmt->next) {
+        for (gfu_uword mi = 0; mi < pattern.match_count; mi++, match_stmt = match_stmt->next) {
             if (match_stmt == nullptr) goto not_match;
             if (mi > 0 && match_stmt->label != nullptr) goto not_match;
 
@@ -450,7 +450,7 @@ static gfu_uword_t fuasm_match_isel(const fuasm_stmt* stmt) {
             if (match.mnemonic != stmt->mnemonic) goto not_match;
             if (match.operand_count != stmt->operand_count) goto not_match;
 
-            for (gfu_uword_t oi = 0; oi < match.operand_count; oi++) {
+            for (gfu_uword oi = 0; oi < match.operand_count; oi++) {
                 isel_operand op = match.operands[oi];
                 fuasm_expr expr = stmt->operands[oi];
 
@@ -471,13 +471,13 @@ static gfu_uword_t fuasm_match_isel(const fuasm_stmt* stmt) {
     return 0xFFFFFFFF;
 }
 
-static bool fuasm_eval_expr(fuasm_state* state, gfu_uword_t label_scope, source source, fuasm_expr expr, gfu_uword_t* result) {
+static bool fuasm_eval_expr(fuasm_state* state, gfu_uword label_scope, source source, fuasm_expr expr, gfu_uword* result) {
 #define R(Value) do { *result = (Value); return true; } while (0)
     switch (expr.kind) {
         case FUASM_EXPR_INVALID: R(0);
         case FUASM_EXPR_BYTE_STRING: R(0);
 
-        case FUASM_EXPR_REG: R((gfu_uword_t)expr.as._register);
+        case FUASM_EXPR_REG: R((gfu_uword)expr.as._register);
 
         case FUASM_EXPR_IMM: R(expr.as.immediate);
         case FUASM_EXPR_IMM_LOWER: R(expr.as.immediate & 0xFFFF);
@@ -486,7 +486,7 @@ static bool fuasm_eval_expr(fuasm_state* state, gfu_uword_t label_scope, source 
         case FUASM_EXPR_ADDR:
         case FUASM_EXPR_ADDR_LOWER:
         case FUASM_EXPR_ADDR_UPPER: {
-            gfu_uword_t addr = fuasm_lookup_address_raw(state, label_scope, expr.source, expr.as.address.location, expr.as.address.as.label);
+            gfu_uword addr = fuasm_lookup_address_raw(state, label_scope, expr.source, expr.as.address.location, expr.as.address.as.label);
             if (addr == ISEL_LABEL_NOT_FOUND) return false;
 
             if (expr.kind == FUASM_EXPR_ADDR_LOWER) {
@@ -501,7 +501,7 @@ static bool fuasm_eval_expr(fuasm_state* state, gfu_uword_t label_scope, source 
     return false;
 }
 
-static gfu_uword_t fuasm_emit_isel(fuasm_state* state, gfu_uword_t label_scope, gfu_uword_t addr, const fuasm_stmt* ir, char* rom, const fuasm_expr* vars) {
+static gfu_uword fuasm_emit_isel(fuasm_state* state, gfu_uword label_scope, gfu_uword addr, const fuasm_stmt* ir, char* rom, const fuasm_expr* vars) {
     isel_pattern pattern = isel_patterns[ir->pattern_index];
 
     if (ir->mnemonic == FUASM_MNEM_BYTES) {
@@ -517,17 +517,17 @@ static gfu_uword_t fuasm_emit_isel(fuasm_state* state, gfu_uword_t label_scope, 
         }
     }
 
-    for (gfu_uword_t ei = 0; ei < pattern.emit_count; ei++, rom += sizeof(gfu_uword_t), addr += sizeof(gfu_uword_t)) {
+    for (gfu_uword ei = 0; ei < pattern.emit_count; ei++, rom += sizeof(gfu_uword), addr += sizeof(gfu_uword)) {
         isel_emit emit = isel_emits[pattern.emit_index + ei];
-        gfu_uword_t args[4] = {0};
+        gfu_uword args[4] = {0};
 
-        for (gfu_uword_t i = 0; i < emit.argument_count; i++) {
+        for (gfu_uword i = 0; i < emit.argument_count; i++) {
             isel_argument arg = emit.arguments[i];
             switch (arg.kind) {
                 case ISEL_ARG_INVALID: break;
 
                 case ISEL_ARG_REGISTER: {
-                    args[i] = (gfu_uword_t)arg.as._register;
+                    args[i] = (gfu_uword)arg.as._register;
                 } break;
 
                 case ISEL_ARG_VAR:
@@ -556,16 +556,16 @@ static gfu_uword_t fuasm_emit_isel(fuasm_state* state, gfu_uword_t label_scope, 
                     fuasm_expr expr = vars[arg.as.var_index];
                     if (!fuasm_eval_expr(state, label_scope, expr.source, expr, &args[i]))
                         return 0;
-                    args[i] = (gfu_uword_t)(-(gfu_word_t)args[i]);
+                    args[i] = (gfu_uword)(-(gfu_word)args[i]);
                 } break;
 
                 case ISEL_ARG_VAR_OFFS: {
                     fuasm_expr expr = vars[arg.as.var_index];
-                    gfu_uword_t to;
+                    gfu_uword to;
                     if (!fuasm_eval_expr(state, label_scope, expr.source, expr, &to))
                         return 0;
-                    gfu_uword_t from = addr + sizeof(gfu_uword_t);
-                    args[i] = (gfu_half_t)(((to - from) & 0x0003FFFC) >> 2);
+                    gfu_uword from = addr + sizeof(gfu_uword);
+                    args[i] = (gfu_half)(((to - from) & 0x0003FFFC) >> 2);
                 } break;
 
                 case ISEL_ARG_IMM:
@@ -582,8 +582,8 @@ static gfu_uword_t fuasm_emit_isel(fuasm_state* state, gfu_uword_t label_scope, 
                 } break;
 
                 case ISEL_ARG_IMM_OFFS: {
-                    gfu_uword_t from = addr + sizeof(gfu_uword_t);
-                    args[i] = (gfu_half_t)(((arg.as.immediate - from) & 0x0003FFFC) >> 2);
+                    gfu_uword from = addr + sizeof(gfu_uword);
+                    args[i] = (gfu_half)(((arg.as.immediate - from) & 0x0003FFFC) >> 2);
                 } break;
             }
         }
@@ -624,7 +624,7 @@ static gfu_uword_t fuasm_emit_isel(fuasm_state* state, gfu_uword_t label_scope, 
         }
     }
 
-    return pattern.emit_count * sizeof(gfu_uword_t);
+    return pattern.emit_count * sizeof(gfu_uword);
 }
 
 /* ===== Parser Shit ===== */
@@ -700,7 +700,7 @@ static bool fuasm_parse_expr(fuasm_parser* parser, fuasm_expr* out_expr) {
         fuasm_parser_advance(parser);
         if (parser->tk.kind == FUASM_TK_IMMEDIATE) {
             expr.kind = FUASM_EXPR_IMM;
-            expr.as.immediate = (gfu_uword_t)(-(gfu_word_t)parser->tk.as.immediate);
+            expr.as.immediate = (gfu_uword)(-(gfu_word)parser->tk.as.immediate);
             fuasm_parser_advance(parser);
         } else {
             diag_issue(DIAG_ERROR, parser->source, expr.location, "Expected an immediate to negate.");
@@ -845,7 +845,7 @@ stmt_end:;
     return stmt;
 }
 
-static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_size) {
+static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword* rom_size) {
     fuasm_stmt* const ir = state->ir;
     fuasm_section section = FUASM_TEXT;
 
@@ -861,7 +861,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
 
     state->addresses = calloc((size_t)state->label_count, sizeof *state->addresses);
 
-    gfu_uword_t text_instruction_count = 0;
+    gfu_uword text_instruction_count = 0;
 
     section = FUASM_TEXT;
     for (fuasm_stmt* stmt = ir; stmt != nullptr; ) {
@@ -892,7 +892,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
             text_instruction_count += pattern.emit_count;
         }
 
-        for (gfu_uword_t i = 0; i < pattern.match_count; i++) {
+        for (gfu_uword i = 0; i < pattern.match_count; i++) {
             if (section == FUASM_TEXT && stmt->mnemonic == FUASM_MNEM_BYTES) {
                 diag_issue(DIAG_ERROR, stmt->source, stmt->location, "'bytes' statement can only occur inside the #data section.");
                 return nullptr;
@@ -908,10 +908,10 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
 
     /* Step 2: Calculate label addresses */
 
-    gfu_uword_t label_index = 0;
-    gfu_uword_t text_index = 0;
-    gfu_uword_t data_index = 0;
-    gfu_uword_t label_scope = ISEL_LABEL_NOPARENT;
+    gfu_uword label_index = 0;
+    gfu_uword text_index = 0;
+    gfu_uword data_index = 0;
+    gfu_uword label_scope = ISEL_LABEL_NOPARENT;
 
     section = FUASM_TEXT;
     for (fuasm_stmt* stmt = ir; stmt != nullptr; ) {
@@ -925,9 +925,9 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
         }
 
         if (stmt->label != nullptr) {
-            gfu_uword_t relative_address = section == FUASM_TEXT
+            gfu_uword relative_address = section == FUASM_TEXT
                 ? text_index : data_index + (text_instruction_count * 4);
-            gfu_uword_t parent_label = ISEL_LABEL_NOPARENT;
+            gfu_uword parent_label = ISEL_LABEL_NOPARENT;
 
             if (stmt->is_label_local) {
                 parent_label = label_scope;
@@ -935,7 +935,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
                 label_scope = relative_address;
             }
 
-            gfu_uword_t addr_offset = state->address_space == GFUOBJ_ADDRSPACE_USER
+            gfu_uword addr_offset = state->address_space == GFUOBJ_ADDRSPACE_USER
                 ? GFU_KSEG0_BASE + GFU_BIOS_RAM_SIZE
                 : GFU_KSEG1_BASE + GFU_BIOS_ROM_BASE;
             state->addresses[label_index++] = (struct address) {
@@ -954,9 +954,9 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
         fuasm_expr vars[pattern.var_count];
 
         const fuasm_stmt* match_stmt = stmt;
-        for (gfu_uword_t mi = 0, var_index = 0; mi < pattern.match_count; mi++, match_stmt = match_stmt->next) {
+        for (gfu_uword mi = 0, var_index = 0; mi < pattern.match_count; mi++, match_stmt = match_stmt->next) {
             isel_match match = isel_matches[pattern.match_index + mi];
-            for (gfu_uword_t oi = 0; oi < match.operand_count; oi++) {
+            for (gfu_uword oi = 0; oi < match.operand_count; oi++) {
                 isel_operand op = match.operands[oi];
                 if (!op.is_constant) {
                     vars[var_index++] = stmt->operands[oi];
@@ -965,7 +965,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
         }
 
         if (section == FUASM_TEXT) {
-            text_index += pattern.emit_count * sizeof(gfu_uword_t);
+            text_index += pattern.emit_count * sizeof(gfu_uword);
         } else if (section == FUASM_DATA) {
             fu_assert(pattern.match_count == 1);
             fu_assert(pattern.emit_count == 1);
@@ -983,12 +983,12 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
             }
         }
 
-        for (gfu_uword_t i = 0; i < pattern.match_count; i++) {
+        for (gfu_uword i = 0; i < pattern.match_count; i++) {
             stmt = stmt->next;
         }
     }
 
-    fu_assert(text_index == text_instruction_count * sizeof(gfu_uword_t));
+    fu_assert(text_index == text_instruction_count * sizeof(gfu_uword));
 
     print_verbose(state, "Label count: %d", state->label_count);
     print_verbose(state, "Instruction byte count: %d", text_index);
@@ -997,7 +997,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
 
     /* Step 3: Generate the final ROM binary */
 
-    gfu_uword_t start_label_address = fuasm_lookup_address_raw(state, ISEL_LABEL_NOPARENT, (struct source){0}, 0, state->entry_name);
+    gfu_uword start_label_address = fuasm_lookup_address_raw(state, ISEL_LABEL_NOPARENT, (struct source){0}, 0, state->entry_name);
     if (start_label_address == 0xFFFFFFFFu) {
         diag_issue(DIAG_ERROR, NOSOURCE, "No '_start' label found.");
         return nullptr;
@@ -1009,7 +1009,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
         .entry_address = start_label_address,
     };
 
-    const gfu_uword_t align = sizeof(gfu_uword_t);
+    const gfu_uword align = sizeof(gfu_uword);
     *rom_size = sizeof(rom_header) + text_index + (data_index + ((align - (data_index % align)) % align));
     rom_header.rom_size = *rom_size - sizeof(rom_header);
     char* rom_data = calloc((size_t)(*rom_size), sizeof *rom_data);
@@ -1035,7 +1035,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
 
         if (stmt->label != nullptr) {
             if (!stmt->is_label_local) {
-                gfu_uword_t relative_address = section == FUASM_TEXT
+                gfu_uword relative_address = section == FUASM_TEXT
                     ? text_index : data_index + text_index;
                 label_scope = relative_address;
             }
@@ -1050,9 +1050,9 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
         fuasm_expr vars[pattern.var_count];
 
         const fuasm_stmt* match_stmt = stmt;
-        for (gfu_uword_t mi = 0, var_index = 0; mi < pattern.match_count; mi++, match_stmt = match_stmt->next) {
+        for (gfu_uword mi = 0, var_index = 0; mi < pattern.match_count; mi++, match_stmt = match_stmt->next) {
             isel_match match = isel_matches[pattern.match_index + mi];
-            for (gfu_uword_t oi = 0; oi < match.operand_count; oi++) {
+            for (gfu_uword oi = 0; oi < match.operand_count; oi++) {
                 isel_operand op = match.operands[oi];
                 if (!op.is_constant) {
                     vars[var_index++] = stmt->operands[oi];
@@ -1060,20 +1060,20 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
             }
         }
 
-        gfu_uword_t addr_offset = state->address_space == GFUOBJ_ADDRSPACE_USER
+        gfu_uword addr_offset = state->address_space == GFUOBJ_ADDRSPACE_USER
             ? GFU_KSEG0_BASE + GFU_BIOS_RAM_SIZE
             : GFU_KSEG1_BASE + GFU_BIOS_ROM_BASE;
 
         if (section == FUASM_TEXT) {
-            gfu_uword_t icount = fuasm_emit_isel(state, label_scope, text_index + addr_offset, stmt, rom_base + text_index, vars);
+            gfu_uword icount = fuasm_emit_isel(state, label_scope, text_index + addr_offset, stmt, rom_base + text_index, vars);
             if (icount == 0) {
                 free(rom_data);
                 return nullptr;
             }
             text_index += icount;
         } else if (section == FUASM_DATA) {
-            gfu_uword_t addr = (text_instruction_count * sizeof(gfu_uword_t)) + data_index;
-            gfu_uword_t icount = fuasm_emit_isel(state, label_scope, addr + addr_offset, stmt, rom_base + addr, vars);
+            gfu_uword addr = (text_instruction_count * sizeof(gfu_uword)) + data_index;
+            gfu_uword icount = fuasm_emit_isel(state, label_scope, addr + addr_offset, stmt, rom_base + addr, vars);
             if (icount == 0) {
                 free(rom_data);
                 return nullptr;
@@ -1081,7 +1081,7 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
             data_index += icount;
         }
 
-        for (gfu_uword_t i = 0; i < pattern.match_count; i++) {
+        for (gfu_uword i = 0; i < pattern.match_count; i++) {
             stmt = stmt->next;
         }
     }
@@ -1089,11 +1089,11 @@ static char* fuasm_assemble_ir_internal(fuasm_state* state, gfu_uword_t* rom_siz
     return rom_data;
 }
 
-static char* fuasm_assemble_internal(fuasm_state* state, gfu_uword_t* rom_size) {
+static char* fuasm_assemble_internal(fuasm_state* state, gfu_uword* rom_size) {
     fuasm_stmt* head = nullptr;
     fuasm_stmt* tail = nullptr;
 
-    for (gfu_uword_t i = 0; i < state->options.source_count; i++) {
+    for (gfu_uword i = 0; i < state->options.source_count; i++) {
         source source = state->options.sources[i];
 
         fuasm_parser parser = {
@@ -1117,7 +1117,7 @@ static char* fuasm_assemble_internal(fuasm_state* state, gfu_uword_t* rom_size) 
 
             if (parser.tk.kind == FUASM_TK_EOF) break;
 
-            gfu_uword_t location  = parser.tk.location;
+            gfu_uword location  = parser.tk.location;
             fuasm_stmt* stmt = parse_statement(&parser);
             if (stmt == nullptr) return nullptr;
             fu_assert(location != parser.tk.location);
@@ -1169,8 +1169,8 @@ static void fuasm_token_dump(fuasm_token token) {
     fputc('\n', stderr);
 }
 
-static gfu_uword_t fuasm_lexer_location(etok_lexer* lexer) {
-    return (gfu_uword_t)(lexer->source_current - lexer->source_begin);
+static gfu_uword fuasm_lexer_location(etok_lexer* lexer) {
+    return (gfu_uword)(lexer->source_current - lexer->source_begin);
 }
 
 static void fuasm_etok_error_callback(void* userdata, const char* source_name, const char* source_text, const char* where, uint64_t line, uint64_t column, const char* format, ...) {
@@ -1245,8 +1245,8 @@ static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
         .kind = FUASM_TK_INVALID,
         .location = fuasm_lexer_location(lexer),
         .begin = lexer->source_current,
-        .line = (gfu_uword_t)lexer->line,
-        .column = (gfu_uword_t)lexer->column,
+        .line = (gfu_uword)lexer->line,
+        .column = (gfu_uword)lexer->column,
     };
 
     if (etok_lexer_is_at_end(lexer)) {
@@ -1332,7 +1332,7 @@ static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
             };
 
             static struct {
-                gfu_gpr_t _register;
+                gfu_gpr _register;
                 const char* image;
             } registers[] = {
 #define X(Id, Image) { GFU_GPR_##Id, Image },
@@ -1370,7 +1370,7 @@ static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
 
             token.as._register = 0;
             token.kind = *name == '.' ? FUASM_TK_LABEL_LOCAL : FUASM_TK_LABEL_GLOBAL;
-            token.as.label = fuasm_intern_string(state, name, (gfu_uword_t)length);
+            token.as.label = fuasm_intern_string(state, name, (gfu_uword)length);
         } break;
 
         case '#': {
@@ -1390,7 +1390,7 @@ static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
 
         case '0': case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9': {
-            gfu_long_t immediate = lexer->ch - '0';
+            gfu_long immediate = lexer->ch - '0';
             etok_lexer_advance(lexer);
 
             while (!etok_lexer_is_at_end(lexer) && etok_lexer_is_decimal_digit(lexer, lexer->ch)) {
@@ -1399,7 +1399,7 @@ static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
             }
 
             token.kind = FUASM_TK_IMMEDIATE;
-            token.as.immediate = (gfu_uword_t)immediate;
+            token.as.immediate = (gfu_uword)immediate;
         } break;
 
         case '"': {
@@ -1415,7 +1415,7 @@ static fuasm_token fuasm_lexer_read(etok_lexer* lexer) {
             }
 
             char* byte_string = gfu_arena_alloc(&state->string_arena, max_length);
-            gfu_uword_t length = 0;
+            gfu_uword length = 0;
 
             while (!etok_lexer_is_at_end(lexer) && lexer->ch != '\n' && lexer->ch != '"') {
                 if (lexer->ch == '\\') {

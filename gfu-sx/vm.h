@@ -23,6 +23,6 @@ struct gfusx {
 bool gfusx_vm_init(gfusx_t* vm);
 void gfusx_vm_deinit(gfusx_t* vm);
 
-void gfusx_schedule_interrupt(gfusx_t* vm, gfu_uword_t interrupt, gfu_uword_t cycle_count);
+void gfusx_schedule_interrupt(gfusx_t* vm, gfu_uword interrupt, gfu_uword cycle_count);
 
 #endif /* GFUSX_VM_H_ */

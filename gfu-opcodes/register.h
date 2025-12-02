@@ -40,7 +40,7 @@ typedef enum gfu_gpr {
     GFU_GPR(X)
 #undef X
     GFU_GPR_INVALID = 0xFF,
-} gfu_gpr_t;
+} gfu_gpr;
 
 #define GFU_CP0R(X) \
     X(BAD_VADDR, 9, "bad_vaddr") \
@@ -52,9 +52,9 @@ typedef enum gfu_cp0r {
     GFU_CP0R(X)
 #undef X
     GFU_CP0R_INVALID = 0xFF,
-} gfu_cp0r_t;
+} gfu_cp0r;
 
-gfu_gpr_t gfu_gpr_from_string(const char* s, size_t length);
-gfu_cp0r_t gfu_cp0r_from_string(const char* s, size_t length);
+gfu_gpr gfu_gpr_from_string(const char* s, size_t length);
+gfu_cp0r gfu_cp0r_from_string(const char* s, size_t length);
 
 #endif /* GAMEFU_SYSTEM_REGISTER_H_ */

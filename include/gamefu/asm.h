@@ -26,28 +26,28 @@ typedef enum fuasm_directive {
 } fuasm_directive, fuasm_directive_t;
 
 typedef union fuasm_inst {
-    gfu_uword_t raw;
+    gfu_uword raw;
     struct {
-        gfu_uword_t function : 6;
-        gfu_uword_t shift : 5;
-        gfu_uword_t r : 5;
-        gfu_uword_t l : 5;
-        gfu_uword_t d : 5;
-        gfu_uword_t opcode : 6;
+        gfu_uword function : 6;
+        gfu_uword shift : 5;
+        gfu_uword r : 5;
+        gfu_uword l : 5;
+        gfu_uword d : 5;
+        gfu_uword opcode : 6;
     } reg;
     struct {
-        gfu_uword_t value : 16;
-        gfu_uword_t l : 5;
-        gfu_uword_t d : 5;
-        gfu_uword_t opcode : 6;
+        gfu_uword value : 16;
+        gfu_uword l : 5;
+        gfu_uword d : 5;
+        gfu_uword opcode : 6;
     } imm;
     struct {
-        gfu_uword_t value : 26;
-        gfu_uword_t opcode : 6;
+        gfu_uword value : 26;
+        gfu_uword opcode : 6;
     } addr;
 } fuasm_inst, fuasm_inst_t;
 
-static_assert(sizeof(fuasm_inst_t) == sizeof(gfu_uword_t), "Ensure that the union of bitfields does not change the size of the instruction type.");
+static_assert(sizeof(fuasm_inst_t) == sizeof(gfu_uword), "Ensure that the union of bitfields does not change the size of the instruction type.");
 
 #define FUASM_EXPR_KINDS(X) \
     X(REG) \
@@ -79,7 +79,7 @@ typedef enum fuasm_addr_kind {
 typedef struct fuasm_addr {
     fuasm_addr_kind_t kind;
     source source;
-    gfu_uword_t location;
+    gfu_uword location;
     union {
         const char* label;
     } as;
@@ -88,15 +88,15 @@ typedef struct fuasm_addr {
 typedef struct fuasm_expr {
     fuasm_expr_kind_t kind;
     source source;
-    gfu_uword_t location;
+    gfu_uword location;
     bool is_base;
     union {
-        gfu_gpr_t _register;
-        gfu_uword_t immediate;
+        gfu_gpr _register;
+        gfu_uword immediate;
         fuasm_addr_t address;
         struct {
             const char* data;
-            gfu_uword_t length;
+            gfu_uword length;
         } byte_string;
     } as;
 } fuasm_expr, fuasm_expr_t;
@@ -104,17 +104,17 @@ typedef struct fuasm_expr {
 typedef struct fuasm_stmt {
     struct fuasm_stmt* next;
     source source;
-    gfu_uword_t location;
+    gfu_uword location;
     fuasm_directive_t directive;
     const char* label;
     bool is_label_local;
     fuasm_mnemonic_t mnemonic;
-    gfu_uword_t operand_count;
+    gfu_uword operand_count;
     fuasm_expr_t operands[3];
-    gfu_uword_t pattern_index;
+    gfu_uword pattern_index;
 } fuasm_stmt, fuasm_stmt_t;
 
-char* fuasm_assemble(source source, gfu_uword_t* rom_size);
-char* fuasm_assemble_ir(fuasm_stmt_t* ir, gfu_uword_t* rom_size);
+char* fuasm_assemble(source source, gfu_uword* rom_size);
+char* fuasm_assemble_ir(fuasm_stmt_t* ir, gfu_uword* rom_size);
 
 #endif /* GAMEFU_ASM_H_ */

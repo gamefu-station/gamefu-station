@@ -86,7 +86,7 @@ static const char* intnames[] = {
 #undef X
 };
 
-static void gfusx_trace_disasm(gfusx_t* vm, gfu_uword_t addr, fuasm_inst inst) {
+static void gfusx_trace_disasm(gfusx_t* vm, gfu_uword addr, fuasm_inst inst) {
     if (!vm->trace) return;
 
     fprintf(stderr, "%08X:   op=%02X (%s), ", addr, inst.addr.opcode, opnames[inst.addr.opcode]);
@@ -126,7 +126,7 @@ static void gfusx_trace_disasm(gfusx_t* vm, gfu_uword_t addr, fuasm_inst inst) {
 }
 #endif /* GFU_NTRACE */
 
-static void gfusx_syscall(gfusx_t* vm, gfu_word_t s) {
+static void gfusx_syscall(gfusx_t* vm, gfu_word s) {
     switch (s) {
         default: {
             gfusx_logf(vm, "Unknown syscall %02X, currently doing nothing and resuming.", s);
@@ -140,8 +140,8 @@ static void gfusx_syscall(gfusx_t* vm, gfu_word_t s) {
 
         // [word, word] file_write_string(word handle, byte* string)
         case GFU_SYS_FILE_WRITE_STRING: {
-            gfu_uword_t fd = _rA0_;
-            gfu_uword_t string_addr = _rA1_;
+            gfu_uword fd = _rA0_;
+            gfu_uword string_addr = _rA1_;
 
             const char* string = (const char*)gfusx_memory_get_rptr(vm, string_addr);
             if (string == nullptr) {
@@ -173,17 +173,17 @@ static void gfusx_syscall(gfusx_t* vm, gfu_word_t s) {
                 break;
             }
 
-            _rR0_ = (gfu_uword_t)(gfu_word_t)r;
+            _rR0_ = (gfu_uword)(gfu_word)r;
             _rR1_ = 0; // Status code 0, no error
         } break;
 
         // [word, word] file_write_format(word handle, byte* format, ...)
         case GFU_SYS_FILE_WRITE_FORMAT: {
-            gfu_uword_t fd = _rA0_;
-            gfu_uword_t format_addr = _rA1_;
+            gfu_uword fd = _rA0_;
+            gfu_uword format_addr = _rA1_;
 
-            gfu_uword_t varargs_count = _rR1_;
-            gfu_uword_t varargs_top = _rSP_;
+            gfu_uword varargs_count = _rR1_;
+            gfu_uword varargs_top = _rSP_;
 
             const char* format = (const char*)gfusx_memory_get_rptr(vm, format_addr);
             if (format == nullptr) {
@@ -206,14 +206,14 @@ static void gfusx_syscall(gfusx_t* vm, gfu_word_t s) {
                 break;
             }
 
-            gfu_uword_t count = 0;
-            gfu_uword_t vararg_index = 0;
+            gfu_uword count = 0;
+            gfu_uword vararg_index = 0;
 
             for (const char* f = format; *f != 0; ) {
                 errno = 0;
 
-                gfu_uword_t current_vararg_addr = varargs_top +
-                    (sizeof(gfu_uword_t) * vararg_index);
+                gfu_uword current_vararg_addr = varargs_top +
+                    (sizeof(gfu_uword) * vararg_index);
 
                 char c = *(f++);
                 switch (c) {
@@ -241,22 +241,22 @@ static void gfusx_syscall(gfusx_t* vm, gfu_word_t s) {
                             }
 
                             case 'w': {
-                                gfu_word_t i = (gfu_word_t)gfusx_memory_read_word(vm, current_vararg_addr);
+                                gfu_word i = (gfu_word)gfusx_memory_read_word(vm, current_vararg_addr);
                                 int r = fprintf(output_stream, "%d", i);
-                                count += (gfu_uword_t)(gfu_word_t)r;
+                                count += (gfu_uword)(gfu_word)r;
                             } break;
 
                             case 'u': {
-                                gfu_uword_t i = gfusx_memory_read_word(vm, current_vararg_addr);
+                                gfu_uword i = gfusx_memory_read_word(vm, current_vararg_addr);
                                 int r = fprintf(output_stream, "%u", i);
-                                count += (gfu_uword_t)(gfu_word_t)r;
+                                count += (gfu_uword)(gfu_word)r;
                             } break;
 
                             case 's': {
-                                gfu_uword_t s_addr = gfusx_memory_read_word(vm, current_vararg_addr);
+                                gfu_uword s_addr = gfusx_memory_read_word(vm, current_vararg_addr);
                                 const char* s = (const char*)gfusx_memory_get_rptr(vm, s_addr);
                                 int r = fprintf(output_stream, "%s", s);
-                                count += (gfu_uword_t)(gfu_word_t)r;
+                                count += (gfu_uword)(gfu_word)r;
                             } break;
                         }
 
@@ -290,25 +290,25 @@ static void gfusx_exception(gfusx_t* vm, gfusx_exc_t cause) {
 
     gfusx_logf(vm, "Exception jumping to PC %08X.", _rPC_);
 
-    _c0Cause_ = (gfu_uword_t)cause;
+    _c0Cause_ = (gfu_uword)cause;
     _c0Status_ = (_c0Status_ & ~0x3F) | ((_c0Status_ & 0x0F) << 2);
 }
 
 static void gfusx_branch_test(gfusx_t* vm) {
-    const gfu_ulong_t cycle = vm->cpu.cycle;
+    const gfu_ulong cycle = vm->cpu.cycle;
 
-    const gfu_uword_t interrupts = vm->cpu.interrupt;
-    gfu_long_t lowest_dist = 0x7FFFFFFFFFFFFFFF;
-    gfu_long_t lowest_target = (gfu_long_t)cycle;
-    const gfu_ulong_t* targets = &vm->cpu.interrupt_targets[0];
+    const gfu_uword interrupts = vm->cpu.interrupt;
+    gfu_long lowest_dist = 0x7FFFFFFFFFFFFFFF;
+    gfu_long lowest_target = (gfu_long)cycle;
+    const gfu_ulong* targets = &vm->cpu.interrupt_targets[0];
 
     if (interrupts != 0 && vm->cpu.lowest_target < cycle) {
 #define CHECK_AND_UPDATE(Irq, Act) \
         do { \
-            const gfu_uword_t mask = 1 << (Irq); \
+            const gfu_uword mask = 1 << (Irq); \
             if ((interrupts & mask) != 0) { \
-                gfu_ulong_t target = targets[Irq]; \
-                gfu_long_t dist = (gfu_long_t)target - (gfu_long_t)cycle; \
+                gfu_ulong target = targets[Irq]; \
+                gfu_long dist = (gfu_long)target - (gfu_long)cycle; \
                 if (dist > 0) { \
                     if (dist < lowest_dist) { \
                         lowest_dist = dist; \
@@ -334,8 +334,8 @@ static void gfusx_branch_test(gfusx_t* vm) {
         vm->cpu.lowest_target = lowest_target;
     }
 
-    const gfu_uword_t istat = gfusx_memory_read_hwreg_word(vm, GFU_ISTAT_ADDR & 0xFFFF);
-    const gfu_uword_t imask = gfusx_memory_read_hwreg_word(vm, GFU_IMASK_ADDR & 0xFFFF);
+    const gfu_uword istat = gfusx_memory_read_hwreg_word(vm, GFU_ISTAT_ADDR & 0xFFFF);
+    const gfu_uword imask = gfusx_memory_read_hwreg_word(vm, GFU_IMASK_ADDR & 0xFFFF);
 
     //gfusx_logf(vm, "ISTAT %08X, IMASK %08X, COP0 STATUS %08X", istat, imask, _c0Status_);
 
@@ -356,7 +356,7 @@ static void gfusx_test_sw_interrupts(gfusx_t* vm) {
     }
 }
 
-static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
+static bool gfusx_step(gfusx_t* vm, gfu_uword pc, gfu_uword code) {
     fuasm_inst inst = { .raw = code };
     gfusx_trace_disasm(vm, pc, inst);
 
@@ -378,49 +378,49 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
 
         case GFU_OP_BEQ: { // 0x04  beq reg $l, reg $r, addr $t
             if (_rD_ == _rL_) {
-                _rPC_ += (gfu_word_t)((gfu_half_t)_iImm_) << 2;
+                _rPC_ += (gfu_word)((gfu_half)_iImm_) << 2;
                 return true;
             } else return false;
         }
 
         case GFU_OP_BNE: { // 0x05  bne reg $l, reg $r, addr $t
             if (_rD_ != _rL_) {
-                _rPC_ += (gfu_word_t)((gfu_half_t)_iImm_) << 2;
+                _rPC_ += (gfu_word)((gfu_half)_iImm_) << 2;
                 return true;
             } else return false;
         }
 
         case GFU_OP_BLEZ: { // 0x06  blez reg $d, addr $t
             if (_rD_ <= 0) {
-                _rPC_ += (gfu_word_t)((gfu_half_t)_iImm_) << 2;
+                _rPC_ += (gfu_word)((gfu_half)_iImm_) << 2;
                 return true;
             } else return false;
         }
 
         case GFU_OP_BGTZ: { // 0x07  bgtz reg $d, addr $t
             if (_rD_ > 0) {
-                _rPC_ += (gfu_word_t)((gfu_half_t)_iImm_) << 2;
+                _rPC_ += (gfu_word)((gfu_half)_iImm_) << 2;
                 return true;
             } else return false;
         }
 
         case GFU_OP_ADDI: { // 0x08  addi reg $d, reg $l, imm $v
-            gfu_long_t v = ((gfu_long_t)_rL_ + sext(half, long, _iImm_));
+            gfu_long v = ((gfu_long)_rL_ + sext(half, long, _iImm_));
             // TODO(echoe): overflow exceptions
-            if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)v;
+            if (_iD_ != _rnZero_) _rD_ = (gfu_uword)v;
         } break;
 
         case GFU_OP_ADDIU: { // 0x09  addiu reg $d, reg $l, imm $v
-            gfu_long_t v = ((gfu_long_t)_rL_ + sext(half, long, _iImm_));
-            if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)v;
+            gfu_long v = ((gfu_long)_rL_ + sext(half, long, _iImm_));
+            if (_iD_ != _rnZero_) _rD_ = (gfu_uword)v;
         } break;
 
         case GFU_OP_SLTI: { // 0x0A  slti reg $d, reg $l, imm $v
-            if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)((gfu_word_t)_rL_ < (gfu_half_t)_iImm_);
+            if (_iD_ != _rnZero_) _rD_ = (gfu_uword)((gfu_word)_rL_ < (gfu_half)_iImm_);
         } break;
 
         case GFU_OP_SLTIU: { // 0x0B  sltiu reg $d, reg $l, imm $v
-            if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)(_rL_ < _iImm_);
+            if (_iD_ != _rnZero_) _rD_ = (gfu_uword)(_rL_ < _iImm_);
         } break;
 
         case GFU_OP_ANDI: { // 0x0C  andi reg $d, reg $l, imm $v
@@ -442,111 +442,111 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
         // TODO(echoe): Trap instructions
 
         case GFU_OP_LB: { // 0x20  lb reg $d, imm $v(reg $l)
-            gfu_uword_t addr = (gfu_uword_t)((gfu_half_t)_iImm_ + (gfu_long_t)_rL_);
-            gfu_ubyte_t v = gfusx_memory_read_byte(vm, addr);
+            gfu_uword addr = (gfu_uword)((gfu_half)_iImm_ + (gfu_long)_rL_);
+            gfu_ubyte v = gfusx_memory_read_byte(vm, addr);
             if (_iD_ != _rnZero_) _rD_ = sext(byte, word, v);
         } break;
 
         case GFU_OP_LH: { // 0x21  lh reg $d, imm $v(reg $l)
-            gfu_uword_t addr = (gfu_uword_t)((gfu_half_t)_iImm_ + (gfu_long_t)_rL_);
-            gfu_uhalf_t v = gfusx_memory_read_half(vm, addr);
+            gfu_uword addr = (gfu_uword)((gfu_half)_iImm_ + (gfu_long)_rL_);
+            gfu_uhalf v = gfusx_memory_read_half(vm, addr);
             if (_iD_ != _rnZero_) _rD_ = sext(half, word, v);
         } break;
 
         case GFU_OP_LWL: { // 0x22  lwl reg $d, imm $v(reg $l)
-            static gfu_uword_t lwl_mask[4] = { 0x00FFFFFFu, 0x0000FFFFu, 0x000000FFu, 0 };
-            static gfu_uword_t lwl_shift[4] = { 24, 16, 8, 0 };
-            gfu_uword_t addr = (gfu_uword_t)((gfu_half_t)_iImm_ + (gfu_long_t)_rL_);
-            gfu_uword_t shift = addr & 0x03, v = gfusx_memory_read_word(vm, addr & ~0x03);
+            static gfu_uword lwl_mask[4] = { 0x00FFFFFFu, 0x0000FFFFu, 0x000000FFu, 0 };
+            static gfu_uword lwl_shift[4] = { 24, 16, 8, 0 };
+            gfu_uword addr = (gfu_uword)((gfu_half)_iImm_ + (gfu_long)_rL_);
+            gfu_uword shift = addr & 0x03, v = gfusx_memory_read_word(vm, addr & ~0x03);
             if (_iD_ != _rnZero_) _rD_ = ((_rD_ & lwl_mask[shift]) | (v << lwl_shift[shift]));
         } break;
 
         case GFU_OP_LW: { // 0x23  lw reg $d, imm $v(reg $l)
-            gfu_uword_t addr = (gfu_uword_t)((gfu_half_t)_iImm_ + (gfu_long_t)_rL_);
-            gfu_uword_t v = gfusx_memory_read_word(vm, addr);
+            gfu_uword addr = (gfu_uword)((gfu_half)_iImm_ + (gfu_long)_rL_);
+            gfu_uword v = gfusx_memory_read_word(vm, addr);
             if (_iD_ != _rnZero_) _rD_ = v;
         } break;
 
         case GFU_OP_LBU: { // 0x24  lbu reg $d, imm $v(reg $l)
-            gfu_uword_t addr = (gfu_uword_t)((gfu_half_t)_iImm_ + (gfu_long_t)_rL_);
-            gfu_ubyte_t v = gfusx_memory_read_byte(vm, addr);
+            gfu_uword addr = (gfu_uword)((gfu_half)_iImm_ + (gfu_long)_rL_);
+            gfu_ubyte v = gfusx_memory_read_byte(vm, addr);
             if (_iD_ != _rnZero_) _rD_ = v;
         } break;
 
         case GFU_OP_LHU: { // 0x25  lhu reg $d, imm $v(reg $l)
-            gfu_uword_t addr = (gfu_uword_t)((gfu_half_t)_iImm_ + (gfu_long_t)_rL_);
-            gfu_uhalf_t v = gfusx_memory_read_half(vm, addr);
+            gfu_uword addr = (gfu_uword)((gfu_half)_iImm_ + (gfu_long)_rL_);
+            gfu_uhalf v = gfusx_memory_read_half(vm, addr);
             if (_iD_ != _rnZero_) _rD_ = v;
         } break;
 
         case GFU_OP_LWR: { // 0x26  lwr reg $d, imm $v(reg $l)
-            static gfu_uword_t lwr_mask[4] = { 0, 0xFF000000u, 0xFFFF0000u, 0xFFFFFF00u };
-            static gfu_uword_t lwr_shift[4] = { 0, 8, 16, 24 };
-            gfu_uword_t addr = (gfu_uword_t)((gfu_half_t)_iImm_ + (gfu_long_t)_rL_);
-            gfu_uword_t shift = addr & 0x03, v = gfusx_memory_read_word(vm, addr & ~0x03);
+            static gfu_uword lwr_mask[4] = { 0, 0xFF000000u, 0xFFFF0000u, 0xFFFFFF00u };
+            static gfu_uword lwr_shift[4] = { 0, 8, 16, 24 };
+            gfu_uword addr = (gfu_uword)((gfu_half)_iImm_ + (gfu_long)_rL_);
+            gfu_uword shift = addr & 0x03, v = gfusx_memory_read_word(vm, addr & ~0x03);
             if (_iD_ != _rnZero_) _rD_ = ((_rD_ & lwr_mask[shift]) | (v >> lwr_shift[shift]));
         } break;
 
         case GFU_OP_SB: { // 0x28  sb imm $v(reg $d), reg $l
-            gfu_uword_t addr = (gfu_uword_t)((gfu_half_t)_iImm_ + (gfu_long_t)_rD_);
-            gfusx_memory_write_byte(vm, addr, (gfu_ubyte_t)_rL_);
+            gfu_uword addr = (gfu_uword)((gfu_half)_iImm_ + (gfu_long)_rD_);
+            gfusx_memory_write_byte(vm, addr, (gfu_ubyte)_rL_);
         } break;
 
         case GFU_OP_SH: { // 0x29  sh imm $v(reg $d), reg $l
-            gfu_uword_t addr = (gfu_uword_t)((gfu_half_t)_iImm_ + (gfu_long_t)_rD_);
-            gfusx_memory_write_half(vm, addr, (gfu_uhalf_t)_rL_);
+            gfu_uword addr = (gfu_uword)((gfu_half)_iImm_ + (gfu_long)_rD_);
+            gfusx_memory_write_half(vm, addr, (gfu_uhalf)_rL_);
         } break;
 
         case GFU_OP_SWL: { // 0x2A  swl imm $v(reg $d), reg $l
-            static gfu_uword_t swl_mask[4] = { 0xFFFFFF00u, 0xFFFF0000u, 0xFF000000u, 0 };
-            static gfu_uword_t swl_shift[4] = { 24, 16, 8, 0 };
-            gfu_uword_t addr = (gfu_uword_t)((gfu_half_t)_iImm_ + (gfu_long_t)_rD_);
-            gfu_uword_t shift = addr & 0x03, v = gfusx_memory_read_word(vm, addr & ~0x03);
+            static gfu_uword swl_mask[4] = { 0xFFFFFF00u, 0xFFFF0000u, 0xFF000000u, 0 };
+            static gfu_uword swl_shift[4] = { 24, 16, 8, 0 };
+            gfu_uword addr = (gfu_uword)((gfu_half)_iImm_ + (gfu_long)_rD_);
+            gfu_uword shift = addr & 0x03, v = gfusx_memory_read_word(vm, addr & ~0x03);
             gfusx_memory_write_word(vm, addr, (_rL_ >> swl_shift[shift]) | (v & swl_mask[shift]));
         } break;
 
         case GFU_OP_SW: { // 0x2B  sw imm $v(reg $d), reg $l
-            gfu_uword_t addr = (gfu_uword_t)((gfu_half_t)_iImm_ + (gfu_long_t)_rD_);
-            gfusx_memory_write_word(vm, addr, (gfu_uword_t)_rL_);
+            gfu_uword addr = (gfu_uword)((gfu_half)_iImm_ + (gfu_long)_rD_);
+            gfusx_memory_write_word(vm, addr, (gfu_uword)_rL_);
         } break;
 
         case GFU_OP_SWR: { // 0x2E  swr imm $v(reg $d), reg $l
-            static gfu_uword_t swr_mask[4] = { 0, 0x000000FFu, 0x0000FFFFu, 0x00FFFFFFu };
-            static gfu_uword_t swr_shift[4] = { 0, 8, 16, 24 };
-            gfu_uword_t addr = (gfu_uword_t)((gfu_half_t)_iImm_ + (gfu_long_t)_rD_);
-            gfu_uword_t shift = addr & 0x03, v = gfusx_memory_read_word(vm, addr & ~0x03);
+            static gfu_uword swr_mask[4] = { 0, 0x000000FFu, 0x0000FFFFu, 0x00FFFFFFu };
+            static gfu_uword swr_shift[4] = { 0, 8, 16, 24 };
+            gfu_uword addr = (gfu_uword)((gfu_half)_iImm_ + (gfu_long)_rD_);
+            gfu_uword shift = addr & 0x03, v = gfusx_memory_read_word(vm, addr & ~0x03);
             gfusx_memory_write_word(vm, addr, (_rL_ << swr_shift[shift]) | (v & swr_mask[shift]));
         } break;
 
         case GFU_OP_BLTZ: { // 0x30  bltz reg $d, imm $v
-            if ((gfu_word_t)_rD_ < 0) {
-                _rPC_ += (gfu_word_t)((gfu_half_t)_iImm_) << 2;
+            if ((gfu_word)_rD_ < 0) {
+                _rPC_ += (gfu_word)((gfu_half)_iImm_) << 2;
                 return true;
             }
             return false;
         }
 
         case GFU_OP_BGEZ: { // 0x31  bgez reg $d, imm $v
-            if ((gfu_word_t)_rD_ >= 0) {
-                _rPC_ += (gfu_word_t)((gfu_half_t)_iImm_) << 2;
+            if ((gfu_word)_rD_ >= 0) {
+                _rPC_ += (gfu_word)((gfu_half)_iImm_) << 2;
                 return true;
             }
             return false;
         }
 
         case GFU_OP_BLTZAL: { // 0x32  bltzal reg $d, imm $v
-            if ((gfu_word_t)_rD_ < 0) {
+            if ((gfu_word)_rD_ < 0) {
                 _rRA_ = _rPC_;
-                _rPC_ += (gfu_word_t)((gfu_half_t)_iImm_) << 2;
+                _rPC_ += (gfu_word)((gfu_half)_iImm_) << 2;
                 return true;
             }
             return false;
         }
 
         case GFU_OP_BGEZAL: { // 0x31  bgezal reg $d, imm $v
-            if ((gfu_word_t)_rD_ >= 0) {
+            if ((gfu_word)_rD_ >= 0) {
                 _rRA_ = _rPC_;
-                _rPC_ += (gfu_word_t)((gfu_half_t)_iImm_) << 2;
+                _rPC_ += (gfu_word)((gfu_half)_iImm_) << 2;
                 return true;
             }
             return false;
@@ -569,7 +569,7 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
                 } break;
 
                 case GFU_OPFN_SRA: { // 0x03  sra reg $d, reg $l, imm $s
-                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)(((gfu_word_t)_rL_) >> _iSh_);
+                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword)(((gfu_word)_rL_) >> _iSh_);
                 } break;
 
                 case GFU_OPFN_SLLV: { // 0x04  sllv reg $d, reg $l, reg $r
@@ -581,13 +581,13 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
                 } break;
 
                 case GFU_OPFN_SRAV: { // 0x07  srav reg $d, reg $l, reg $r
-                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)(((gfu_word_t)_rL_) >> _rR_);
+                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword)(((gfu_word)_rL_) >> _rR_);
                 } break;
 
                 case GFU_OPFN_JR: { // 0x08  jr reg $l
-                    gfu_uword_t jaddr = _rL_;
+                    gfu_uword jaddr = _rL_;
                     if ((jaddr & 3) != 0) {
-                        _rPC_ -= sizeof(gfu_uword_t);
+                        _rPC_ -= sizeof(gfu_uword);
                         gfusx_logf(vm, "Attempt unaligned JR to 0x%08X from 0x%08X.", jaddr, _rPC_);
                         _c0BadVAddr_ = jaddr;
                         gfusx_exception(vm, GFUSX_EXC_BAD_LOAD);
@@ -598,9 +598,9 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
                 } break;
 
                 case GFU_OPFN_JALR: { // 0x09  jalr reg $d, reg $l
-                    gfu_uword_t jaddr = _rL_;
+                    gfu_uword jaddr = _rL_;
                     if ((jaddr & 3) != 0) {
-                        _rPC_ -= sizeof(gfu_uword_t);
+                        _rPC_ -= sizeof(gfu_uword);
                         gfusx_logf(vm, "Attempt unaligned JALR to 0x%08X from 0x%08X.", jaddr, _rPC_);
                         _c0BadVAddr_ = jaddr;
                         gfusx_exception(vm, GFUSX_EXC_BAD_LOAD);
@@ -643,48 +643,48 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
                 } break;
 
                 case GFU_OPFN_MADD: { // 0x14  madd reg $l, reg $r
-                    gfu_long_t m = ((gfu_word_t)_rL_) * ((gfu_word_t)_rR_);
-                    gfu_long_t v = ((((gfu_ulong_t)_rHI_) << 32) | ((gfu_ulong_t)_rLO_)) + m;
-                    _rHI_ = (gfu_uword_t)((v >> 32) & 0xFFFFFFFFu);
-                    _rLO_ = (gfu_uword_t)((v      ) & 0xFFFFFFFFu);
+                    gfu_long m = ((gfu_word)_rL_) * ((gfu_word)_rR_);
+                    gfu_long v = ((((gfu_ulong)_rHI_) << 32) | ((gfu_ulong)_rLO_)) + m;
+                    _rHI_ = (gfu_uword)((v >> 32) & 0xFFFFFFFFu);
+                    _rLO_ = (gfu_uword)((v      ) & 0xFFFFFFFFu);
                 } break;
 
                 case GFU_OPFN_MADDU: { // 0x15  maddu reg $l, reg $r
-                    gfu_long_t m = _rL_ * _rR_;
-                    gfu_long_t v = ((((gfu_ulong_t)_rHI_) << 32) | ((gfu_ulong_t)_rLO_)) + m;
-                    _rHI_ = (gfu_uword_t)((v >> 32) & 0xFFFFFFFFu);
-                    _rLO_ = (gfu_uword_t)((v      ) & 0xFFFFFFFFu);
+                    gfu_long m = _rL_ * _rR_;
+                    gfu_long v = ((((gfu_ulong)_rHI_) << 32) | ((gfu_ulong)_rLO_)) + m;
+                    _rHI_ = (gfu_uword)((v >> 32) & 0xFFFFFFFFu);
+                    _rLO_ = (gfu_uword)((v      ) & 0xFFFFFFFFu);
                 } break;
 
                 case GFU_OPFN_MSUB: { // 0x16  msub reg $l, reg $r
-                    gfu_long_t m = ((gfu_word_t)_rL_) * ((gfu_word_t)_rR_);
-                    gfu_long_t v = ((((gfu_ulong_t)_rHI_) << 32) | ((gfu_ulong_t)_rLO_)) - m;
-                    _rHI_ = (gfu_uword_t)((v >> 32) & 0xFFFFFFFFu);
-                    _rLO_ = (gfu_uword_t)((v      ) & 0xFFFFFFFFu);
+                    gfu_long m = ((gfu_word)_rL_) * ((gfu_word)_rR_);
+                    gfu_long v = ((((gfu_ulong)_rHI_) << 32) | ((gfu_ulong)_rLO_)) - m;
+                    _rHI_ = (gfu_uword)((v >> 32) & 0xFFFFFFFFu);
+                    _rLO_ = (gfu_uword)((v      ) & 0xFFFFFFFFu);
                 } break;
 
                 case GFU_OPFN_MSUBU: { // 0x17  msubu reg $l, reg $r
-                    gfu_long_t m = _rL_ * _rR_;
-                    gfu_long_t v = ((((gfu_ulong_t)_rHI_) << 32) | ((gfu_ulong_t)_rLO_)) - m;
-                    _rHI_ = (gfu_uword_t)((v >> 32) & 0xFFFFFFFFu);
-                    _rLO_ = (gfu_uword_t)((v      ) & 0xFFFFFFFFu);
+                    gfu_long m = _rL_ * _rR_;
+                    gfu_long v = ((((gfu_ulong)_rHI_) << 32) | ((gfu_ulong)_rLO_)) - m;
+                    _rHI_ = (gfu_uword)((v >> 32) & 0xFFFFFFFFu);
+                    _rLO_ = (gfu_uword)((v      ) & 0xFFFFFFFFu);
                 } break;
 
                 case GFU_OPFN_MULT: { // 0x18  mult reg $l, reg $r
-                    gfu_long_t v = ((gfu_word_t)_rL_) * ((gfu_word_t)_rR_);
-                    _rHI_ = (gfu_uword_t)((v >> 32) & 0xFFFFFFFFu);
-                    _rLO_ = (gfu_uword_t)((v      ) & 0xFFFFFFFFu);
+                    gfu_long v = ((gfu_word)_rL_) * ((gfu_word)_rR_);
+                    _rHI_ = (gfu_uword)((v >> 32) & 0xFFFFFFFFu);
+                    _rLO_ = (gfu_uword)((v      ) & 0xFFFFFFFFu);
                 } break;
 
                 case GFU_OPFN_MULTU: { // 0x19  multu reg $l, reg $r
-                    gfu_long_t v = _rL_ * _rR_;
-                    _rHI_ = (gfu_uword_t)((v >> 32) & 0xFFFFFFFFu);
-                    _rLO_ = (gfu_uword_t)((v      ) & 0xFFFFFFFFu);
+                    gfu_long v = _rL_ * _rR_;
+                    _rHI_ = (gfu_uword)((v >> 32) & 0xFFFFFFFFu);
+                    _rLO_ = (gfu_uword)((v      ) & 0xFFFFFFFFu);
                 } break;
 
                 case GFU_OPFN_DIV: { // 0x1A  div reg $l, reg $r
-                    _rHI_ = (gfu_uword_t)(((gfu_word_t)_rL_) % ((gfu_word_t)_rR_));
-                    _rLO_ = (gfu_uword_t)(((gfu_word_t)_rL_) / ((gfu_word_t)_rR_));
+                    _rHI_ = (gfu_uword)(((gfu_word)_rL_) % ((gfu_word)_rR_));
+                    _rLO_ = (gfu_uword)(((gfu_word)_rL_) / ((gfu_word)_rR_));
                 } break;
 
                 case GFU_OPFN_DIVU: { // 0x1B  divu reg $l, reg $r
@@ -693,13 +693,13 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
                 } break;
 
                 case GFU_OPFN_MUL: { // 0x1C  mul reg $d, reg $l, reg $r
-                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)(sext(word, long, _rL_) * sext(word, long, _rR_));
+                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword)(sext(word, long, _rL_) * sext(word, long, _rR_));
                 } break;
 
                 case GFU_OPFN_ADD: { // 0x20  add reg $d, reg $l, reg $r
-                    gfu_long_t v = (gfu_word_t)_rL_ + (gfu_word_t)_rR_;
+                    gfu_long v = (gfu_word)_rL_ + (gfu_word)_rR_;
                     // TODO(echoe): overflow exceptions
-                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)v;
+                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword)v;
                 } break;
 
                 case GFU_OPFN_ADDU: { // 0x21  addu reg $d, reg $l, reg $r
@@ -707,9 +707,9 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
                 } break;
 
                 case GFU_OPFN_SUB: { // 0x22  sub reg $d, reg $l, reg $r
-                    gfu_long_t v = (gfu_word_t)_rL_ - (gfu_word_t)_rR_;
+                    gfu_long v = (gfu_word)_rL_ - (gfu_word)_rR_;
                     // TODO(echoe): overflow exceptions
-                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)v;
+                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword)v;
                 } break;
 
                 case GFU_OPFN_SUBU: { // 0x23  subu reg $d, reg $l, reg $r
@@ -735,9 +735,9 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
                 // TODO(echoe): See if we can get hardware calls through some compilers.
                 case GFU_OPFN_CLZ: { // 0x28  clz reg $d, reg $l
                     if (_iD_ != _rnZero_) {
-                        gfu_long_t x = _rL_;
-                        gfu_long_t r = (x > 0xFFFFu) << 4; x >>= r;
-                        gfu_long_t q = (x > 0xFFu  ) << 3; x >>= q; r |= q;
+                        gfu_long x = _rL_;
+                        gfu_long r = (x > 0xFFFFu) << 4; x >>= r;
+                        gfu_long q = (x > 0xFFu  ) << 3; x >>= q; r |= q;
                                  q = (x > 0xFu   ) << 2; x >>= q; r |= q;
                                  q = (x > 0x3u   ) << 1; x >>= q; r |= q;
                                                                   r |= (x >> 1);
@@ -747,9 +747,9 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
 
                 case GFU_OPFN_CLO: { // 0x29  clo reg $d, reg $l
                     if (_iD_ != _rnZero_) {
-                        gfu_long_t x = ~_rL_;
-                        gfu_long_t r = (x > 0xFFFFu) << 4; x >>= r;
-                        gfu_long_t q = (x > 0xFFu  ) << 3; x >>= q; r |= q;
+                        gfu_long x = ~_rL_;
+                        gfu_long r = (x > 0xFFFFu) << 4; x >>= r;
+                        gfu_long q = (x > 0xFFu  ) << 3; x >>= q; r |= q;
                                  q = (x > 0xFu   ) << 2; x >>= q; r |= q;
                                  q = (x > 0x3u   ) << 1; x >>= q; r |= q;
                                                                   r |= (x >> 1);
@@ -758,11 +758,11 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
                 } break;
 
                 case GFU_OPFN_SLT: { // 0x2A  slt reg $d, reg $l, reg $r
-                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)((gfu_word_t)_rL_ < (gfu_word_t)_rR_);
+                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword)((gfu_word)_rL_ < (gfu_word)_rR_);
                 } break;
 
                 case GFU_OPFN_SLTU: { // 0x2B  sltu reg $d, reg $l, reg $r
-                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword_t)(_rL_ < _rR_);
+                    if (_iD_ != _rnZero_) _rD_ = (gfu_uword)(_rL_ < _rR_);
                 } break;
 
                 // TODO(echoe): Trap instructions
@@ -776,12 +776,12 @@ static bool gfusx_step(gfusx_t* vm, gfu_uword_t pc, gfu_uword_t code) {
                 } break;
 
                 case GFU_C0FN_MF: {
-                    gfu_uword_t reg = _iL_ + _iSh_;
+                    gfu_uword reg = _iL_ + _iSh_;
                     if (_iD_ != _rnZero_) _rD_ = _c0N_(reg);
                 } break;
 
                 case GFU_C0FN_MT: {
-                    gfu_uword_t reg = _iD_ + _iSh_;
+                    gfu_uword reg = _iD_ + _iSh_;
                     switch (reg) {
                         default: _c0N_(reg) = _rL_; break;
                         case 12: { /* IRQ Status */
@@ -829,8 +829,8 @@ static void gfusx_dumpreg(gfusx_t* vm) {
 }
 
 static void gfusx_dumpstack(gfusx_t* vm) {
-    gfu_uword_t sp = _rSP_ & ~0x1E;
-    gfu_uword_t ram_size = gfusx_memory_read_hwreg_half(vm, GFU_RAM_SIZE_ADDR & 0xFFFF) == GFU_RAM_SIZE_LARGE
+    gfu_uword sp = _rSP_ & ~0x1E;
+    gfu_uword ram_size = gfusx_memory_read_hwreg_half(vm, GFU_RAM_SIZE_ADDR & 0xFFFF) == GFU_RAM_SIZE_LARGE
         ? GFU_MAIN1_RAM_SIZE : GFU_MAIN0_RAM_SIZE;
 
     if (
@@ -840,9 +840,9 @@ static void gfusx_dumpstack(gfusx_t* vm) {
         return;
     }
 
-    gfu_uword_t* stack_top = (gfu_uword_t*)gfusx_memory_get_rptr(vm, sp);
+    gfu_uword* stack_top = (gfu_uword*)gfusx_memory_get_rptr(vm, sp);
     gfu_assert(stack_top != nullptr, "Stack pointer should have been in range.");
-    gfu_uword_t* stack_bottom = (gfu_uword_t*)gfusx_memory_get_rptr(vm, GFU_KSEG0_BASE + GFU_WRAM_BASE + GFU_WRAM_SIZE);
+    gfu_uword* stack_bottom = (gfu_uword*)gfusx_memory_get_rptr(vm, GFU_KSEG0_BASE + GFU_WRAM_BASE + GFU_WRAM_SIZE);
     gfu_assert(stack_top != nullptr, "Stack pointer should have been in range.");
 
     if (gfusx_memory_read_hwreg_half(vm, GFU_RAM_SIZE_ADDR & 0xFFFF) == GFU_RAM_SIZE_LARGE) {
@@ -851,14 +851,14 @@ static void gfusx_dumpstack(gfusx_t* vm) {
         stack_bottom += GFU_MAIN0_RAM_SIZE;
     }
 
-    gfu_uword_t stack_size = cast(gfu_uword_t, stack_bottom - stack_top);
+    gfu_uword stack_size = cast(gfu_uword, stack_bottom - stack_top);
     if (stack_size == 0) return;
 
     fprintf(stderr, "Stack           +00      +04      +08      +0C      +10      +14      +18      +1C\n");
 
-    for (gfu_uword_t* stack = stack_top; stack < stack_bottom; stack += 8) {
-        fprintf(stderr, "%08X | ", (gfu_uword_t)(gfu_ulong_t)stack);
-        for (gfu_uword_t i = 0; i < 8 && stack + i < stack_bottom; i++) {
+    for (gfu_uword* stack = stack_top; stack < stack_bottom; stack += 8) {
+        fprintf(stderr, "%08X | ", (gfu_uword)(gfu_ulong)stack);
+        for (gfu_uword i = 0; i < 8 && stack + i < stack_bottom; i++) {
             fprintf(stderr, "%08X ", *(stack + i));
         }
         fputc('\n', stderr);
@@ -869,10 +869,10 @@ static void gfusx_dumpstack(gfusx_t* vm) {
 
 void gfusx_exec_block(gfusx_t* vm) {
     while (!vm->halt) {
-        gfu_ulong_t begin_cycle_count = vm->cpu.cycle;
+        gfu_ulong begin_cycle_count = vm->cpu.cycle;
 
-        gfu_uword_t pc = _rPC_;
-        gfu_uword_t code = gfusx_memory_read_inst(vm, pc);
+        gfu_uword pc = _rPC_;
+        gfu_uword code = gfusx_memory_read_inst(vm, pc);
 
         _rPC_ += 4;
         // TODO(echoe): Put more "accurate" cycle counts into varying instructions and operations.
@@ -880,7 +880,7 @@ void gfusx_exec_block(gfusx_t* vm) {
 
         bool jumped = gfusx_step(vm, pc, code);
 
-        gfu_ulong_t end_cycle_count = vm->cpu.cycle;
+        gfu_ulong end_cycle_count = vm->cpu.cycle;
         gfu_assert(end_cycle_count > begin_cycle_count, "Missing cycle counting on some instructions.");
 
         if (jumped) {

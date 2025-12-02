@@ -4,28 +4,28 @@
 #include "memory.h"
 #include "vm.h"
 
-gfu_ubyte_t gfusx_hardware_read_byte(gfusx_t* vm, gfu_uword_t addr) {
-    gfu_uword_t hwaddr = addr & 0x1FFFFFFF;
-    gfu_ubyte_t value = 0xFFu;
+gfu_ubyte gfusx_hardware_read_byte(gfusx_t* vm, gfu_uword addr) {
+    gfu_uword hwaddr = addr & 0x1FFFFFFF;
+    gfu_ubyte value = 0xFFu;
 
     switch (hwaddr) {
         default: {
             gfusx_logf(vm, "Unknown 8-bit hardware read at address %08X.", addr);
-            gfu_ubyte_t* hwptr = vm->memory.hard + (hwaddr & 0xFFFF);
+            gfu_ubyte* hwptr = vm->memory.hard + (hwaddr & 0xFFFF);
             *hwptr = value;
             return value;
         }
     }
 
     gfusx_logf(vm, "Known 8-bit hardware read at address %08X.", addr);
-    gfu_ubyte_t* hwptr = vm->memory.hard + (hwaddr & 0xFFFF);
+    gfu_ubyte* hwptr = vm->memory.hard + (hwaddr & 0xFFFF);
     *hwptr = value;
     return value;
 }
 
-gfu_uhalf_t gfusx_hardware_read_half(gfusx_t* vm, gfu_uword_t addr) {
-    gfu_uword_t hwaddr = addr & 0x1FFFFFFF;
-    gfu_uhalf_t value = 0xFFFFu;
+gfu_uhalf gfusx_hardware_read_half(gfusx_t* vm, gfu_uword addr) {
+    gfu_uword hwaddr = addr & 0x1FFFFFFF;
+    gfu_uhalf value = 0xFFFFu;
 
     switch (hwaddr) {
         case GFU_RAM_SIZE_ADDR: {
@@ -42,21 +42,21 @@ gfu_uhalf_t gfusx_hardware_read_half(gfusx_t* vm, gfu_uword_t addr) {
 
         default: {
             gfusx_logf(vm, "Unknown 16-bit hardware read at address %08X.", addr);
-            gfu_uhalf_t* hwptr = cast(gfu_uhalf_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+            gfu_uhalf* hwptr = cast(gfu_uhalf*, vm->memory.hard + (hwaddr & 0xFFFF));
             *hwptr = SWAP16(value);
             return value;
         }
     }
 
     gfusx_logf(vm, "Known 16-bit hardware read at address %08X.", addr);
-    gfu_uhalf_t* hwptr = cast(gfu_uhalf_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+    gfu_uhalf* hwptr = cast(gfu_uhalf*, vm->memory.hard + (hwaddr & 0xFFFF));
     *hwptr = SWAP16(value);
     return value;
 }
 
-gfu_uword_t gfusx_hardware_read_word(gfusx_t* vm, gfu_uword_t addr) {
-    gfu_uword_t hwaddr = addr & 0x1FFFFFFF;
-    gfu_uword_t value = 0xFFFFFFFFu;
+gfu_uword gfusx_hardware_read_word(gfusx_t* vm, gfu_uword addr) {
+    gfu_uword hwaddr = addr & 0x1FFFFFFF;
+    gfu_uword value = 0xFFFFFFFFu;
 
     switch (hwaddr) {
         case GFU_RAM_SIZE_ADDR: {
@@ -127,20 +127,20 @@ gfu_uword_t gfusx_hardware_read_word(gfusx_t* vm, gfu_uword_t addr) {
 
         default: {
             gfusx_logf(vm, "Unknown 32-bit hardware read at address %08X.", addr);
-            gfu_uword_t* hwptr = cast(gfu_uword_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+            gfu_uword* hwptr = cast(gfu_uword*, vm->memory.hard + (hwaddr & 0xFFFF));
             *hwptr = SWAP32(value);
             return value;
         }
     }
 
     gfusx_logf(vm, "Known 32-bit hardware read at address %08X.", addr);
-    gfu_uword_t* hwptr = cast(gfu_uword_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+    gfu_uword* hwptr = cast(gfu_uword*, vm->memory.hard + (hwaddr & 0xFFFF));
     *hwptr = SWAP32(value);
     return value;
 }
 
-void gfusx_hardware_write_byte(gfusx_t* vm, gfu_uword_t addr, gfu_ubyte_t value) {
-    gfu_uword_t hwaddr = addr & 0x1FFFFFFF;
+void gfusx_hardware_write_byte(gfusx_t* vm, gfu_uword addr, gfu_ubyte value) {
+    gfu_uword hwaddr = addr & 0x1FFFFFFF;
 
     switch (hwaddr) {
         case GFU_POST_ADDR: {
@@ -149,19 +149,19 @@ void gfusx_hardware_write_byte(gfusx_t* vm, gfu_uword_t addr, gfu_ubyte_t value)
 
         default: {
             gfusx_logf(vm, "Unknown 8-bit hardware write at address %02X of value %08X.", addr, value);
-            gfu_ubyte_t* hwptr = vm->memory.hard + (hwaddr & 0xFFFF);
+            gfu_ubyte* hwptr = vm->memory.hard + (hwaddr & 0xFFFF);
             *hwptr = value;
             return;
         }
     }
 
     gfusx_logf(vm, "Known 8-bit hardware write at address %08X of value %02X.", addr, value);
-    gfu_ubyte_t* hwptr = vm->memory.hard + (hwaddr & 0xFFFF);
+    gfu_ubyte* hwptr = vm->memory.hard + (hwaddr & 0xFFFF);
     *hwptr = value;
 }
 
-void gfusx_hardware_write_half(gfusx_t* vm, gfu_uword_t addr, gfu_uhalf_t value) {
-    gfu_uword_t hwaddr = addr & 0x1FFFFFFF;
+void gfusx_hardware_write_half(gfusx_t* vm, gfu_uword addr, gfu_uhalf value) {
+    gfu_uword hwaddr = addr & 0x1FFFFFFF;
 
     switch (hwaddr) {
         case GFU_RAM_SIZE_ADDR: {
@@ -186,19 +186,19 @@ void gfusx_hardware_write_half(gfusx_t* vm, gfu_uword_t addr, gfu_uhalf_t value)
 
         default: {
             gfusx_logf(vm, "Unknown 16-bit hardware write at address %08X of value %04X.", addr, value);
-            gfu_uhalf_t* hwptr = cast(gfu_uhalf_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+            gfu_uhalf* hwptr = cast(gfu_uhalf*, vm->memory.hard + (hwaddr & 0xFFFF));
             *hwptr = SWAP16(value);
             return;
         }
     }
 
     gfusx_logf(vm, "Known 16-bit hardware write at address %08X of value %04X.", addr, value);
-    gfu_uhalf_t* hwptr = cast(gfu_uhalf_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+    gfu_uhalf* hwptr = cast(gfu_uhalf*, vm->memory.hard + (hwaddr & 0xFFFF));
     *hwptr = SWAP16(value);
 }
 
-void gfusx_hardware_write_word(gfusx_t* vm, gfu_uword_t addr, gfu_uword_t value) {
-    gfu_uword_t hwaddr = addr & 0x1FFFFFFF;
+void gfusx_hardware_write_word(gfusx_t* vm, gfu_uword addr, gfu_uword value) {
+    gfu_uword hwaddr = addr & 0x1FFFFFFF;
 
     switch (hwaddr) {
         case GFU_RAM_SIZE_ADDR: {
@@ -210,7 +210,7 @@ void gfusx_hardware_write_word(gfusx_t* vm, gfu_uword_t addr, gfu_uword_t value)
 
         case GFU_ISTAT_ADDR: {
             gfusx_logf(vm, "I_STAT 32-bit write of %08X.", value);
-            gfu_uhalf_t half_value = (gfu_uhalf_t)value;
+            gfu_uhalf half_value = (gfu_uhalf)value;
             gfusx_memory_write_hwreg_half(vm, hwaddr, half_value);
             gfusx_clear_irq(vm, ~half_value);
             return;
@@ -218,7 +218,7 @@ void gfusx_hardware_write_word(gfusx_t* vm, gfu_uword_t addr, gfu_uword_t value)
 
         case GFU_IMASK_ADDR: {
             gfusx_logf(vm, "I_MASK 32-bit write of %08X.", value);
-            gfu_uhalf_t half_value = (gfu_uhalf_t)value;
+            gfu_uhalf half_value = (gfu_uhalf)value;
             gfusx_memory_write_hwreg_half(vm, hwaddr, half_value);
             return;
         }
@@ -261,10 +261,10 @@ void gfusx_hardware_write_word(gfusx_t* vm, gfu_uword_t addr, gfu_uword_t value)
 
         case GFU_DMA_DICR: {
             gfusx_logf(vm, "DMA ICR 32-bit write of %08X.", value);
-            gfu_uword_t icr = gfusx_memory_read_hwreg_word(vm, hwaddr);
+            gfu_uword icr = gfusx_memory_read_hwreg_word(vm, hwaddr);
             // 01111111'00000000'00000000'00000000
             // 00000000'11111111'10000000'00111111
-            gfu_uword_t ack = (value & 0x7F000000) ^ 0x7F000000;
+            gfu_uword ack = (value & 0x7F000000) ^ 0x7F000000;
             bool was_not_triggered = 0 == (icr & GFU_DMA_DICR_MASTER_ENABLE);
             bool is_triggered = false;
             bool has_error = 0 != (value & GFU_DMA_DICR_BUS_ERROR);
@@ -302,34 +302,34 @@ void gfusx_hardware_write_word(gfusx_t* vm, gfu_uword_t addr, gfu_uword_t value)
 
         default: {
             gfusx_logf(vm, "Unknown 32-bit hardware write at address %08X of value %08X.", addr, value);
-            gfu_uword_t* hwptr = cast(gfu_uword_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+            gfu_uword* hwptr = cast(gfu_uword*, vm->memory.hard + (hwaddr & 0xFFFF));
             *hwptr = SWAP32(value);
             return;
         }
     }
 
     gfusx_logf(vm, "Known 32-bit hardware write at address %08X of value %08X.", addr, value);
-    gfu_uword_t* hwptr = cast(gfu_uword_t*, vm->memory.hard + (hwaddr & 0xFFFF));
+    gfu_uword* hwptr = cast(gfu_uword*, vm->memory.hard + (hwaddr & 0xFFFF));
     *hwptr = SWAP32(value);
 }
 
-void gfusx_set_irq(gfusx_t* vm, gfu_uword_t irq) {
-    gfu_uword_t istat = gfusx_memory_read_hwreg_word(vm, GFU_ISTAT_ADDR & 0xFFFF);
+void gfusx_set_irq(gfusx_t* vm, gfu_uword irq) {
+    gfu_uword istat = gfusx_memory_read_hwreg_word(vm, GFU_ISTAT_ADDR & 0xFFFF);
     // gfusx_memory_write_hwreg_word(vm, GFU_ISTAT_ADDR & 0xFFFF, istat | irq);
     gfusx_hardware_write_word(vm, GFU_ISTAT_ADDR, istat | irq);
 }
 
-void gfusx_clear_irq(gfusx_t* vm, gfu_uword_t irq) {
-    gfu_uword_t istat = gfusx_memory_read_hwreg_word(vm, GFU_ISTAT_ADDR & 0xFFFF);
+void gfusx_clear_irq(gfusx_t* vm, gfu_uword irq) {
+    gfu_uword istat = gfusx_memory_read_hwreg_word(vm, GFU_ISTAT_ADDR & 0xFFFF);
     gfusx_memory_write_hwreg_word(vm, GFU_ISTAT_ADDR & 0xFFFF, istat & ~irq);
 }
 
-void gfusx_dma_exec(gfusx_t* vm, gfu_uhalf_t channel, gfu_uword_t chcr) {
+void gfusx_dma_exec(gfusx_t* vm, gfu_uhalf channel, gfu_uword chcr) {
     gfusx_memory_set_dma_chcr(vm, channel, chcr);
     bool start_transfer = chcr & 0x01000000;
     if (!start_transfer) return;
 
-    gfu_uword_t dpcr = gfusx_memory_read_hwreg_word(vm, GFU_DMA_DPCR & 0xFFFF);
+    gfu_uword dpcr = gfusx_memory_read_hwreg_word(vm, GFU_DMA_DPCR & 0xFFFF);
     bool is_dma_channel_enabled = GFU_DMA_DPCR_ENABLED(dpcr, channel);
 
     if (!is_dma_channel_enabled) {
@@ -340,9 +340,9 @@ void gfusx_dma_exec(gfusx_t* vm, gfu_uhalf_t channel, gfu_uword_t chcr) {
     gfu_assert(start_transfer && is_dma_channel_enabled, "We should have early-exited if either condition was false.");
     gfusx_logf(vm, "Begin DMA%u exec", channel);
 
-    gfu_uword_t madr = gfusx_memory_get_dma_madr(vm, channel);
-    gfu_uword_t bcr = gfusx_memory_get_dma_bcr(vm, channel);
-    gfu_uword_t mode = (chcr & 0x0600) >> 9;
+    gfu_uword madr = gfusx_memory_get_dma_madr(vm, channel);
+    gfu_uword bcr = gfusx_memory_get_dma_bcr(vm, channel);
+    gfu_uword mode = (chcr & 0x0600) >> 9;
 
     gfusx_logf(vm, "    MADR = 0x%08X", madr);
     gfusx_logf(vm, "    BCR  = 0x%08X", bcr);

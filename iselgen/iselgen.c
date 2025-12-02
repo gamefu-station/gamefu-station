@@ -55,16 +55,16 @@ typedef enum isel_token_kind {
 
 typedef struct isel_token {
     isel_token_kind kind;
-    gfu_uword_t location;
+    gfu_uword location;
     const char *begin, *end;
-    gfu_uword_t line, column;
+    gfu_uword line, column;
     union {
-        gfu_opcode_t opcode;
-        gfu_opfn_t function;
-        gfu_c0fn_t cop0_function;
+        gfu_opcode opcode;
+        gfu_opfn function;
+        gfu_c0fn cop0_function;
         int mnemonic;
-        gfu_gpr_t _register;
-        gfu_uword_t immediate;
+        gfu_gpr _register;
+        gfu_uword immediate;
         const char* var;
     } as;
 } isel_token;
@@ -82,10 +82,10 @@ static void isel_parse_pattern(isel_parser* parser);
 
 static source isel_source = {0};
 
-static gfu_arena_t isel_string_arena = {0};
-static gfu_arena_t isel_match_arena = {0};
-static gfu_arena_t isel_emit_arena = {0};
-static gfu_arena_t isel_pattern_arena = {0};
+static gfu_arena isel_string_arena = {0};
+static gfu_arena isel_match_arena = {0};
+static gfu_arena isel_emit_arena = {0};
+static gfu_arena isel_pattern_arena = {0};
 
 static struct mnemonic {
     char mnemonic[16];
@@ -161,16 +161,16 @@ int main(int argc, char** argv) {
     };
 
     gfu_arena_init(&isel_string_arena, 256);
-    isel_string_arena.alignment = sizeof(gfu_uword_t);
+    isel_string_arena.alignment = sizeof(gfu_uword);
 
     gfu_arena_init(&isel_match_arena, 32 * 1024);
-    isel_match_arena.alignment = sizeof(gfu_uword_t);
+    isel_match_arena.alignment = sizeof(gfu_uword);
 
     gfu_arena_init(&isel_emit_arena, 32 * 1024);
-    isel_emit_arena.alignment = sizeof(gfu_uword_t);
+    isel_emit_arena.alignment = sizeof(gfu_uword);
 
     gfu_arena_init(&isel_pattern_arena, 16 * 1024);
-    isel_pattern_arena.alignment = sizeof(gfu_uword_t);
+    isel_pattern_arena.alignment = sizeof(gfu_uword);
 
     isel_parser parser = {0};
     isel_lexer_init(&parser.lexer);
@@ -180,13 +180,13 @@ int main(int argc, char** argv) {
         isel_parse_pattern(&parser);
     }
 
-    gfu_uword_t match_count = isel_match_arena.allocated / sizeof(isel_match);
+    gfu_uword match_count = isel_match_arena.allocated / sizeof(isel_match);
     isel_match* matches = (isel_match*)isel_match_arena.memory;
 
-    gfu_uword_t emit_count = isel_emit_arena.allocated / sizeof(isel_emit);
+    gfu_uword emit_count = isel_emit_arena.allocated / sizeof(isel_emit);
     isel_emit* emits = (isel_emit*)isel_emit_arena.memory;
 
-    gfu_uword_t pattern_count = isel_pattern_arena.allocated / sizeof(isel_pattern);
+    gfu_uword pattern_count = isel_pattern_arena.allocated / sizeof(isel_pattern);
     isel_pattern* patterns = (isel_pattern*)isel_pattern_arena.memory;
 
     fprintf(stderr, "Variable name storage required: %d bytes\n", isel_string_arena.allocated);
@@ -209,14 +209,14 @@ int main(int argc, char** argv) {
 
     fprintf(f, "#define ISEL_MATCH_COUNT %d\n", match_count);
     fprintf(f, "static isel_match isel_matches[%d] = {\n", match_count + 1);
-    for (gfu_uword_t i = 0; i < match_count; i++) {
+    for (gfu_uword i = 0; i < match_count; i++) {
         isel_match match = matches[i];
         fprintf(f, "    {\n");
         fprintf(f, "        .mnemonic = FUASM_MNEM_%s,\n", defined_mnemonics[match.mnemonic].constant);
         if (match.operand_count > 0) {
             fprintf(f, "        .operand_count = %d,\n", match.operand_count);
             fprintf(f, "        .operands = {\n");
-            for (gfu_uword_t j = 0; j < match.operand_count; j++) {
+            for (gfu_uword j = 0; j < match.operand_count; j++) {
                 isel_operand operand = match.operands[j];
                 fprintf(f, "            {\n");
                 fprintf(f, "                .type = %s,\n", isel_type_constants[operand.type]);
@@ -238,7 +238,7 @@ int main(int argc, char** argv) {
 
     fprintf(f, "#define ISEL_EMIT_COUNT %d\n", emit_count);
     fprintf(f, "static isel_emit isel_emits[%d] = {\n", emit_count + 1);
-    for (gfu_uword_t i = 0; i < emit_count; i++) {
+    for (gfu_uword i = 0; i < emit_count; i++) {
         isel_emit emit = emits[i];
         fprintf(f, "    {\n");
         fprintf(f, "        .kind = %s,\n", isel_emit_kind_constants[emit.kind]);
@@ -250,7 +250,7 @@ int main(int argc, char** argv) {
         if (emit.argument_count > 0) {
             fprintf(f, "        .argument_count = %d,\n", emit.argument_count);
             fprintf(f, "        .arguments = {\n");
-            for (gfu_uword_t j = 0; j < emit.argument_count; j++) {
+            for (gfu_uword j = 0; j < emit.argument_count; j++) {
                 isel_argument argument = emit.arguments[j];
                 fprintf(f, "            {\n");
                 fprintf(f, "                .kind = %s,\n", isel_argument_kind_constants[argument.kind]);
@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
                 } else if (argument.kind >= ISEL_ARG_VAR && argument.kind <= ISEL_ARG_VAR_OFFS) {
                     fprintf(f, "                .as.var_index = %d,\n", argument.as.var_index);
                 } else if (argument.kind >= ISEL_ARG_IMM && argument.kind <= ISEL_ARG_IMM_OFFS) {
-                    fprintf(f, "                .as.immediate = %"PRIi64",\n", (int64_t)(gfu_word_t)argument.as.immediate);
+                    fprintf(f, "                .as.immediate = %"PRIi64",\n", (int64_t)(gfu_word)argument.as.immediate);
                 }
                 fprintf(f, "            },\n");
             }
@@ -272,7 +272,7 @@ int main(int argc, char** argv) {
 
     fprintf(f, "#define ISEL_PATTERN_COUNT %d\n", pattern_count);
     fprintf(f, "static isel_pattern isel_patterns[%d] = {\n", pattern_count + 1);
-    for (gfu_uword_t i = 0; i < pattern_count; i++) {
+    for (gfu_uword i = 0; i < pattern_count; i++) {
         isel_pattern pattern = patterns[i];
         fprintf(f, "    {\n");
         fprintf(f, "        .var_count = %d,\n", pattern.var_count);
@@ -349,15 +349,15 @@ static isel_emit_kind isel_parser_expect_emit_kind(isel_parser* parser) {
     return ISEL_EMIT_INVALID;
 }
 
-static gfu_opcode_t isel_parser_expect_opcode(isel_parser* parser) {
+static gfu_opcode isel_parser_expect_opcode(isel_parser* parser) {
     return isel_parser_expect(parser, ISEL_TK_OPCODE, "an opcode").as.opcode;
 }
 
-static gfu_opfn_t isel_parser_expect_function(isel_parser* parser) {
+static gfu_opfn isel_parser_expect_function(isel_parser* parser) {
     return isel_parser_expect(parser, ISEL_TK_FUNCTION, "a function").as.function;
 }
 
-static gfu_c0fn_t isel_parser_expect_cop0_function(isel_parser* parser) {
+static gfu_c0fn isel_parser_expect_cop0_function(isel_parser* parser) {
     return isel_parser_expect(parser, ISEL_TK_COP0_FUNCTION, "a COP0 function").as.cop0_function;
 }
 
@@ -403,8 +403,8 @@ static void isel_parse_match(isel_parser* parser) {
     }
 }
 
-static gfu_uword_t isel_lookup_var(gfu_uword_t location, const char* var, const char** vars, gfu_uword_t var_count) {
-    for (gfu_uword_t i = 0; i < var_count; i++) {
+static gfu_uword isel_lookup_var(gfu_uword location, const char* var, const char** vars, gfu_uword var_count) {
+    for (gfu_uword i = 0; i < var_count; i++) {
         if (0 == strcmp(var, vars[i])) {
             return i;
         }
@@ -414,7 +414,7 @@ static gfu_uword_t isel_lookup_var(gfu_uword_t location, const char* var, const 
     return -1;
 }
 
-static void isel_parse_emit_argument(isel_parser* parser, isel_argument* argument, const char** vars, gfu_uword_t var_count) {
+static void isel_parse_emit_argument(isel_parser* parser, isel_argument* argument, const char** vars, gfu_uword var_count) {
     if (parser->tk.kind == ISEL_TK_REGISTER) {
         argument->kind = ISEL_ARG_REGISTER;
         argument->as._register = parser->tk.as._register;
@@ -431,7 +431,7 @@ static void isel_parse_emit_argument(isel_parser* parser, isel_argument* argumen
         isel_parser_advance(parser);
         if (parser->tk.kind == ISEL_TK_IMMEDIATE) {
             argument->kind = ISEL_ARG_IMM;
-            argument->as.immediate = (gfu_uword_t)(-(gfu_word_t)(parser->tk.as.immediate));
+            argument->as.immediate = (gfu_uword)(-(gfu_word)(parser->tk.as.immediate));
             isel_parser_advance(parser);
         } else {
             argument->kind = ISEL_ARG_VAR_NEGATE;
@@ -459,7 +459,7 @@ static void isel_parse_emit_argument(isel_parser* parser, isel_argument* argumen
     }
 }
 
-static void isel_parse_emit(isel_parser* parser, const char** vars, gfu_uword_t var_count) {
+static void isel_parse_emit(isel_parser* parser, const char** vars, gfu_uword var_count) {
     isel_emit* emit = gfu_arena_alloc(&isel_emit_arena, sizeof *emit);
 
     emit->kind = isel_parser_expect_emit_kind(parser);
@@ -491,7 +491,7 @@ static void isel_parse_emit(isel_parser* parser, const char** vars, gfu_uword_t 
 }
 
 static void isel_parse_pattern(isel_parser* parser) {
-    gfu_uword_t location = parser->tk.location;
+    gfu_uword location = parser->tk.location;
 
     isel_pattern* pattern = gfu_arena_alloc(&isel_pattern_arena, sizeof *pattern);
     isel_match* matches = (isel_match*)&isel_match_arena.memory[isel_match_arena.allocated];
@@ -502,7 +502,7 @@ static void isel_parse_pattern(isel_parser* parser) {
     while (!isel_parser_is_at_end(parser) && parser->tk.kind != ISEL_TK_EMITS) {
         isel_parse_match(parser);
         isel_match* match = &matches[pattern->match_count++];
-        for (gfu_uword_t j = 0; j < match->operand_count; j++) {
+        for (gfu_uword j = 0; j < match->operand_count; j++) {
             if (!match->operands[j].is_constant) {
                 pattern->var_count++;
             }
@@ -514,11 +514,11 @@ static void isel_parse_pattern(isel_parser* parser) {
     }
 
     const char* vars[pattern->var_count];
-    for (gfu_uword_t i = 0, var_index = 0; i < pattern->match_count; i++) {
+    for (gfu_uword i = 0, var_index = 0; i < pattern->match_count; i++) {
         isel_match* match = &matches[i];
-        for (gfu_uword_t j = 0; j < match->operand_count; j++) {
+        for (gfu_uword j = 0; j < match->operand_count; j++) {
             if (!match->operands[j].is_constant) {
-                for (gfu_uword_t k = 0; k < var_index; k++) {
+                for (gfu_uword k = 0; k < var_index; k++) {
                     if (0 == strcmp(match->operands[j].as.var, vars[k])) {
                         diag_issue(DIAG_FATAL, isel_source, location, "Match claus(es) contain duplicate variable names.");
                     }
@@ -603,8 +603,8 @@ static void isel_lexer_init(etok_lexer* lexer) {
     lexer->comment_consumer = isel_etok_comment_consumer;
 }
 
-static gfu_uword_t isel_lexer_location(etok_lexer* lexer) {
-    return (gfu_uword_t)(lexer->source_current - lexer->source_begin);
+static gfu_uword isel_lexer_location(etok_lexer* lexer) {
+    return (gfu_uword)(lexer->source_current - lexer->source_begin);
 }
 
 static struct {
@@ -626,7 +626,7 @@ static struct {
 };
 
 static struct {
-    gfu_opcode_t opcode;
+    gfu_opcode opcode;
     const char* image;
 } isel_opcodes[] = {
 #define X(Id, Value) { GFU_OP_##Id, #Id },
@@ -636,7 +636,7 @@ static struct {
 };
 
 static struct {
-    gfu_opfn_t function;
+    gfu_opfn function;
     const char* image;
 } isel_functions[] = {
 #define X(Id, Value) { (int)GFU_OPFN_##Id, #Id },
@@ -646,7 +646,7 @@ static struct {
 };
 
 static struct {
-    gfu_c0fn_t cop0_function;
+    gfu_c0fn cop0_function;
     const char* image;
 } isel_cop0_functions[] = {
 #define X(Id, Value) { (int)GFU_C0FN_##Id, #Id },
@@ -656,7 +656,7 @@ static struct {
 };
 
 static struct {
-    gfu_gpr_t _register;
+    gfu_gpr _register;
     const char* image;
 } isel_registers[] = {
 #define X(Id, Image) { GFU_GPR_##Id, "" Image "" },
@@ -678,8 +678,8 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
         .kind = ISEL_TK_INVALID,
         .location = isel_lexer_location(lexer),
         .begin = lexer->source_current,
-        .line = (gfu_uword_t)lexer->line,
-        .column = (gfu_uword_t)lexer->column,
+        .line = (gfu_uword)lexer->line,
+        .column = (gfu_uword)lexer->column,
     };
 
     if (etok_lexer_is_at_end(lexer)) {
@@ -700,7 +700,7 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
             }
 
             token.kind = ISEL_TK_IMMEDIATE;
-            token.as.immediate = (gfu_uword_t)immediate;
+            token.as.immediate = (gfu_uword)immediate;
         } break;
 
         case '%': {
@@ -770,7 +770,7 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
             }
 
             if (varname == nullptr) {
-                varname = gfu_arena_alloc(&isel_string_arena, (gfu_uword_t)length + 1);
+                varname = gfu_arena_alloc(&isel_string_arena, (gfu_uword)length + 1);
                 memcpy(varname, name, length);
                 varname[length] = 0;
             }

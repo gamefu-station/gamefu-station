@@ -25,7 +25,7 @@ void gfusx_chip_deinit(gfusx_t* vm) {
     vm->chip = (gfusx_chip_t){0};
 }
 
-bool gfusx_chip_insert_rom_data(gfusx_t* vm, gfu_ubyte_t* data, gfu_uword_t size) {
+bool gfusx_chip_insert_rom_data(gfusx_t* vm, gfu_ubyte* data, gfu_uword size) {
     vm->chip.data = data;
     vm->chip.size = size;
 
@@ -80,10 +80,10 @@ defer:;
         return false;
     }
 
-    return gfusx_chip_insert_rom_data(vm, (gfu_ubyte_t*)rom_data, (gfu_uword_t)length);
+    return gfusx_chip_insert_rom_data(vm, (gfu_ubyte*)rom_data, (gfu_uword)length);
 }
 
-void gfusx_chip_dma(gfusx_t* vm, gfu_uword_t madr, gfu_uword_t bcr, gfu_uword_t chcr) {
+void gfusx_chip_dma(gfusx_t* vm, gfu_uword madr, gfu_uword bcr, gfu_uword chcr) {
     gfusx_logf(vm, ">> DMA0 CHIP - %08X ADDR = %08X SIZE = %04X", chcr, madr, bcr);
     switch (chcr) {
         default: {
@@ -92,37 +92,37 @@ void gfusx_chip_dma(gfusx_t* vm, gfu_uword_t madr, gfu_uword_t bcr, gfu_uword_t 
         } break;
 
         case 0x11000000: {
-            gfu_uword_t nwords = bcr & 0xFFFF;
-            gfu_uword_t nbytes = nwords * 4;
+            gfu_uword nwords = bcr & 0xFFFF;
+            gfu_uword nbytes = nwords * 4;
 
             if (nbytes > vm->chip.size - vm->chip.offset) {
                 nbytes = vm->chip.size - vm->chip.offset;
             }
 
-            gfu_ubyte_t* mem_wptr = gfusx_memory_get_wptr(vm, madr);
+            gfu_ubyte* mem_wptr = gfusx_memory_get_wptr(vm, madr);
             memcpy(mem_wptr, vm->chip.data + vm->chip.offset, (size_t)nbytes);
 
-            gfu_uword_t cycle_count = nbytes / 16;
+            gfu_uword cycle_count = nbytes / 16;
             gfusx_schedule_interrupt(vm, GFUSX_INT_CHIP_DMA, cycle_count);
         } break;
     }
 }
 
-gfu_uword_t gfusx_chip_read0(gfusx_t* vm) {
+gfu_uword gfusx_chip_read0(gfusx_t* vm) {
     return 0xFFFFFFFF;
 }
 
-gfu_uword_t gfusx_chip_read1(gfusx_t* vm) {
-    gfu_uword_t status = vm->chip.status.value;
+gfu_uword gfusx_chip_read1(gfusx_t* vm) {
+    gfu_uword status = vm->chip.status.value;
     return status;
 }
 
-void gfusx_chip_write0(gfusx_t* vm, gfu_uword_t value) {
+void gfusx_chip_write0(gfusx_t* vm, gfu_uword value) {
     gfusx_memory_write_hwreg_word(vm, GFU_CHIP0_ADDR & 0xFFFF, value);
 }
 
-void gfusx_chip_write1(gfusx_t* vm, gfu_uword_t value) {
-    gfu_uword_t cmd = (value >> 24) & 0xFF;
+void gfusx_chip_write1(gfusx_t* vm, gfu_uword value) {
+    gfu_uword cmd = (value >> 24) & 0xFF;
     // gfusx_memory_write_hwreg_word(vm, GFU_CHIP1_ADDR & 0xFFFF, value);
 
     switch (cmd) {
@@ -148,7 +148,7 @@ void gfusx_chip_write1(gfusx_t* vm, gfu_uword_t value) {
         } break;
 
         case 0x03: {
-            gfu_uword_t offset = value & 0x00FFFFFF;
+            gfu_uword offset = value & 0x00FFFFFF;
             if (offset > vm->chip.size) {
                 offset = vm->chip.size;
             }

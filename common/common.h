@@ -80,20 +80,19 @@
 #define return_defer(Result) do { result = (Result); goto defer; } while (0)
 
 #define cast(T, V) ((T)(V))
-#define sext(I, O, V) ((gfu_u##O##_t)(gfu_##O##_t)(gfu_##I##_t)(V))
+#define sext(I, O, V) ((gfu_u##O)(gfu_##O)(gfu_##I)(V))
 
 #define SWAP16(V) (V)
 #define SWAP32(V) (V)
 
-typedef int8_t gfu_byte_t;
-typedef uint8_t gfu_ubyte_t;
-typedef int16_t gfu_half_t;
-typedef uint16_t gfu_uhalf_t;
-typedef int32_t gfu_word_t;
-typedef uint32_t gfu_uword_t;
-typedef int64_t gfu_long_t;
-typedef uint64_t gfu_ulong_t;
-typedef bool gfu_bool_t;
+typedef int8_t gfu_byte;
+typedef uint8_t gfu_ubyte;
+typedef int16_t gfu_half;
+typedef uint16_t gfu_uhalf;
+typedef int32_t gfu_word;
+typedef uint32_t gfu_uword;
+typedef int64_t gfu_long;
+typedef uint64_t gfu_ulong;
 
 typedef struct source {
     const char* name;
@@ -129,12 +128,12 @@ void diag_issue_v(diag_level level, source source, int32_t location, const char*
 
 typedef struct gfu_arena {
     char* memory;
-    gfu_uword_t capacity, allocated;
-    gfu_uword_t alignment;
-} gfu_arena_t;
+    gfu_uword capacity, allocated;
+    gfu_uword alignment;
+} gfu_arena;
 
-void gfu_arena_init(gfu_arena_t* arena, gfu_uword_t capacity);
-void gfu_arena_deinit(gfu_arena_t* arena);
-void* gfu_arena_alloc(gfu_arena_t* arena, gfu_uword_t size);
+void gfu_arena_init(gfu_arena* arena, gfu_uword capacity);
+void gfu_arena_deinit(gfu_arena* arena);
+void* gfu_arena_alloc(gfu_arena* arena, gfu_uword size);
 
 #endif /* GAMEFU_COMMON_COMMON_H_ */

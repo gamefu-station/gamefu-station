@@ -2,7 +2,7 @@
 #include "register.h"
 
 static struct {
-    gfu_gpr_t gpr;
+    gfu_gpr gpr;
     const char* name;
     size_t name_length;
 } gfu_gpr_names[] = {
@@ -12,7 +12,7 @@ static struct {
     {GFU_GPR_INVALID, nullptr, 0},
 };
 
-gfu_gpr_t gfu_gpr_from_string(const char* s, size_t length) {
+gfu_gpr gfu_gpr_from_string(const char* s, size_t length) {
     for (int i = 0; gfu_gpr_names[i].gpr != GFU_GPR_INVALID; i++) {
         if (length != gfu_gpr_names[i].name_length) continue;
         if (0 == strncmp(s, gfu_gpr_names[i].name, length)) {
@@ -24,7 +24,7 @@ gfu_gpr_t gfu_gpr_from_string(const char* s, size_t length) {
 }
 
 static struct {
-    gfu_cp0r_t cp0r;
+    gfu_cp0r cp0r;
     const char* name;
     size_t name_length;
 } gfu_cp0r_names[] = {
@@ -34,7 +34,7 @@ static struct {
     {GFU_CP0R_INVALID, nullptr, 0},
 };
 
-gfu_cp0r_t gfu_cp0r_from_string(const char* s, size_t length) {
+gfu_cp0r gfu_cp0r_from_string(const char* s, size_t length) {
     for (int i = 0; gfu_cp0r_names[i].cp0r != GFU_CP0R_INVALID; i++) {
         if (length != gfu_cp0r_names[i].name_length) continue;
         if (0 == strncmp(s, gfu_cp0r_names[i].name, length)) {

@@ -98,18 +98,18 @@ typedef enum gfu_opcode {
 #define X(Id, Value) GFU_OP_##Id = (Value),
     GFU_OP(X)
 #undef X
-} gfu_opcode_t;
+} gfu_opcode;
 
 typedef enum gfu_opfn {
 #define X(Id, Value) GFU_OPFN_##Id = (Value),
     GFU_OPFN(X)
 #undef X
-} gfu_opfn_t;
+} gfu_opfn;
 
 typedef enum gfu_opc0fn {
 #define X(Id, Value) GFU_C0FN_##Id = (Value),
     GFU_C0FN(X)
 #undef X
-} gfu_c0fn_t;
+} gfu_c0fn;
 
 #endif /* GAMEFU_SYSTEM_INSTRUCTION_H_ */

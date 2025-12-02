@@ -24,13 +24,13 @@ typedef struct isel_operand {
     bool is_base;
     union {
         const char* var;
-        gfu_uword_t immediate;
+        gfu_uword immediate;
     } as;
 } isel_operand, isel_operand_t;
 
 typedef struct isel_match {
     fuasm_mnemonic_t mnemonic;
-    gfu_uword_t operand_count;
+    gfu_uword operand_count;
     isel_operand_t operands[3];
 } isel_match, isel_match_t;
 
@@ -53,9 +53,9 @@ typedef enum isel_argument_kind {
 typedef struct isel_argument {
     isel_argument_kind_t kind;
     union {
-        gfu_gpr_t _register;
-        gfu_uword_t var_index;
-        gfu_uword_t immediate;
+        gfu_gpr _register;
+        gfu_uword var_index;
+        gfu_uword immediate;
     } as;
 } isel_argument, isel_argument_t;
 
@@ -71,18 +71,18 @@ typedef enum isel_emit_kind {
 typedef struct isel_emit {
     isel_emit_kind_t kind;
     union {
-        gfu_opcode_t opcode;
-        gfu_opfn_t function;
-        gfu_c0fn_t cop0_function;
+        gfu_opcode opcode;
+        gfu_opfn function;
+        gfu_c0fn cop0_function;
     } op;
-    gfu_uword_t argument_count;
+    gfu_uword argument_count;
     isel_argument_t arguments[4];
 } isel_emit, isel_emit_t;
 
 typedef struct isel_pattern {
-    gfu_uword_t var_count;
-    gfu_uword_t match_index, match_count;
-    gfu_uword_t emit_index, emit_count;
+    gfu_uword var_count;
+    gfu_uword match_index, match_count;
+    gfu_uword emit_index, emit_count;
 } isel_pattern, isel_pattern_t;
 
 #endif /* GAMEFU_ISEL_H_ */

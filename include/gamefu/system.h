@@ -83,11 +83,11 @@ enum {
 /* Block Control R/W */
 #define GFU_DMA_BCR(Channel) (GFU_EXP1_IOPORT_BASE + 0x0084 + ((Channel) * 0x10))
 /* 16-bit word-count, where 0x0000 == 0x10000 */
-#define GFU_DMA_BCR_SYNC0_NWORDS(Reg) 1 + (gfu_uword_t)(((gfu_uhalf_t)Reg) - 1)
+#define GFU_DMA_BCR_SYNC0_NWORDS(Reg) 1 + (gfu_uword)(((gfu_uhalf)Reg) - 1)
 /* 16-bit block size in words */
-#define GFU_DMA_BCR_SYNC1_BLOCK_SIZE(Reg) ((gfu_uhalf_t)(Reg))
+#define GFU_DMA_BCR_SYNC1_BLOCK_SIZE(Reg) ((gfu_uhalf)(Reg))
 /* 16-bit block count */
-#define GFU_DMA_BCR_SYNC1_BLOCK_COUNT(Reg) ((gfu_uhalf_t)((Reg) >> 16))
+#define GFU_DMA_BCR_SYNC1_BLOCK_COUNT(Reg) ((gfu_uhalf)((Reg) >> 16))
 /* Channel Control R/W */
 #define GFU_DMA_CHCR(Channel) (GFU_EXP1_IOPORT_BASE + 0x0088 + ((Channel) * 0x10))
 /* Transfer direction (0 = device to RAM, 1 = RAM to device) */

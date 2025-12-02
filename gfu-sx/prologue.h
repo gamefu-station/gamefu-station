@@ -14,11 +14,11 @@ typedef struct gfusx gfusx_t;
 #endif
 
 typedef struct gfusx_uwpair {
-    gfu_uword_t l;
-    gfu_uword_t r;
+    gfu_uword l;
+    gfu_uword r;
 } gfusx_uwpair_t;
 
-static_assert(sizeof(gfusx_uwpair_t) == sizeof(gfu_ulong_t), "uwpair should be two uwords, or one ulong in size.");
+static_assert(sizeof(gfusx_uwpair_t) == sizeof(gfu_ulong), "uwpair should be two uwords, or one ulong in size.");
 
 #define GFUSX_UWPAIR(L, R) ((gfusx_uwpair_t){(L), (R)})
 

@@ -10,6 +10,6 @@ void gfusx_platform_deinit(gfusx_t* vm);
 
 void gfusx_platform_main_loop(gfusx_t* vm);
 
-void gfusx_platform_sleep(gfusx_t* vm, gfu_ulong_t nanoseconds);
+void gfusx_platform_sleep(gfusx_t* vm, gfu_ulong nanoseconds);
 
 #endif /* GFUSX_PLATFORM_H_ */

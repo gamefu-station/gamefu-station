@@ -48,6 +48,6 @@
 
 */
 
-gfu_ubyte_t gfusx_sio_read_byte(gfusx_t* vm);
+gfu_ubyte gfusx_sio_read_byte(gfusx_t* vm);
 
 #endif /* GFUSX_SIO_H_ */
