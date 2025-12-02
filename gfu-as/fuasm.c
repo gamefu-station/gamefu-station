@@ -1463,6 +1463,6 @@ return_token:;
     return token;
 }
 
-#include "../common/diagnostic.c"
-#include "../common/arena.c"
-#include "../common/source.c"
+#include "../gfu-common/diagnostic.c"
+#include "../gfu-common/arena.c"
+#include "../gfu-common/source.c"

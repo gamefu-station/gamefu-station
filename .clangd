@@ -1,7 +1,7 @@
 CompileFlags:
   Add:
     - "-Iinclude"
-    - "-Icommon/include"
+    - "-Igfu-common/include"
     - "-Igfu-ar/include"
     - "-Igfu-as/include"
     - "-Igfu-bfd/include"
