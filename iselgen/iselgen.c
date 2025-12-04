@@ -1,10 +1,10 @@
 #include <gamefu/common.h>
 
+#include <gamefu/iselgen/data.h>
+
 #include "../gfu-opcodes/instruction.h"
 #include "../gfu-opcodes/register.h"
 #include "../gfu-opcodes/syscall.h"
-
-#include "isel.h"
 
 #if defined(__linux__)
 #  include <unistd.h>
@@ -193,7 +193,7 @@ int main(int argc, char** argv) {
     f = fopen("./gfu-as/include/gamefu/as/x/mnemonics.h", "w");
 
     fprintf(f, "#ifndef MNEM\n");
-    fprintf(f, "#  define MNEM(Id, ...) TK(MNEM_##Id)\n");
+    fprintf(f, "#  define MNEM(Id, ...)\n");
     fprintf(f, "#endif\n\n");
     for (int i = 0; i < mnemonic_count; i++) {
         fprintf(f, "MNEM(%s, \"%s\")\n", defined_mnemonics[i].constant, defined_mnemonics[i].mnemonic);

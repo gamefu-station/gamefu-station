@@ -6,8 +6,6 @@
 #include "../gfu-opcodes/instruction.h"
 #include "../gfu-opcodes/register.h"
 
-// #include "../gfu-as/mnemonics.h"
-
 typedef enum isel_type {
     ISEL_TY_INVALID,
     ISEL_TY_REG,

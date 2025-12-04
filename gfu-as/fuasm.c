@@ -1,8 +1,8 @@
 #include <gamefu/common.h>
+#include <gamefu/iselgen/data.h>
 
 #include "../gfu-bfd/system.h"
 
-#include "../iselgen/isel.h"
 #include "../gfu-bfd/object.h"
 
 #if defined(__linux__)

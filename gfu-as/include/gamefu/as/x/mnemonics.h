@@ -1,5 +1,5 @@
 #ifndef MNEM
-#  define MNEM(Id, ...) TK(MNEM_##Id)
+#  define MNEM(Id, ...)
 #endif
 
 MNEM(BYTES, "bytes")
