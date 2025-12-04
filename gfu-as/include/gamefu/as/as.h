@@ -7,7 +7,11 @@
 #include "../gfu-opcodes/register.h"
 #include "../gfu-opcodes/syscall.h"
 
-#include <gamefu/as/mnemonics.h>
+typedef enum gfuas_mnemonic {
+    GFUAS_MNEM_INVALID,
+#define MNEM(Id, Name) GFUAS_MNEM_##Id,
+#include <gamefu/as/x/mnemonics.h>
+} gfuas_mnemonic;
 
 typedef enum gfuas_directive {
     GFUAS_DIR_INVALID,

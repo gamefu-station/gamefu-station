@@ -17,7 +17,7 @@
 #define ECHOETOK_IMPL
 #include <echoetok.h>
 
-#include "asm.h"
+#include <gamefu/as/as.h>
 
 #define VERSION "0.0.1.0"
 

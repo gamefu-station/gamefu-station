@@ -63,7 +63,7 @@ iselgen/isel_source.h: iselgen/isel.txt bin/hx
 
 AS_C=gfu-as/as.c
 AS_O:=$(patsubst gfu-as/%.c,bin/o/gfu-as/%.o,$(subst $(AS_C),,$(subst gfu-as/isel_tables.c,,$(wildcard gfu-as/*.c))))
-AS_H:=gfu-as/include/as/x/mnemonics.h $(wildcard gfu-as/include/**/*.h)
+AS_H:=gfu-as/include/gamefu/as/x/mnemonics.h $(wildcard gfu-as/include/**/*.h)
 bin/as: bin/o/gfu-as/as.o bin/libgfu-as.a
 	@mkdir -p bin
 	cc -o $@ $^ $(CFLAGS)
