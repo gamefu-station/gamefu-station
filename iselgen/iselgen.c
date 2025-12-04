@@ -190,7 +190,7 @@ int main(int argc, char** argv) {
     fprintf(stderr, "Emit storage required: %d bytes (%d items)\n", isel_emit_arena.allocated, emit_count);
     fprintf(stderr, "Pattern storage required: %d bytes (%d items)\n", isel_pattern_arena.allocated, pattern_count);
 
-    f = fopen("./gfu-as/x/mnemonics.h", "w");
+    f = fopen("./gfu-as/include/gamefu/as/x/mnemonics.h", "w");
 
     fprintf(f, "#ifndef MNEM\n");
     fprintf(f, "#  define MNEM(Id, ...) TK(MNEM_##Id)\n");

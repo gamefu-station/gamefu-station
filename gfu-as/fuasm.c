@@ -60,7 +60,7 @@ typedef enum gfuas_token_kind {
     _gfuas_tk_multibyte_offset = ETOK_MULTIBYTE_BEGIN,
 
 #define TK(Id) GFUAS_TK_##Id,
-#include "x/tokens.h"
+#include <gamefu/as/x/tokens.h>
 } gfuas_token_kind;
 
 typedef struct gfuas_token {
@@ -1134,7 +1134,7 @@ static const char* gfuas_token_kind_names[] = {
     [GFUAS_TK_INVALID] = "INVALID",
     [GFUAS_TK_EOF] = "EOF",
 #define TK(Id) [GFUAS_TK_##Id] = #Id,
-#include "x/tokens.h"
+#include <gamefu/as/x/tokens.h>
 };
 
 static void gfuas_token_dump(gfuas_token token) {
@@ -1274,7 +1274,7 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
                 const char* image;
             } directives[] = {
 #define DIR(Id, Image) { GFUAS_DIR_##Id, Image },
-#include "x/directives.h"
+#include <gamefu/as/x/directives.h>
                 {0},
             };
 
@@ -1318,7 +1318,7 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
                 const char* image;
             } mnemonics[] = {
 #define MNEM(Id, Name) { GFUAS_MNEM_##Id, Name },
-#include "x/mnemonics.h"
+#include <gamefu/as/x/mnemonics.h>
                 {0},
             };
 

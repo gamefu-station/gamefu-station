@@ -14,6 +14,7 @@ all: \
 .PHONY: clean
 clean:
 	rm -rf ./bin
+	rm -rf ./*.gfu
 	rm gfu-as/x/mnemonics.h
 	rm gfu-as/isel_tables.c
 

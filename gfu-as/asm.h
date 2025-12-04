@@ -7,24 +7,24 @@
 #include "../gfu-opcodes/register.h"
 #include "../gfu-opcodes/syscall.h"
 
-#include "mnemonics.h"
+#include <gamefu/as/mnemonics.h>
 
 typedef enum gfuas_directive {
     GFUAS_DIR_INVALID,
 #define DIR(Id, Image) GFUAS_DIR_##Id,
-#include "x/directives.h"
+#include <gamefu/as/x/directives.h>
 } gfuas_directive;
 
 typedef enum gfuas_expr_kind {
     GFUAS_EXPR_INVALID,
 #define EXPR(Id) GFUAS_EXPR_##Id,
-#include "x/exprs.h"
+#include <gamefu/as/x/exprs.h>
 } gfuas_expr_kind;
 
 typedef enum gfuas_addr_kind {
     GFUAS_ADDR_INVALID,
 #define ADDR_KIND(Id) GFUAS_ADDR_##Id,
-#include "x/addr_kinds.h"
+#include <gamefu/as/x/addr_kinds.h>
 } gfuas_addr_kind;
 
 typedef struct gfuas_addr {
