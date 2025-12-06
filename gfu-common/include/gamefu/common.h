@@ -55,14 +55,32 @@
 #define SWAP16(V) (V)
 #define SWAP32(V) (V)
 
+#include <limits.h>
+
 typedef int8_t gfu_byte;
 typedef uint8_t gfu_ubyte;
 typedef int16_t gfu_half;
 typedef uint16_t gfu_uhalf;
 typedef int32_t gfu_word;
 typedef uint32_t gfu_uword;
-typedef int64_t gfu_long;
-typedef uint64_t gfu_ulong;
+typedef int64_t gfu_double;
+typedef uint64_t gfu_udouble;
+
+#define GFU_BYTE_MIN INT8_MIN
+#define GFU_BYTE_MAX INT8_MAX
+#define GFU_UBYTE_MAX UINT8_MAX
+
+#define GFU_HALF_MIN INT16_MIN
+#define GFU_HALF_MAX INT16_MAX
+#define GFU_UHALF_MAX UINT16_MAX
+
+#define GFU_WORD_MIN INT32_MIN
+#define GFU_WORD_MAX INT32_MAX
+#define GFU_UWORD_MAX UINT32_MAX
+
+#define GFU_DOUBLE_MIN INT64_MIN
+#define GFU_DOUBLE_MAX INT64_MAX
+#define GFU_UDOUBLE_MAX UINT64_MAX
 
 typedef struct source {
     const char* name;

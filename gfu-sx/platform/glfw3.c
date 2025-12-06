@@ -119,7 +119,7 @@ void gfusx_platform_main_loop(gfusx_t* vm) {
     double begin_time = glfwGetTime();
     double last_frame_time = begin_time;
 
-    gfu_ulong cycle_overflow = 0;
+    gfu_udouble cycle_overflow = 0;
 
     while (!vm->halt) {
         glfwPollEvents();
@@ -144,11 +144,11 @@ void gfusx_platform_main_loop(gfusx_t* vm) {
         double elapsed_time = frame_time - last_frame_time;
         last_frame_time = frame_time;
 
-        gfu_ulong desired_cycle_count = (gfu_ulong)(elapsed_time * GFUSX_FU6109_CLOCK_SPEED);
-        gfu_ulong target_cycles = vm->cpu.cycle + desired_cycle_count;
+        gfu_udouble desired_cycle_count = (gfu_udouble)(elapsed_time * GFUSX_FU6109_CLOCK_SPEED);
+        gfu_udouble target_cycles = vm->cpu.cycle + desired_cycle_count;
 
         while (!vm->halt && vm->cpu.cycle < target_cycles) {
-            gfu_ulong target_block_cycles = vm->cpu.cycle + desired_cycle_count / 10;
+            gfu_udouble target_block_cycles = vm->cpu.cycle + desired_cycle_count / 10;
             while (!vm->halt && vm->cpu.cycle < target_block_cycles) {
                 gfusx_exec_block(vm);
             }

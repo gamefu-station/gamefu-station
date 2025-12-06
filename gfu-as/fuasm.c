@@ -1380,7 +1380,7 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
 
         case '0': case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9': {
-            gfu_long immediate = lexer->ch - '0';
+            gfu_double immediate = lexer->ch - '0';
             etok_lexer_advance(lexer);
 
             while (!etok_lexer_is_at_end(lexer) && etok_lexer_is_decimal_digit(lexer, lexer->ch)) {

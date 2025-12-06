@@ -77,13 +77,13 @@ typedef struct gfusx_fu6109_registers {
 
 typedef struct gfusx_fu6109 {
     gfusx_fu6109_registers_t regs;
-    gfu_ulong inst;
-    gfu_ulong cycle;
+    gfu_udouble inst;
+    gfu_udouble cycle;
     gfusx_memory_t* memory;
     gfu_uword interrupt;
     // 32 bit padding here
-    gfu_ulong lowest_target;
-    gfu_ulong interrupt_targets[GFUSX_INT_COUNT];
+    gfu_udouble lowest_target;
+    gfu_udouble interrupt_targets[GFUSX_INT_COUNT];
     gfu_uword icache_addr[GFU_FU6109_ICACHE_SIZE];
     gfu_uword icache_code[GFU_FU6109_ICACHE_SIZE];
 } gfusx_fu6109_t;

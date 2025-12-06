@@ -23,8 +23,8 @@ void gfusx_vm_deinit(gfusx_t* vm) {
 
 void gfusx_schedule_interrupt(gfusx_t* vm, gfu_uword interrupt, gfu_uword cycle_count) {
     gfusx_logf(vm, "Scheduling interrupt %08X in %u cycles.", interrupt, cycle_count);
-    const gfu_ulong cycle = vm->cpu.cycle;
-    gfu_ulong target_cycle = cycle + cycle_count;
+    const gfu_udouble cycle = vm->cpu.cycle;
+    gfu_udouble target_cycle = cycle + cycle_count;
     vm->cpu.interrupt |= 1 << interrupt;
     vm->cpu.interrupt_targets[interrupt] = target_cycle;
     if (target_cycle < vm->cpu.lowest_target) {
