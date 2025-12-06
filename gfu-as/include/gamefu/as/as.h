@@ -71,7 +71,7 @@ typedef struct gfuas_stmt {
 } gfuas_stmt;
 
 typedef struct gfuas_builder {
-    arena arena;
+    gfu_arena arena;
     gfuas_stmt* head;
     gfuas_stmt* tail;
     gfuas_stmt* current;
@@ -97,7 +97,7 @@ static inline gfuas_stmt* gfuas_build_directive(
     gfuas_directive directive
 ) {
     if (b == nullptr) return nullptr;
-    gfuas_stmt* stmt = arena_alloc(&b->arena, sizeof *stmt);
+    gfuas_stmt* stmt = gfu_arena_alloc(&b->arena, sizeof *stmt);
     *stmt = (gfuas_stmt) {
         .directive = directive,
     };
@@ -111,7 +111,7 @@ static inline gfuas_stmt* gfuas_build_label(
     bool is_local
 ) {
     if (b == nullptr) return nullptr;
-    gfuas_stmt* stmt = arena_alloc(&b->arena, sizeof *stmt);
+    gfuas_stmt* stmt = gfu_arena_alloc(&b->arena, sizeof *stmt);
     *stmt = (gfuas_stmt) {
         .label = label,
         .is_label_local = is_local,
@@ -125,7 +125,7 @@ static inline gfuas_stmt* gfuas_build_instruction0(
     gfuas_mnemonic mnemonic
 ) {
     if (b == nullptr) return nullptr;
-    gfuas_stmt* stmt = arena_alloc(&b->arena, sizeof *stmt);
+    gfuas_stmt* stmt = gfu_arena_alloc(&b->arena, sizeof *stmt);
     *stmt = (gfuas_stmt) {
         .mnemonic = mnemonic,
     };
@@ -139,7 +139,7 @@ static inline gfuas_stmt* gfuas_build_instruction1(
     gfuas_expr op1
 ) {
     if (b == nullptr) return nullptr;
-    gfuas_stmt* stmt = arena_alloc(&b->arena, sizeof *stmt);
+    gfuas_stmt* stmt = gfu_arena_alloc(&b->arena, sizeof *stmt);
     *stmt = (gfuas_stmt) {
         .mnemonic = mnemonic,
         .operand_count = 1,
@@ -156,7 +156,7 @@ static inline gfuas_stmt* gfuas_build_instruction2(
     gfuas_expr op2
 ) {
     if (b == nullptr) return nullptr;
-    gfuas_stmt* stmt = arena_alloc(&b->arena, sizeof *stmt);
+    gfuas_stmt* stmt = gfu_arena_alloc(&b->arena, sizeof *stmt);
     *stmt = (gfuas_stmt) {
         .mnemonic = mnemonic,
         .operand_count = 2,
@@ -175,7 +175,7 @@ static inline gfuas_stmt* gfuas_build_instruction3(
     gfuas_expr op3
 ) {
     if (b == nullptr) return nullptr;
-    gfuas_stmt* stmt = arena_alloc(&b->arena, sizeof *stmt);
+    gfuas_stmt* stmt = gfu_arena_alloc(&b->arena, sizeof *stmt);
     *stmt = (gfuas_stmt) {
         .mnemonic = mnemonic,
         .operand_count = 3,

@@ -29,11 +29,15 @@ typedef struct gfuas_options {
     const char* output;
 } gfuas_options;
 
+typedef struct gfuas_strings {
+    GFU_DA_FIELDS(char*);
+} gfuas_strings;
+
 typedef struct gfuas_state {
     gfuas_options options;
 
-    arena string_arena;
-    arena stmt_arena;
+    gfu_arena arena;
+    gfuas_strings strings;
 
     gfuas_stmt* ir;
     struct address {
@@ -129,8 +133,7 @@ int gfuas_driver_main(int argc, char** argv) {
         return_defer(1);
     }
 
-    arena_init(&state.string_arena, 32 * 1024 * 1024);
-    arena_init(&state.stmt_arena, 32 * 1024 * 1024);
+    gfu_arena_init(&state.arena, 32 * 1024);
 
     const char* output_name = state.options.output;
     if (output_name == nullptr) {
@@ -149,7 +152,7 @@ int gfuas_driver_main(int argc, char** argv) {
             last_dot = source_name + strlen(source_name);
         }
 
-        char* new_output_name = arena_alloc(&state.string_arena, (size_t)(last_dot - source_name) + 5);
+        char* new_output_name = gfu_arena_alloc(&state.arena, (last_dot - source_name) + 5);
         sprintf(new_output_name, "%.*s.gfu", (int)(last_dot - source_name), source_name);
         output_name = new_output_name;
     }
@@ -184,10 +187,8 @@ defer:;
     }
 
     free(state.options.sources);
-
-    arena_deinit(&state.stmt_arena);
-    arena_deinit(&state.string_arena);
-
+    gfu_da_free(&state.strings);
+    gfu_arena_deinit(&state.arena);
     return result;
 }
 
@@ -207,8 +208,7 @@ int gfuas_driver_fuzz(const char* text, size_t length) {
         .length = (gfu_word)length,
     };
 
-    arena_init(&state.string_arena, 32 * 1024 * 1024);
-    arena_init(&state.stmt_arena, 32 * 1024 * 1024);
+    gfu_arena_init(&state.arena, 32 * 1024);
 
     gfu_uword rom_size;
     char* rom_data = gfuas_assemble_internal(&state, &rom_size);
@@ -217,8 +217,8 @@ defer:;
     free(rom_data);
     free(state.addresses);
     free(state.options.sources);
-    arena_deinit(&state.stmt_arena);
-    arena_deinit(&state.string_arena);
+    gfu_da_free(&state.strings);
+    gfu_arena_deinit(&state.arena);
     return result;
 }
 
@@ -235,14 +235,13 @@ char* gfuas_assemble_ir(gfuas_stmt* ir, gfu_uword* rom_size) {
         .length = 1,
     };
 
-    arena_init(&state.string_arena, 32 * 1024 * 1024);
-    arena_init(&state.stmt_arena, 32 * 1024 * 1024);
+    gfu_arena_init(&state.arena, 32 * 1024);
 
     char* rom_data = gfuas_assemble_ir_internal(&state, rom_size);
 
     free(state.options.sources);
-    arena_deinit(&state.stmt_arena);
-    arena_deinit(&state.string_arena);
+    gfu_da_free(&state.strings);
+    gfu_arena_deinit(&state.arena);
     return rom_data;
 }
 
@@ -253,32 +252,29 @@ char* gfuas_assemble(source source, gfu_uword* rom_size) {
     state.options.sources = calloc(1, sizeof *state.options.sources);
     state.options.sources[0] = source;
 
-    arena_init(&state.string_arena, 32 * 1024 * 1024);
-    arena_init(&state.stmt_arena, 32 * 1024 * 1024);
+    gfu_arena_init(&state.arena, 32 * 1024);
 
     char* rom_data = gfuas_assemble_internal(&state, rom_size);
 
     free(state.options.sources);
-    arena_deinit(&state.stmt_arena);
-    arena_deinit(&state.string_arena);
-
+    gfu_da_free(&state.strings);
+    gfu_arena_deinit(&state.arena);
     return rom_data;
 }
 
 static const char* gfuas_intern_string(gfuas_state* state, const char* s, gfu_uword length) {
-    for (char* strings = state->string_arena.memory; strings < state->string_arena.memory + state->string_arena.allocated; ) {
-        size_t existing_length = strlen(strings);
-        if (existing_length == (size_t)length && 0 == strncmp(strings, s, (size_t)length)) {
-            return strings;
-            break;
+    for (gfu_uword i = 0; i < state->strings.count; ++i) {
+        char *string = state->strings.items[i];
+        size_t existing_length = strlen(string);
+        if (existing_length == (size_t)length && 0 == strncmp(string, s, (size_t)length)) {
+            return string;
         }
-
-        strings += existing_length + 1;
     }
 
-    char* new_string = arena_alloc(&state->string_arena, length + 1);
+    char* new_string = gfu_arena_alloc(&state->arena, length + 1);
     memcpy(new_string, s, (size_t)length);
     new_string[length] = 0;
+    gfu_da_push(&state->strings, new_string);
     return new_string;
 }
 
@@ -716,7 +712,7 @@ static gfuas_stmt* parse_statement(gfuas_parser* parser) {
 
     assertn(parser->tk.kind != GFUAS_TK_ENDL && parser->tk.kind != GFUAS_TK_EOF);
 
-    gfuas_stmt* stmt = arena_alloc(&state->stmt_arena, sizeof *stmt);
+    gfuas_stmt* stmt = gfu_arena_alloc(&state->arena, sizeof *stmt);
     stmt->source = source;
     stmt->location = parser->tk.location;
 
@@ -1404,7 +1400,7 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
                 max_length++;
             }
 
-            char* byte_string = arena_alloc(&state->string_arena, max_length);
+            char* byte_string = gfu_arena_alloc(&state->arena, max_length);
             gfu_uword length = 0;
 
             while (!etok_lexer_is_at_end(lexer) && lexer->ch != '\n' && lexer->ch != '"') {

@@ -55,6 +55,49 @@
 #define SWAP16(V) (V)
 #define SWAP32(V) (V)
 
+#define gfu_max(X, Y) (((X) > (Y)) ? (X) : (Y))
+#define gfu_min(X, Y) (((X) < (Y)) ? (X) : (Y))
+
+#define GFU_DA_INIT_CAP 1024
+#define GFU_DA_FIELDS(Type) \
+    Type* items;            \
+    gfu_uword count;        \
+    gfu_uword capacity
+
+#define gfu_da_reserve(DA, MinCap)                                      \
+    do {                                                                \
+        if ((MinCap) > (DA)->capacity) {                                \
+            gfu_uword new_cap = ((DA)->capacity == 0)                   \
+                ? GFU_DA_INIT_CAP                                       \
+                : (DA)->capacity * 2;                                   \
+            while ((MinCap) > new_cap) {                                \
+                new_cap *= 2;                                           \
+            }                                                           \
+            (DA)->items = realloc((DA)->items, new_cap * sizeof(*(DA)->items)); \
+            (DA)->capacity = new_cap;                                   \
+        }                                                               \
+    } while (0)
+
+#define gfu_da_push(DA, Item)                       \
+    do {                                            \
+        gfu_da_reserve((DA), (DA)->capacity + 1);   \
+        (DA)->items[(DA)->count++] = (Item);        \
+    } while(0)
+
+#define gfu_da_push_many(DA, Items, Count)                              \
+    do {                                                                \
+        gfu_da_reserve((DA), (DA)->capacity + (Count));                 \
+        memcpy((DA)->items + (DA)->count, (Items), (Count) * sizeof(*(Items))); \
+        (DA)->count += (Count);                                         \
+    } while(0)
+
+#define gfu_da_free(DA)                         \
+    do {                                        \
+        assertn((DA) != nullptr);               \
+        free((DA)->items);                      \
+        memset((DA), 0, sizeof *(DA));          \
+    } while(0);
+
 #include <limits.h>
 
 typedef int8_t gfu_byte;
@@ -109,14 +152,20 @@ bool diag_has_issued_error(void);
 void diag_issue(diag_level level, source source, int32_t location, const char* format, ...);
 void diag_issue_v(diag_level level, source source, int32_t location, const char* format, va_list v);
 
-typedef struct arena {
+typedef struct gfu_chunk {
     char* memory;
     gfu_uword capacity, allocated;
-    gfu_uword alignment;
-} arena;
+    struct gfu_chunk* next;
+} gfu_chunk;
 
-void arena_init(arena* arena, gfu_uword capacity);
-void arena_deinit(arena* arena);
-void* arena_alloc(arena* arena, gfu_uword size);
+typedef struct gfu_arena {
+    gfu_chunk* start;
+    gfu_uword alignment;
+    gfu_uword default_capacity_per_chunk;
+} gfu_arena;
+
+void gfu_arena_init(gfu_arena* arena, gfu_uword default_capacity_per_chunk);
+void gfu_arena_deinit(gfu_arena* arena);
+void* gfu_arena_alloc(gfu_arena* arena, gfu_uword size);
 
 #endif /* GAMEFU_COMMON_H_ */

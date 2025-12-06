@@ -79,10 +79,17 @@ static void isel_parse_pattern(isel_parser* parser);
 
 static source isel_source = {0};
 
-static arena isel_string_arena = {0};
-static arena isel_match_arena = {0};
-static arena isel_emit_arena = {0};
-static arena isel_pattern_arena = {0};
+static char isel_string_data[64] = {0};
+gfu_uword isel_string_allocated = 0;
+
+static isel_match isel_match_data[256] = {0};
+gfu_uword isel_match_allocated = 0;
+
+static isel_emit isel_emit_data[256] = {0};
+gfu_uword isel_emit_allocated = 0;
+
+static isel_pattern isel_pattern_data[256] = {0};
+gfu_uword isel_pattern_allocated = 0;
 
 static struct mnemonic {
     char mnemonic[16];
@@ -156,18 +163,6 @@ int main(int argc, char** argv) {
         .length = isel_len,
     };
 
-    arena_init(&isel_string_arena, 256);
-    isel_string_arena.alignment = sizeof(gfu_uword);
-
-    arena_init(&isel_match_arena, 32 * 1024);
-    isel_match_arena.alignment = sizeof(gfu_uword);
-
-    arena_init(&isel_emit_arena, 32 * 1024);
-    isel_emit_arena.alignment = sizeof(gfu_uword);
-
-    arena_init(&isel_pattern_arena, 16 * 1024);
-    isel_pattern_arena.alignment = sizeof(gfu_uword);
-
     isel_parser parser = {0};
     isel_lexer_init(&parser.lexer);
     parser.tk = isel_lexer_read(&parser.lexer);
@@ -176,19 +171,19 @@ int main(int argc, char** argv) {
         isel_parse_pattern(&parser);
     }
 
-    gfu_uword match_count = isel_match_arena.allocated / sizeof(isel_match);
-    isel_match* matches = (isel_match*)isel_match_arena.memory;
+    gfu_uword match_count = isel_match_allocated;
+    isel_match* matches = (isel_match*)isel_match_data;
 
-    gfu_uword emit_count = isel_emit_arena.allocated / sizeof(isel_emit);
-    isel_emit* emits = (isel_emit*)isel_emit_arena.memory;
+    gfu_uword emit_count = isel_emit_allocated;
+    isel_emit* emits = (isel_emit*)isel_emit_data;
 
-    gfu_uword pattern_count = isel_pattern_arena.allocated / sizeof(isel_pattern);
-    isel_pattern* patterns = (isel_pattern*)isel_pattern_arena.memory;
+    gfu_uword pattern_count = isel_pattern_allocated;
+    isel_pattern* patterns = (isel_pattern*)isel_pattern_data;
 
-    fprintf(stderr, "Variable name storage required: %d bytes\n", isel_string_arena.allocated);
-    fprintf(stderr, "Match storage required: %d bytes (%d items)\n", isel_match_arena.allocated, match_count);
-    fprintf(stderr, "Emit storage required: %d bytes (%d items)\n", isel_emit_arena.allocated, emit_count);
-    fprintf(stderr, "Pattern storage required: %d bytes (%d items)\n", isel_pattern_arena.allocated, pattern_count);
+    fprintf(stderr, "Variable name storage required: %d bytes\n", isel_string_allocated);
+    fprintf(stderr, "Match storage required: %d bytes (%d items)\n", isel_match_allocated, match_count);
+    fprintf(stderr, "Emit storage required: %d bytes (%d items)\n", isel_emit_allocated, emit_count);
+    fprintf(stderr, "Pattern storage required: %d bytes (%d items)\n", isel_pattern_allocated, pattern_count);
 
     f = fopen("./gfu-as/include/gamefu/as/x/mnemonics.h", "w");
 
@@ -285,10 +280,6 @@ int main(int argc, char** argv) {
 
 defer:;
     if (f != nullptr) fclose(f);
-    arena_deinit(&isel_pattern_arena);
-    arena_deinit(&isel_emit_arena);
-    arena_deinit(&isel_match_arena);
-    arena_deinit(&isel_string_arena);
     return result;
 }
 
@@ -358,7 +349,7 @@ static gfu_c0fn isel_parser_expect_cop0_function(isel_parser* parser) {
 }
 
 static void isel_parse_match(isel_parser* parser) {
-    isel_match* match = arena_alloc(&isel_match_arena, sizeof *match);
+    isel_match* match = &isel_match_data[isel_match_allocated++];
 
     match->mnemonic = isel_parser_expect(parser, ISEL_TK_MNEMONIC, "a mnemonic").as.mnemonic;
     if (!isel_parser_is_at_end(parser) && parser->tk.kind != ISEL_TK_EMITS && parser->tk.kind != ISEL_TK_MNEMONIC) {
@@ -456,7 +447,7 @@ static void isel_parse_emit_argument(isel_parser* parser, isel_argument* argumen
 }
 
 static void isel_parse_emit(isel_parser* parser, const char** vars, gfu_uword var_count) {
-    isel_emit* emit = arena_alloc(&isel_emit_arena, sizeof *emit);
+    isel_emit* emit = &isel_emit_data[isel_emit_allocated++];
 
     emit->kind = isel_parser_expect_emit_kind(parser);
     (void)isel_parser_expect(parser, '(', nullptr);
@@ -489,12 +480,12 @@ static void isel_parse_emit(isel_parser* parser, const char** vars, gfu_uword va
 static void isel_parse_pattern(isel_parser* parser) {
     gfu_uword location = parser->tk.location;
 
-    isel_pattern* pattern = arena_alloc(&isel_pattern_arena, sizeof *pattern);
-    isel_match* matches = (isel_match*)&isel_match_arena.memory[isel_match_arena.allocated];
+    isel_pattern* pattern = &isel_pattern_data[isel_pattern_allocated++];
+    isel_match* matches = &isel_match_data[isel_match_allocated];
 
     isel_parser_expect(parser, ISEL_TK_MATCH, "'match'");
 
-    pattern->match_index = isel_match_arena.allocated / sizeof(isel_match);
+    pattern->match_index = isel_match_allocated;
     while (!isel_parser_is_at_end(parser) && parser->tk.kind != ISEL_TK_EMITS) {
         isel_parse_match(parser);
         isel_match* match = &matches[pattern->match_count++];
@@ -526,12 +517,12 @@ static void isel_parse_pattern(isel_parser* parser) {
 
     isel_parser_expect(parser, ISEL_TK_EMITS, "'emit'");
 
-    pattern->emit_index = isel_emit_arena.allocated / sizeof(isel_emit);
+    pattern->emit_index = isel_emit_allocated;
     while (!isel_parser_is_at_end(parser) && parser->tk.kind != ISEL_TK_MATCH) {
         isel_parse_emit(parser, vars, pattern->var_count);
     }
 
-    pattern->emit_count = (isel_emit_arena.allocated / sizeof(isel_emit)) - pattern->emit_index;
+    pattern->emit_count = isel_emit_allocated - pattern->emit_index;
     if (pattern->emit_count == 0) {
         diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected an emit clause.");
     }
@@ -754,7 +745,7 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
             token.kind = ISEL_TK_VAR;
             char* varname = nullptr;
 
-            for (char* strings = isel_string_arena.memory; strings < isel_string_arena.memory + isel_string_arena.allocated; ) {
+            for (char* strings = isel_string_data; strings < isel_string_data + isel_string_allocated; ) {
                 size_t existing_length = strlen(strings);
                 if (existing_length == length && 0 == strncmp(strings, name, length)) {
                     varname = strings;
@@ -765,7 +756,8 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
             }
 
             if (varname == nullptr) {
-                varname = arena_alloc(&isel_string_arena, (gfu_uword)length + 1);
+                varname = &isel_string_data[isel_string_allocated];
+                isel_string_allocated += (gfu_uword)length + 1;
                 memcpy(varname, name, length);
                 varname[length] = 0;
             }
@@ -897,5 +889,4 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
 }
 
 #include "../gfu-common/diagnostic.c"
-#include "../gfu-common/arena.c"
 #include "../gfu-common/source.c"

@@ -1,34 +1,66 @@
 #include <gamefu/common.h>
 
-void arena_init(arena* a, gfu_uword capacity) {
+void gfu_arena_init(gfu_arena* a, gfu_uword default_capacity_per_chunk) {
     if (a == nullptr) return;
 
-    char* memory = calloc((size_t)capacity, sizeof *memory);
+    char* memory = calloc((size_t)default_capacity_per_chunk, sizeof *memory);
     assert(memory != nullptr, "Failed to allocate arena backing memory.");
 
-    *a = (arena) {
-        .memory = memory,
-        .capacity = capacity,
+    gfu_chunk* start = calloc(1, sizeof *start);
+    assert(start != nullptr, "Failed to allocate arena chunk.");
+
+    start->memory = memory;
+    start->capacity = default_capacity_per_chunk;
+
+    *a = (gfu_arena) {
+        .start = start,
         .alignment = 16,
+        .default_capacity_per_chunk = default_capacity_per_chunk,
     };
 }
 
-void arena_deinit(arena* a) {
+void gfu_arena_deinit(gfu_arena* a) {
     if (a == nullptr) return;
-    free(a->memory);
-    *a = (arena) {0};
+
+    gfu_chunk* c = a->start;
+    while (c != nullptr) {
+        gfu_chunk* next = c->next;
+        free(c->memory);
+        free(c);
+        c = next;
+    }
+
+    *a = (gfu_arena) {0};
 }
 
-void* arena_alloc(arena* a, gfu_uword size) {
+void* gfu_arena_alloc(gfu_arena* a, gfu_uword size) {
     assert(a != nullptr, "Can't allocate into a null arena.");
 
     const gfu_uword align = a->alignment;
     const gfu_uword padding = (align - (size % align)) % align;
     size += padding;
 
-    assertf(a->allocated + size <= a->capacity, "Arena overflow: %u (currently allocated) + %u (requested) > %u (max capacity).", a->allocated, size, a->capacity);
+    for (gfu_chunk* c = a->start; c != nullptr; c = c->next) {
+        gfu_uword available = c->capacity - c->allocated;
+        if (size > available) {
+            continue;
+        }
+        char* result = c->memory + c->allocated;
+        c->allocated += size;
+        return result;
+    }
 
-    char* result = a->memory + a->allocated;
-    a->allocated += size;
-    return result;
+    char* memory = calloc((size_t)gfu_max(a->default_capacity_per_chunk, size), sizeof *memory);
+    assert(memory != nullptr, "Failed to allocate arena backing memory.");
+
+    gfu_chunk* chunk = calloc(1, sizeof *chunk);
+    assert(chunk != nullptr, "Failed to allocate arena chunk.");
+
+    chunk->memory = memory;
+    chunk->allocated = size;
+    chunk->capacity = a->default_capacity_per_chunk;
+
+    chunk->next = a->start;
+    a->start = chunk;
+    return chunk->memory;
 }
