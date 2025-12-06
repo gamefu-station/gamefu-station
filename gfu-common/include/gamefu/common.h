@@ -49,6 +49,33 @@
 #  define unreachable do { assertn(false); } while (0)
 #endif
 
+#include <limits.h>
+
+typedef int8_t gfu_byte;
+typedef uint8_t gfu_ubyte;
+typedef int16_t gfu_half;
+typedef uint16_t gfu_uhalf;
+typedef int32_t gfu_word;
+typedef uint32_t gfu_uword;
+typedef int64_t gfu_double;
+typedef uint64_t gfu_udouble;
+
+#define GFU_BYTE_MIN INT8_MIN
+#define GFU_BYTE_MAX INT8_MAX
+#define GFU_UBYTE_MAX UINT8_MAX
+
+#define GFU_HALF_MIN INT16_MIN
+#define GFU_HALF_MAX INT16_MAX
+#define GFU_UHALF_MAX UINT16_MAX
+
+#define GFU_WORD_MIN INT32_MIN
+#define GFU_WORD_MAX INT32_MAX
+#define GFU_UWORD_MAX UINT32_MAX
+
+#define GFU_DOUBLE_MIN INT64_MIN
+#define GFU_DOUBLE_MAX INT64_MAX
+#define GFU_UDOUBLE_MAX UINT64_MAX
+
 #define cast(T, V) ((T)(V))
 #define sext(I, O, V) ((gfu_u##O)(gfu_##O)(gfu_##I)(V))
 
@@ -57,6 +84,26 @@
 
 #define gfu_max(X, Y) (((X) > (Y)) ? (X) : (Y))
 #define gfu_min(X, Y) (((X) < (Y)) ? (X) : (Y))
+
+static inline gfu_byte gfu_minb(gfu_byte a, gfu_byte b) { return a < b ? a : b; }
+static inline gfu_byte gfu_maxb(gfu_byte a, gfu_byte b) { return a > b ? a : b; }
+static inline gfu_ubyte gfu_minub(gfu_ubyte a, gfu_ubyte b) { return a < b ? a : b; }
+static inline gfu_ubyte gfu_maxub(gfu_ubyte a, gfu_ubyte b) { return a > b ? a : b; }
+
+static inline gfu_half gfu_minh(gfu_half a, gfu_half b) { return a < b ? a : b; }
+static inline gfu_half gfu_maxh(gfu_half a, gfu_half b) { return a > b ? a : b; }
+static inline gfu_uhalf gfu_minuh(gfu_uhalf a, gfu_uhalf b) { return a < b ? a : b; }
+static inline gfu_uhalf gfu_maxuh(gfu_uhalf a, gfu_uhalf b) { return a > b ? a : b; }
+
+static inline gfu_word gfu_minw(gfu_word a, gfu_word b) { return a < b ? a : b; }
+static inline gfu_word gfu_maxw(gfu_word a, gfu_word b) { return a > b ? a : b; }
+static inline gfu_uword gfu_minuw(gfu_uword a, gfu_uword b) { return a < b ? a : b; }
+static inline gfu_uword gfu_maxuw(gfu_uword a, gfu_uword b) { return a > b ? a : b; }
+
+static inline gfu_double gfu_mind(gfu_double a, gfu_double b) { return a < b ? a : b; }
+static inline gfu_double gfu_maxd(gfu_double a, gfu_double b) { return a > b ? a : b; }
+static inline gfu_udouble gfu_minud(gfu_udouble a, gfu_udouble b) { return a < b ? a : b; }
+static inline gfu_udouble gfu_maxud(gfu_udouble a, gfu_udouble b) { return a > b ? a : b; }
 
 #define GFU_DA_INIT_CAP 1024
 #define GFU_DA_FIELDS(Type) \
@@ -97,33 +144,6 @@
         free((DA)->items);                      \
         memset((DA), 0, sizeof *(DA));          \
     } while(0);
-
-#include <limits.h>
-
-typedef int8_t gfu_byte;
-typedef uint8_t gfu_ubyte;
-typedef int16_t gfu_half;
-typedef uint16_t gfu_uhalf;
-typedef int32_t gfu_word;
-typedef uint32_t gfu_uword;
-typedef int64_t gfu_double;
-typedef uint64_t gfu_udouble;
-
-#define GFU_BYTE_MIN INT8_MIN
-#define GFU_BYTE_MAX INT8_MAX
-#define GFU_UBYTE_MAX UINT8_MAX
-
-#define GFU_HALF_MIN INT16_MIN
-#define GFU_HALF_MAX INT16_MAX
-#define GFU_UHALF_MAX UINT16_MAX
-
-#define GFU_WORD_MIN INT32_MIN
-#define GFU_WORD_MAX INT32_MAX
-#define GFU_UWORD_MAX UINT32_MAX
-
-#define GFU_DOUBLE_MIN INT64_MIN
-#define GFU_DOUBLE_MAX INT64_MAX
-#define GFU_UDOUBLE_MAX UINT64_MAX
 
 typedef struct source {
     const char* name;
