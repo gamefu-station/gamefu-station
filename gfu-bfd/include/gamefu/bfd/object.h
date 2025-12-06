@@ -1,0 +1,142 @@
+#ifndef GAMEFU_BFD_OBJECT_H_
+#define GAMEFU_BFD_OBJECT_H_
+
+#include <gamefu/common.h>
+
+#define GFUOBJ_MAGIC 0xF0FF6109
+#define GFUOBJ_VERIFY_MAGIC(Magic) (((Magic) & 0xF0FFFFFF) == (GFUOBJ_MAGIC & 0xF0FFFFFF))
+#define GFUOBJ_GET_VERSION(Magic)  (((Magic) & 0x0F000000) >> 24)
+#define GFUOBJ_MAGIC_VERSION(Version) ((GFUOBJ_MAGIC) | (((Version) & 0x0F) << 24))
+
+#define GFUOBJ_RAM_SIZE_SMALL 0
+#define GFUOBJ_RAM_SIZE_LARGE 1
+
+/* No relocation needs to be applied. */
+#define GFUOBJ_R_NONE 0x00
+/* A single 16-bit absolute address relocation.
+   `gfu_inst::imm.value`, likely right-shifted to be 18 bits (word aligned) address. */
+#define GFUOBJ_R_16 0x01
+/* A single 26-bit absolute address relocation.
+   `gfu_inst::addr.value`, likely right-shifted to be 28 bits (word aligned) address. */
+#define GFUOBJ_R_26 0x02
+/* A single 32-bit absolute address relocation. */
+#define GFUOBJ_R_32 0x03
+/* A single 16-bit absolute address relocation.
+   `gfu_inst::imm.value` treated as the high 16-bits of an address. */
+#define GFUOBJ_R_HI16 0x04
+/* A single 16-bit absolute address relocation.
+   `gfu_inst::imm.value` treated as the low 16-bits of an address. */
+#define GFUOBJ_R_LO16 0x05
+/* PC-relative, 16-bit address relocation.
+ * Relative addresses only need relocated when they refer to external symbols. */
+#define GFUOBJ_R_PC16 0x06
+
+//#define GFUOBJ_NUL_SECTION_NAME ".nul"
+#define GFUOBJ_STRINGS_SECTION_NAME ".str"
+#define GFUOBJ_RELOCATION_SECTION_NAME ".rel"
+#define GFUOBJ_SYMBOL_SECTION_NAME ".sym"
+#define GFUOBJ_DEFAULT_DATA_SECTION_NAME ".dat"
+#define GFUOBJ_DEFAULT_TEXT_SECTION_NAME ".txt"
+#define GFUOBJ_DEFAULT_BSS_SECTION_NAME ".bss"
+
+typedef gfu_uword gfuobj_addr;
+typedef gfu_word  gfuobj_offs;
+typedef gfu_uhalf gfuobj_sectidx;
+typedef gfu_uword gfuobj_symidx;
+
+/*
+
+Object File Layout: (Every struct/section/whatever will be word aligned and padded to the next 4 bytes if necessary)
+  Header (4 words)
+    Contains section count
+  Section Table (N Sections, described by header)
+  Raw Section Data (Remaining bytes in the ROM, described by entries in the section table)
+
+*/
+
+typedef union gfuobj_flags {
+    gfu_uword raw[1];
+    struct {
+        /* 0 if small RAM size, 1 if large RAM size. */
+        gfu_uword ram_size : 1;
+        gfu_uword padding0 : 7;
+        /* The number of sections in this object file. */
+        gfu_uword section_count : 24;
+    } bits;
+} gfuobj_flags;
+
+static_assert(sizeof(gfuobj_flags) == 1 * sizeof(gfu_uword), "GameFU Object flags expected to be 1 32-bit word.");
+
+typedef struct gfuobj_header {
+    gfu_uword magic;
+    gfuobj_flags flags;
+    /* The virtual address where the program entry is located.
+     * This value minus the text section or segment's base address
+     * should be the index into that section or segment. */
+    gfuobj_addr entry_address;
+    /* The total size of the ROM file in bytes. */
+    gfu_uword rom_size;
+} gfuobj_header;
+
+static_assert(sizeof(gfuobj_header) == 4 * sizeof(gfu_uword), "GameFU Object header expected to be 4 32-bit words.");
+
+typedef enum gfuobj_section_class {
+    GFUOBJ_CLASS_META,
+    GFUOBJ_CLASS_DATA,
+    GFUOBJ_CLASS_TEXT,
+    GFUOBJ_CLASS_BSS,
+} gfuobj_section_class;
+
+typedef struct gfuobj_section {
+    /* The name of this section.
+     * String data like this is stored in the string table.
+     * This pointer points directly into that table from the loaded ROM data. */
+    gfuobj_addr name;
+    /* The absolute location in the ROM data where this section begins. */
+    gfuobj_addr offset;
+    /* The total size of this section in bytes. */
+    gfu_uword size;
+    /* Class of the section. Defines whether the section is readable, writeable and/or executable */
+    gfuobj_section_class class;
+    /* Where in virtual memory this section would like to be placed.
+       If multiple sections overlap in virtual memory, then linking will fail. */
+    gfuobj_addr virtual_address;
+} gfuobj_section;
+
+static_assert(sizeof(gfuobj_section) == 5 * sizeof(gfu_uword), "GameFU Section header expected to be 5 32-bit words.");
+
+typedef struct gfuobj_symbol {
+    /* The name of this symbol.
+     * String data like this is stored in the string table.
+     * This pointer points directly into that table from the loaded ROM data. */
+    gfuobj_addr name;
+    union {
+        gfu_uhalf raw;
+    } info;
+    /* Index of the section in which the symbol is defined. */
+    gfuobj_sectidx section;
+    /* The absolute location in the ROM data where this symbol is defined. */
+    gfuobj_addr offset;
+    /* The size of all data related to this symbol. */
+    gfu_uword size;
+} gfuobj_symbol;
+
+static_assert(sizeof(gfuobj_symbol) == 4 * sizeof(gfu_uword), "GameFU Symbol entry expected to be 4 32-bit words.");
+
+typedef struct gfuobj_rel {
+    /* The absolute location in the ROM data to apply the relocation to. */
+    gfuobj_addr offset;
+    union {
+        gfu_uword raw;
+        struct {
+            /* The type of relocation to apply. */
+            gfu_uword type : 8;
+            /* The index of a referenced symbol, if any. */
+            gfu_uword symbol_index : 24;
+        } bits;
+    } info;
+} gfuobj_rel;
+
+static_assert(sizeof(gfuobj_rel) == 2 * sizeof(gfu_uword), "GameFU Relocation entry expected to be 2 32-bit words.");
+
+#endif /* GAMEFU_BFD_OBJECT_H_ */
