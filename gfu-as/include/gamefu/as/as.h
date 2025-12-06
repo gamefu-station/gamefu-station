@@ -71,6 +71,7 @@ typedef struct gfuas_stmt {
 } gfuas_stmt;
 
 typedef struct gfuas_builder {
+    arena arena;
     gfuas_stmt* head;
     gfuas_stmt* tail;
     gfuas_stmt* current;
@@ -85,44 +86,106 @@ void gfuas_builder_position_before(gfuas_builder* b, gfuas_stmt* stmt);
 void gfuas_builder_position_after(gfuas_builder* b, gfuas_stmt* stmt);
 void gfuas_builder_insert(gfuas_builder* b, gfuas_stmt* stmt);
 
-void gfuas_set_location(gfuas_stmt* stmt, source source, gfu_uword location);
+static inline void gfuas_set_location(gfuas_stmt* stmt, source source, gfu_uword location) {
+    if (stmt == nullptr) return;
+    stmt->source = source;
+    stmt->location = location;
+}
 
-gfuas_stmt* gfuas_build_directive(
+static inline gfuas_stmt* gfuas_build_directive(
     gfuas_builder* b,
     gfuas_directive directive
-);
+) {
+    if (b == nullptr) return nullptr;
+    gfuas_stmt* stmt = arena_alloc(&b->arena, sizeof *stmt);
+    *stmt = (gfuas_stmt) {
+        .directive = directive,
+    };
+    gfuas_builder_insert(b, stmt);
+    return stmt;
+}
 
-gfuas_stmt* gfuas_build_label(
+static inline gfuas_stmt* gfuas_build_label(
     gfuas_builder* b,
     const char* label,
     bool is_local
-);
+) {
+    if (b == nullptr) return nullptr;
+    gfuas_stmt* stmt = arena_alloc(&b->arena, sizeof *stmt);
+    *stmt = (gfuas_stmt) {
+        .label = label,
+        .is_label_local = is_local,
+    };
+    gfuas_builder_insert(b, stmt);
+    return stmt;
+}
 
-gfuas_stmt* gfuas_build_instruction0(
+static inline gfuas_stmt* gfuas_build_instruction0(
     gfuas_builder* b,
     gfuas_mnemonic mnemonic
-);
+) {
+    if (b == nullptr) return nullptr;
+    gfuas_stmt* stmt = arena_alloc(&b->arena, sizeof *stmt);
+    *stmt = (gfuas_stmt) {
+        .mnemonic = mnemonic,
+    };
+    gfuas_builder_insert(b, stmt);
+    return stmt;
+}
 
-gfuas_stmt* gfuas_build_instruction1(
+static inline gfuas_stmt* gfuas_build_instruction1(
     gfuas_builder* b,
     gfuas_mnemonic mnemonic,
     gfuas_expr op1
-);
+) {
+    if (b == nullptr) return nullptr;
+    gfuas_stmt* stmt = arena_alloc(&b->arena, sizeof *stmt);
+    *stmt = (gfuas_stmt) {
+        .mnemonic = mnemonic,
+        .operand_count = 1,
+        .operands[0] = op1,
+    };
+    gfuas_builder_insert(b, stmt);
+    return stmt;
+}
 
-gfuas_stmt* gfuas_build_instruction2(
+static inline gfuas_stmt* gfuas_build_instruction2(
     gfuas_builder* b,
     gfuas_mnemonic mnemonic,
     gfuas_expr op1,
     gfuas_expr op2
-);
+) {
+    if (b == nullptr) return nullptr;
+    gfuas_stmt* stmt = arena_alloc(&b->arena, sizeof *stmt);
+    *stmt = (gfuas_stmt) {
+        .mnemonic = mnemonic,
+        .operand_count = 2,
+        .operands[0] = op1,
+        .operands[1] = op2,
+    };
+    gfuas_builder_insert(b, stmt);
+    return stmt;
+}
 
-gfuas_stmt* gfuas_build_instruction3(
+static inline gfuas_stmt* gfuas_build_instruction3(
     gfuas_builder* b,
     gfuas_mnemonic mnemonic,
     gfuas_expr op1,
     gfuas_expr op2,
     gfuas_expr op3
-);
+) {
+    if (b == nullptr) return nullptr;
+    gfuas_stmt* stmt = arena_alloc(&b->arena, sizeof *stmt);
+    *stmt = (gfuas_stmt) {
+        .mnemonic = mnemonic,
+        .operand_count = 3,
+        .operands[0] = op1,
+        .operands[1] = op2,
+        .operands[2] = op3,
+    };
+    gfuas_builder_insert(b, stmt);
+    return stmt;
+}
 
 static inline gfuas_stmt* gfuas_build_instruction(
     gfuas_builder* b,
@@ -130,6 +193,7 @@ static inline gfuas_stmt* gfuas_build_instruction(
     gfuas_expr* ops,
     int count
 ) {
+    if (b == nullptr) return nullptr;
     assertf(count >= 0 && count <= 3, "Instruction argument count out of range: %d is not in the range [0, 3].", count);
     switch (count) {
         default: unreachable; return nullptr;
