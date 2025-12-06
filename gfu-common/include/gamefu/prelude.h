@@ -17,6 +17,25 @@
 #ifndef GAMEFU_PRELUDE_H_
 #define GAMEFU_PRELUDE_H_
 
+/*
+ * C Compiler Identification
+ */
+
+#define GFU_COMPILER_CLANG 0
+#define GFU_COMPILER_GCC 0
+
+#if defined(__clang__)
+#  undef GFU_COMPILER_CLANG
+#  define GFU_COMPILER_CLANG 1
+/// Many compilers define this for compatibility, so we'll have to explicitly check all of those when supported later.
+#elif defined(__GNUC__)
+#  undef GFU_COMPILER_GCC
+#  define GFU_COMPILER_GCC 1
+#else
+// #  include "Unknown C compiler. Add explicit support for this compiler at the top of this C file."
+#  warning "Unknown C compiler. Edit this header to add explicit support for it and silence this warning."
+#endif
+
 #ifdef _WIN32
 #  define WIN32_LEAN_AND_MEAN
 #  ifndef _CRT_SECURE_NO_WARNINGS

@@ -43,6 +43,12 @@
 
 #define return_defer(Result) do { result = (Result); goto defer; } while (0)
 
+#if GFU_COMPILER_CLANG || GFU_COMPILER_GCC
+#  define unreachable __builtin_unreachable()
+#else
+#  define unreachable do { assertn(false); } while (0)
+#endif
+
 #define cast(T, V) ((T)(V))
 #define sext(I, O, V) ((gfu_u##O)(gfu_##O)(gfu_##I)(V))
 
