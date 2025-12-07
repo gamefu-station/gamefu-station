@@ -23,7 +23,7 @@ If you have a Codeberg account and a fork of the GameFU Station project, you can
 
 If you do not or do not wish to use your Codeberg account, you can submit patches through the GameFU Station mailing list. You can use Git to format patches and also to email them directly from the CLI, or just email the patch file manually when generated.
 
-See documentation on [formatting a patch with Git] and [sending an email with Git] for more information. You may need to install additional OS packages and look up specific documentation to configure Git's email capabilities.
+See documentation on [formatting a patch with Git](https://git-scm.com/docs/git-format-patch) and [sending an email with Git](https://git-scm.com/docs/git-send-email) for more information. You may need to install additional OS packages and look up specific documentation to configure Git's email capabilities.
 
 To create a patch, do some work and then use `git format-patch`:
 
