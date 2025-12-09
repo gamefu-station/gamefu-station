@@ -64,4 +64,6 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define GAMEFU_API extern
+
 #endif /* GAMEFU_PRELUDE_H_ */

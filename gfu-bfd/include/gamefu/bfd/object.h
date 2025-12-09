@@ -43,6 +43,7 @@ typedef gfu_uword gfuobj_addr;
 typedef gfu_word  gfuobj_offs;
 typedef gfu_uhalf gfuobj_sectidx;
 typedef gfu_uword gfuobj_symidx;
+typedef gfu_uword gfuobj_relidx;
 
 /*
 
@@ -123,7 +124,7 @@ typedef struct gfuobj_symbol {
 
 static_assert(sizeof(gfuobj_symbol) == 4 * sizeof(gfu_uword), "GameFU Symbol entry expected to be 4 32-bit words.");
 
-typedef struct gfuobj_rel {
+typedef struct gfuobj_relocation {
     /* The absolute location in the ROM data to apply the relocation to. */
     gfuobj_addr offset;
     union {
@@ -135,8 +136,84 @@ typedef struct gfuobj_rel {
             gfu_uword symbol_index : 24;
         } bits;
     } info;
-} gfuobj_rel;
+} gfuobj_relocation;
 
-static_assert(sizeof(gfuobj_rel) == 2 * sizeof(gfu_uword), "GameFU Relocation entry expected to be 2 32-bit words.");
+static_assert(sizeof(gfuobj_relocation) == 2 * sizeof(gfu_uword), "GameFU Relocation entry expected to be 2 32-bit words.");
+
+typedef struct gfuobj_raw {
+    gfuobj_header header;
+    gfu_ubyte data[];
+} gfuobj_raw;
+
+GAMEFU_API gfuobj_raw* gfuobj_raw_read_from_file(const char* file_path);
+GAMEFU_API gfuobj_raw* gfuobj_raw_from_data(gfu_ubyte* data, gfu_uword size);
+GAMEFU_API void gfuobj_raw_write_to_file(gfuobj_raw* raw, const char* file_path);
+
+GAMEFU_API void* gfuobj_raw_get_pointer(gfuobj_raw* obj, gfuobj_addr addr);
+GAMEFU_API gfuobj_section gfuobj_raw_get_section_header(gfuobj_raw* obj, gfuobj_sectidx section_index);
+GAMEFU_API gfuobj_symbol gfuobj_raw_get_symbol_by_index(gfuobj_raw* obj, gfuobj_symidx symbol_index);
+GAMEFU_API gfuobj_symbol gfuobj_raw_get_symbol_by_name_addr(gfuobj_raw* obj, gfuobj_addr symbol_name_addr);
+GAMEFU_API gfuobj_symbol gfuobj_raw_get_symbol_by_name(gfuobj_raw* obj, const char* symbol_name);
+GAMEFU_API gfuobj_relocation gfuobj_raw_get_relocation(gfuobj_raw* obj, gfuobj_relidx relocation_index);
+
+typedef struct gfuobj_byte_builder {
+    GFU_DA_FIELDS(gfu_ubyte);
+} gfuobj_byte_builder;
+
+typedef struct gfuobj_section_builder {
+    const char* name;
+    gfuobj_section_class class;
+    gfuobj_addr offset;
+    gfuobj_byte_builder data;
+} gfuobj_section_builder;
+
+typedef struct gfuobj_symbol_builder {
+    /* The name of this symbol. */
+    const char* name;
+    union {
+        gfu_uhalf raw;
+    } info;
+    /* Index of the section in which the symbol is defined. */
+    gfuobj_sectidx section;
+    /* The absolute location in the ROM data where this symbol is defined. */
+    gfuobj_addr offset;
+    /* The size of all data related to this symbol. */
+    gfu_uword size;
+} gfuobj_symbol_builder;
+
+typedef struct gfuobj_relocation_builder {
+    /* The absolute location in the ROM data to apply the relocation to. */
+    gfuobj_addr offset;
+    union {
+        gfu_uword raw;
+        struct {
+            /* The type of relocation to apply. */
+            gfu_uword type : 8;
+            /* The index of a referenced symbol, if any. */
+            gfu_uword symbol_index : 24;
+        } bits;
+    } info;
+} gfuobj_relocation_builder;
+
+typedef struct gfuobj_builder {
+    gfuobj_flags flags;
+    /* The virtual address where the program entry is located.
+     * This value minus the text section or segment's base address
+     * should be the index into that section or segment. */
+    gfuobj_addr entry_address;
+    GFU_DA_FIELDS(gfuobj_section_builder);
+} gfuobj_builder;
+
+GAMEFU_API gfuobj_raw* gfuobj_builder_to_raw(gfuobj_builder* builder);
+GAMEFU_API void gfuobj_builder_deinit(gfuobj_builder* builder);
+
+GAMEFU_API gfuobj_sectidx gfuobj_builder_add_section(gfuobj_builder* builder, const char* section_name);
+GAMEFU_API gfuobj_section_builder* gfuobj_builder_get_section(gfuobj_builder* builder, gfuobj_sectidx section_index);
+GAMEFU_API gfuobj_symbol_builder* gfuobj_builder_get_symbol(gfuobj_builder* builder, gfuobj_symidx symbol_index);
+GAMEFU_API gfuobj_relocation_builder* gfuobj_builder_get_relocation(gfuobj_builder* builder, gfuobj_relidx relocation_index);
+
+GAMEFU_API gfuobj_addr gfuobj_byte_builder_push_word(gfuobj_byte_builder* byte_builder, gfu_uword word);
+GAMEFU_API gfuobj_symidx gfuobj_byte_builder_push_symbol(gfuobj_byte_builder* byte_builder);
+GAMEFU_API gfuobj_relidx gfuobj_byte_builder_push_relocation(gfuobj_byte_builder* byte_builder);
 
 #endif /* GAMEFU_BFD_OBJECT_H_ */
