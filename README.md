@@ -4,7 +4,8 @@ A fantasy games console and home computing environment.
 
 The GameFU Station project implements an emulator and a toolchain for a custom MIPS-like architecture and provides the system's kernel and official SDK.
 
-Primary Git mirror: https://codeberg.org/gamefu/gamefu-station
+Primary Git mirror on Codeberg: https://codeberg.org/gamefu/gamefu-station
+
 Project contact email: contact@gamefu-station.org
 Request subscription to mailing lists: subscribe@gamefu-station.org
 Submit patch requests: patch@gamefu-station.org
