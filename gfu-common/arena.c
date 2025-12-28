@@ -50,7 +50,8 @@ void* gfu_arena_alloc(gfu_arena* a, gfu_uword size) {
         return result;
     }
 
-    char* memory = calloc((size_t)gfu_max(a->default_capacity_per_chunk, size), sizeof *memory);
+    gfu_uword capacity = gfu_max(a->default_capacity_per_chunk, size);
+    char* memory = calloc((size_t)capacity, sizeof *memory);
     assert(memory != nullptr, "Failed to allocate arena backing memory.");
 
     gfu_chunk* chunk = calloc(1, sizeof *chunk);
@@ -58,7 +59,7 @@ void* gfu_arena_alloc(gfu_arena* a, gfu_uword size) {
 
     chunk->memory = memory;
     chunk->allocated = size;
-    chunk->capacity = a->default_capacity_per_chunk;
+    chunk->capacity = capacity;
 
     chunk->next = a->start;
     a->start = chunk;
