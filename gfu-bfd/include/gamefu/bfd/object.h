@@ -234,7 +234,8 @@ GAMEFU_API gfuobj_relocation_builder* gfuobj_builder_get_relocation(gfuobj_build
 
 /// Returns the relative address from the start of this byte builder, in case that's useful.
 GAMEFU_API gfuobj_addr gfuobj_byte_builder_push_word(gfuobj_byte_builder* byte_builder, gfu_uword word);
-GAMEFU_API gfuobj_symidx gfuobj_byte_builder_push_symbol(gfuobj_byte_builder* byte_builder);
-GAMEFU_API gfuobj_relidx gfuobj_byte_builder_push_relocation(gfuobj_byte_builder* byte_builder);
+
+GAMEFU_API gfuobj_symidx gfuobj_builder_push_symbol(gfuobj_builder* builder, const char* symbol_name);
+GAMEFU_API gfuobj_relidx gfuobj_builder_push_relocation(gfuobj_builder* builder);
 
 #endif /* GAMEFU_BFD_OBJECT_H_ */

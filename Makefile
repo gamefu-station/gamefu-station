@@ -5,6 +5,7 @@ all: \
 	bin/hx \
 	bin/libgfu-common.a \
 	bin/libgfu-opcodes.a \
+	bin/libgfu-bfd.a \
 	bin/iselgen \
 	gfu-as/include/gamefu/as/x/mnemonics.h \
 	gfu-as/isel_tables.c \
@@ -48,6 +49,16 @@ bin/o/gfu-opcodes/%.o: gfu-opcodes/%.c $(wildcard gfu-opcodes/*.h) $(COMMON_H) $
 	@mkdir -p bin/o/gfu-opcodes
 	cc -o $@ -c $< -Igfu-common/include -Igfu-opcodes/include $(CFLAGS)
 
+BFD_O:=$(patsubst gfu-bfd/%.c,bin/o/gfu-bfd/%.o,$(wildcard gfu-bfd/*.c))
+BFD_H:=$(wildcard gfu-bfd/include/**/*.h)
+bin/libgfu-bfd.a: $(BFD_O)
+	@mkdir -p bin
+	ar rcs $@ $(BFD_O)
+	@echo "> Built libgfu-bfd.a"
+bin/o/gfu-bfd/%.o: gfu-bfd/%.c $(wildcard gfu-bfd/*.h) $(COMMON_H) $(BFD_H)
+	@mkdir -p bin/o/gfu-bfd
+	cc -o $@ -c $< -Igfu-common/include -Igfu-opcodes/include -Igfu-bfd/include $(CFLAGS)
+
 ISELGEN_O:=$(patsubst iselgen/%.c,bin/o/iselgen/%.o,$(wildcard iselgen/*.c))
 ISELGEN_H:=$(wildcard iselgen/include/**/*.h)
 bin/iselgen: $(ISELGEN_O)
@@ -64,7 +75,7 @@ iselgen/isel_source.h: iselgen/isel.txt bin/hx
 AS_C=gfu-as/as.c
 AS_O:=$(patsubst gfu-as/%.c,bin/o/gfu-as/%.o,$(subst $(AS_C),,$(subst gfu-as/isel_tables.c,,$(wildcard gfu-as/*.c))))
 AS_H:=gfu-as/include/gamefu/as/x/mnemonics.h $(wildcard gfu-as/include/**/*.h)
-bin/as: bin/o/gfu-as/as.o bin/libgfu-as.a
+bin/as: bin/o/gfu-as/as.o bin/libgfu-bfd.a bin/libgfu-as.a
 	@mkdir -p bin
 	cc -o $@ $^ $(CFLAGS)
 	@echo "> Built GameFU Assembler"
@@ -72,9 +83,9 @@ bin/libgfu-as.a: gfu-as/isel_tables.c $(AS_O)
 	@mkdir -p bin
 	ar rcs $@ $(AS_O)
 	@echo "> Built libgfu-as.a"
-bin/o/gfu-as/%.o: gfu-as/%.c $(wildcard gfu-as/*.h) $(COMMON_H) $(OPCODES_H) $(ISELGEN_H) $(AS_H)
+bin/o/gfu-as/%.o: gfu-as/%.c $(wildcard gfu-as/*.h) $(COMMON_H) $(OPCODES_H) $(BFD_H) $(ISELGEN_H) $(AS_H)
 	@mkdir -p bin/o/gfu-as
-	cc -o $@ -c $< -Iinclude -Igfu-common/include -Igfu-opcodes/include -Iiselgen/include -Igfu-as/include $(CFLAGS)
+	cc -o $@ -c $< -Iinclude -Igfu-common/include -Igfu-opcodes/include -Igfu-bfd/include -Iiselgen/include -Igfu-as/include $(CFLAGS)
 gfu-as/include/gamefu/as/x/mnemonics.h: iselgen/isel.txt bin/iselgen
 	./bin/iselgen
 gfu-as/isel_tables.c: iselgen/isel.txt bin/iselgen

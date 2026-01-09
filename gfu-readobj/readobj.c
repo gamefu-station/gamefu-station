@@ -1,18 +1,23 @@
 #include <gamefu/common.h>
+#include <gamefu/bfd/object.h>
 
-typedef struct readobj_options {
-    const char* program_name;
-} readobj_options_t;
+#include <stdio.h>
 
-static bool readobj_parse_options(
-    int argc, char** argv,
-    readobj_options_t* options
-);
+static void readobj_print_help(void);
 
 int main(int argc, char** argv) {
+    if (argc == 1) {
+        readobj_print_help();
+        return 0;
+    }
+
     int result = 0;
-defer:;
+
+    const char* obj_path = argv[1];
+
+fail:;
     return result;
+
 }
 
 static void readobj_print_help(void) {
@@ -20,11 +25,4 @@ static void readobj_print_help(void) {
         stderr,
         "readobj -- Display information about a GFU object file.\n"
     );
-}
-
-static bool readobj_parse_options(
-    int argc, char** argv,
-    readobj_options_t* options
-) {
-    return false;
 }
