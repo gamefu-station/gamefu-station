@@ -1,7 +1,7 @@
 #include <gamefu/common.h>
 #include <gamefu/iselgen/data.h>
 
-#include "../gfu-bfd/system.h"
+#include <gamefu/bfd/system.h>
 
 #include "../gfu-bfd/object.h"
 
@@ -28,10 +28,6 @@ typedef struct gfuas_options {
     gfu_uword source_count;
     const char* output;
 } gfuas_options;
-
-typedef struct gfuas_strings {
-    GFU_DA_FIELDS(char*);
-} gfuas_strings;
 
 typedef struct gfuas_state {
     gfuas_options options;
@@ -117,7 +113,7 @@ static void gfuas_lexer_init(gfuas_userdata* userdata, etok_lexer* lexer);
 static gfuas_token gfuas_lexer_read(etok_lexer* lexer);
 static void gfuas_token_dump(gfuas_token token);
 
-int gfuas_driver_main(int argc, char** argv) {
+int fuasm_driver_main(int argc, char** argv) {
     int result = 0;
 
     FILE* f = nullptr;
@@ -192,7 +188,7 @@ defer:;
     return result;
 }
 
-int gfuas_driver_fuzz(const char* text, size_t length) {
+int fuasm_driver_fuzz(const char* text, size_t length) {
     int result = 0;
 
     gfuas_state state = {

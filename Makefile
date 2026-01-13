@@ -110,9 +110,9 @@ bin/libgfu-sx.a: $(SX_O)
 	@mkdir -p bin
 	ar rcs $@ $(SX_O)
 	@echo "> Built libgfu-sx.a"
-bin/o/gfu-sx/%.o: gfu-sx/%.c $(wildcard gfu-sx/*.h) $(SX_H)
+bin/o/gfu-sx/%.o: gfu-sx/%.c $(wildcard gfu-sx/*.h) $(COMMON_H) $(SX_H) $(BFD_H)
 	@mkdir -p bin/o/gfu-sx
-	cc -o $@ -c $< -Igfu-common/include -Igfu-sx/include -Ivendor/glfw3/include -DGFUSX_PLATFORM_GLFW $(CFLAGS)
+	cc -o $@ -c $< -Igfu-common/include -Igfu-bfd/include -Igfu-sx/include -Ivendor/glfw3/include -DGFUSX_PLATFORM_GLFW $(CFLAGS)
 bin/libglfw3.a: $(patsubst %.c,bin/o/glfw3/%.o,glfw3.c glfw3_linux.c glfw3_null.c glfw3_osmesa.c glfw3_wl.c glfw3_x11.c)
 	@mkdir -p bin
 	ar rcs $@ $^

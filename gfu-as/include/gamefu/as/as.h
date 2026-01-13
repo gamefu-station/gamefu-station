@@ -70,8 +70,24 @@ typedef struct gfuas_stmt {
     gfu_uword pattern_index;
 } gfuas_stmt;
 
+typedef struct gfuas_strings {
+    GFU_DA_FIELDS(char*);
+} gfuas_strings;
+
+typedef struct gfuas_builder_label {
+    const char* name;
+    gfu_uword address;
+    gfu_uword parent;
+} gfuas_builder_label;
+
+typedef struct gfuas_builder_labels {
+    GFU_DA_FIELDS(gfuas_builder_label);
+} gfuas_builder_labels;
+
 typedef struct gfuas_builder {
     gfu_arena arena;
+    gfuas_strings strings;
+    gfuas_builder_labels labels;
     gfuas_stmt* head;
     gfuas_stmt* tail;
     gfuas_stmt* current;
@@ -203,5 +219,8 @@ static inline gfuas_stmt* gfuas_build_instruction(
         case 3: return gfuas_build_instruction3(b, mnemonic, ops[0], ops[1], ops[2]);
     }
 }
+
+GAMEFU_API int gfuas_driver_main(int argc, char** argv);
+GAMEFU_API int gfuas_driver_fuzz(const char* text, size_t length);
 
 #endif /* GAMEFU_GFUAS_ASM_H_ */
