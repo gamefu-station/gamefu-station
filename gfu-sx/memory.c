@@ -1,7 +1,7 @@
 #include <gamefu/common.h>
 
 #include "../gfu-bfd/object.h"
-#include "../gfu-bfd/system.h"
+#include <gamefu/bfd/system.h>
 
 #include "prologue.h"
 #include "memory.h"

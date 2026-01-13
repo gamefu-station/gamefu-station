@@ -2,8 +2,7 @@
 #define GAMEFU_BFD_OBJECT_H_
 
 #include <gamefu/common.h>
-
-#include "system.h"
+#include <gamefu/bfd/system.h>
 
 #define GFUOBJ_MAGIC 0xF0FF6109
 
