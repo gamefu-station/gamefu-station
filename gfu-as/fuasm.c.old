@@ -2,6 +2,7 @@
 #include <gamefu/iselgen/data.h>
 
 #include <gamefu/bfd/system.h>
+#include <gamefu/bfd/object.h>
 
 #if defined(__linux__)
 #  include <unistd.h>
@@ -19,9 +20,6 @@
 
 #define VERSION "0.0.1.0"
 
-#define GFUOBJ_ADDRSPACE_BIOS 0x01
-#define GFUOBJ_ADDRSPACE_USER 0x02
-
 typedef struct gfuas_options {
     const char* program;
     bool verbose;
@@ -29,6 +27,13 @@ typedef struct gfuas_options {
     gfu_uword source_count;
     const char* output;
 } gfuas_options;
+
+typedef struct gfuas_strings {
+    GFU_DA_FIELDS(char*);
+} gfuas_strings;
+
+#define GFUOBJ_ADDRSPACE_USER 0
+#define GFUOBJ_ADDRSPACE_BIOS 1
 
 typedef struct gfuas_state {
     gfuas_options options;
@@ -992,20 +997,89 @@ static char* gfuas_assemble_ir_internal(gfuas_state* state, gfu_uword* rom_size)
         return nullptr;
     }
 
-    gfuobj_header_t rom_header = {
-        .magic = GFUOBJ_MAGIC,
-        .address_space = state->address_space,
+    gfuobj_header rom_header = {
+        .magic = GFUOBJ_MAGIC_VERSION(GFUOBJ_CURRENT_VERSION),
         .entry_address = start_label_address,
+        .flags.bits.ram_size = 0,
+        .flags.bits.section_count = 7, // Hardcoded
     };
 
+    gfuobj_section sections[7] = {0};
+
+    gfu_uword addr_offset = state->address_space == GFUOBJ_ADDRSPACE_USER
+        ? GFU_KSEG0_BASE + GFU_BIOS_RAM_SIZE
+        : GFU_KSEG1_BASE + GFU_BIOS_ROM_BASE;
+
     const gfu_uword align = sizeof(gfu_uword);
-    *rom_size = sizeof(rom_header) + text_index + (data_index + ((align - (data_index % align)) % align));
-    rom_header.rom_size = *rom_size - sizeof(rom_header);
+    gfu_uword section_offset = sizeof(rom_header) + sizeof(sections);
+
+    gfu_uword section_name_base = 1;
+    for (size_t i = 0; i < state->strings.count; ++i) {
+        section_name_base += strlen(state->strings.items[i]) + 1;
+    }
+
+    gfu_da_push(&state->strings, GFUOBJ_STRINGS_SECTION_NAME);
+    gfu_da_push(&state->strings, GFUOBJ_RELOCATION_SECTION_NAME);
+    gfu_da_push(&state->strings, GFUOBJ_SYMBOL_SECTION_NAME);
+    gfu_da_push(&state->strings, GFUOBJ_DEFAULT_DATA_SECTION_NAME);
+    gfu_da_push(&state->strings, GFUOBJ_DEFAULT_TEXT_SECTION_NAME);
+    gfu_da_push(&state->strings, GFUOBJ_DEFAULT_BSS_SECTION_NAME);
+
+    gfu_uword strings_table_size = 1;
+    for (size_t i = 0; i < state->strings.count; ++i) {
+        strings_table_size += strlen(state->strings.items[i]) + 1;
+    }
+
+    for (gfu_uword i = 0; i < 7; ++i) {
+        gfu_uword section_class = GFUOBJ_CLASS_META;
+        gfu_uword section_size = 0;
+
+        if (i == GFUOBJ_STRINGS_SECTIDX) {
+            section_size = strings_table_size;
+        } else if (i == 4) {
+            section_class = GFUOBJ_CLASS_TEXT;
+            section_size = text_index;
+        } else if (i == 5) {
+            section_class = GFUOBJ_CLASS_DATA;
+            section_size = data_index;
+        } else if (i == 6) {
+            section_class = GFUOBJ_CLASS_BSS;
+        }
+
+        sections[i].offset = section_offset;
+        sections[i].size = section_size;
+        sections[i].class = section_class;
+        sections[i].virtual_address = addr_offset + section_offset;
+        sections[i].name = (i > 0) ? section_name_base + ((i - 1) * 5) : 0;
+
+        section_offset += (section_size + ((align - (section_size % align)) % align));
+    }
+
+    const gfu_uword text_size = (sections[4].size + ((align - (sections[4].size % align)) % align));
+    const gfu_uword data_size = (sections[5].size + ((align - (sections[5].size % align)) % align));
+
+    const gfu_uword text_virtual_address = sections[4].virtual_address;
+    const gfu_uword data_virtual_address = sections[5].virtual_address;
+
+    *rom_size = sizeof(rom_header) + sizeof(sections) + section_offset;
+    rom_header.rom_size = *rom_size;
     char* rom_data = calloc((size_t)(*rom_size), sizeof *rom_data);
-    char* rom_base = rom_data + sizeof(rom_header);
     print_verbose(state, "Final ROM size is %d bytes", *rom_size);
 
+    char* text_base = rom_data + sections[4].offset;
+    char* data_base = rom_data + sections[5].offset;
+    char* strings_table_base = rom_data + sections[GFUOBJ_STRINGS_SECTIDX].offset;
+
     memcpy(rom_data, &rom_header, sizeof(rom_header));
+    memcpy(rom_data + sizeof(rom_header), sections, sizeof(sections));
+
+    strings_table_base[0] = 0;
+    for (gfu_uword offset = 1, i = 0; i < state->strings.count; ++i) {
+        const char *string = state->strings.items[i];
+        gfu_uword string_len = (gfu_uword) strlen(string);
+        memcpy(strings_table_base + offset, string, string_len);
+        offset += string_len + 1;
+    }
 
     text_index = 0;
     data_index = 0;
@@ -1022,12 +1096,10 @@ static char* gfuas_assemble_ir_internal(gfuas_state* state, gfu_uword* rom_size)
             case GFUAS_DIR_DATA: section = GFUAS_DATA; break;
         }
 
-        if (stmt->label != nullptr) {
-            if (!stmt->is_label_local) {
-                gfu_uword relative_address = section == GFUAS_TEXT
-                    ? text_index : data_index + text_index;
-                label_scope = relative_address;
-            }
+        if (stmt->label != nullptr && !stmt->is_label_local) {
+            gfu_uword relative_address = section == GFUAS_TEXT
+                ? text_index : data_index + text_index;
+            label_scope = relative_address;
         }
 
         if (stmt->mnemonic == GFUAS_MNEM_INVALID) {
@@ -1049,20 +1121,17 @@ static char* gfuas_assemble_ir_internal(gfuas_state* state, gfu_uword* rom_size)
             }
         }
 
-        gfu_uword addr_offset = state->address_space == GFUOBJ_ADDRSPACE_USER
-            ? GFU_KSEG0_BASE + GFU_BIOS_RAM_SIZE
-            : GFU_KSEG1_BASE + GFU_BIOS_ROM_BASE;
-
         if (section == GFUAS_TEXT) {
-            gfu_uword icount = gfuas_emit_isel(state, label_scope, text_index + addr_offset, stmt, rom_base + text_index, vars);
+            const gfu_uword addr = text_virtual_address + text_index;
+            gfu_uword icount = gfuas_emit_isel(state, label_scope, addr, stmt, text_base + text_index, vars);
             if (icount == 0) {
                 free(rom_data);
                 return nullptr;
             }
             text_index += icount;
         } else if (section == GFUAS_DATA) {
-            gfu_uword addr = (text_instruction_count * sizeof(gfu_uword)) + data_index;
-            gfu_uword icount = gfuas_emit_isel(state, label_scope, addr + addr_offset, stmt, rom_base + addr, vars);
+            const gfu_uword addr = data_virtual_address + data_index;
+            gfu_uword icount = gfuas_emit_isel(state, label_scope, addr, stmt, data_base + data_index, vars);
             if (icount == 0) {
                 free(rom_data);
                 return nullptr;

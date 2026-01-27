@@ -10,7 +10,8 @@ all: \
 	gfu-as/include/gamefu/as/x/mnemonics.h \
 	gfu-as/isel_tables.c \
 	bin/as \
-	bin/sx
+	bin/sx \
+	bin/readobj
 
 .PHONY: clean
 clean:
@@ -25,9 +26,23 @@ bin/hx: $(HX_O)
 	@mkdir -p bin
 	cc -o $@ $(HX_O) $(CFLAGS)
 	@echo "> Built HX utility"
+bin/libgfu-hx.a: $(HX_O)
+	@mkdir -p bin
+	ar rcs $@ bin/o/gfu-hx/libhx.o
+	@echo "> Built libgfu-hx.a"
 bin/o/gfu-hx/%.o: gfu-hx/%.c $(wildcard gfu-hx/*.h) $(HX_H)
 	@mkdir -p bin/o/gfu-hx
-	cc -o $@ -c $< -Igfu-hx/include $(CFLAGS)
+	cc -o $@ -c $< -Igfu-common/include -Igfu-hx/include $(CFLAGS)
+
+READOBJ_O:=$(patsubst gfu-readobj/%.c,bin/o/gfu-readobj/%.o,$(wildcard gfu-readobj/*.c))
+READOBJ_H:=$(wildcard gfu-readobj/include/**/*.h)
+bin/readobj: $(READOBJ_O) bin/libgfu-common.a bin/libgfu-bfd.a bin/libgfu-hx.a
+	@mkdir -p bin
+	cc -o $@ $(READOBJ_O) bin/libgfu-common.a bin/libgfu-bfd.a bin/libgfu-hx.a $(CFLAGS)
+	@echo "> Built readobj utility"
+bin/o/gfu-readobj/%.o: gfu-readobj/%.c $(wildcard gfu-readobj/*.h) $(READOBJ_H)
+	@mkdir -p bin/o/gfu-readobj
+	cc -o $@ -c $< -Igfu-common/include -Igfu-bfd/include -Igfu-readobj/include -Igfu-hx/include $(CFLAGS)
 
 COMMON_O:=$(patsubst gfu-common/%.c,bin/o/gfu-common/%.o,$(wildcard gfu-common/*.c))
 COMMON_H:=$(wildcard gfu-common/include/**/*.h)
@@ -85,7 +100,7 @@ bin/libgfu-as.a: gfu-as/isel_tables.c $(AS_O)
 	@echo "> Built libgfu-as.a"
 bin/o/gfu-as/%.o: gfu-as/%.c $(wildcard gfu-as/*.h) $(COMMON_H) $(OPCODES_H) $(BFD_H) $(ISELGEN_H) $(AS_H)
 	@mkdir -p bin/o/gfu-as
-	cc -o $@ -c $< -Iinclude -Igfu-common/include -Igfu-opcodes/include -Igfu-bfd/include -Iiselgen/include -Igfu-as/include $(CFLAGS)
+	cc -o $@ -c $< -Iinclude -Igfu-common/include -Igfu-opcodes/include -Iiselgen/include -Igfu-as/include -Igfu-bfd/include $(CFLAGS)
 gfu-as/include/gamefu/as/x/mnemonics.h: iselgen/isel.txt bin/iselgen
 	./bin/iselgen
 gfu-as/isel_tables.c: iselgen/isel.txt bin/iselgen

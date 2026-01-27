@@ -8,7 +8,7 @@
 #define GFUOBJ_GET_VERSION(Magic)  (((Magic) & 0x0F000000) >> 24)
 #define GFUOBJ_MAGIC_VERSION(Version) ((GFUOBJ_MAGIC) | (((Version) & 0x0F) << 24))
 
-#define GFUOBJ_CURRENT_VERSION 1
+#define GFUOBJ_CURRENT_VERSION 2
 
 #define GFUOBJ_ALIGN(Value) ((Value) + ((sizeof(gfu_uword) - ((Value) % sizeof(gfu_uword))) % sizeof(gfu_uword)))
 
@@ -64,8 +64,11 @@ typedef gfu_uword gfuobj_relidx;
 Object File Layout: (Every struct/section/whatever will be word aligned and padded to the next 4 bytes if necessary)
   Header (4 words)
     Contains section count
-  Section Table (N Sections, described by header)
+  Section Table (N Section Headers, described by header)
   Raw Section Data (Remaining bytes in the ROM, described by entries in the section table)
+
+Remarks:
+- Should have at least four sections (.nul, .str, .rel, .sym)
 
 */
 
@@ -163,8 +166,11 @@ GAMEFU_API gfuobj_raw* gfuobj_raw_read_from_file(const char* file_path);
 GAMEFU_API gfuobj_raw* gfuobj_raw_from_data(gfu_ubyte* data, gfu_uword size);
 GAMEFU_API void gfuobj_raw_write_to_file(gfuobj_raw* raw, const char* file_path);
 
+GAMEFU_API const char* gfuobj_raw_get_section_name(gfuobj_raw* obj, gfuobj_addr section_name_offset);
+
 GAMEFU_API void* gfuobj_raw_get_pointer(gfuobj_raw* obj, gfuobj_addr addr);
 GAMEFU_API gfuobj_section* gfuobj_raw_get_section_header(gfuobj_raw* obj, gfuobj_sectidx section_index);
+GAMEFU_API gfuobj_section* gfuobj_raw_get_section_header_by_name(gfuobj_raw* obj, const char* section_name);
 GAMEFU_API gfuobj_symbol* gfuobj_raw_get_symbol_by_index(gfuobj_raw* obj, gfuobj_symidx symbol_index);
 GAMEFU_API gfuobj_symbol* gfuobj_raw_get_symbol_by_name_addr(gfuobj_raw* obj, gfuobj_addr symbol_name_addr);
 GAMEFU_API gfuobj_symbol* gfuobj_raw_get_symbol_by_name(gfuobj_raw* obj, const char* symbol_name);

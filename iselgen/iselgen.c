@@ -202,7 +202,7 @@ int main(int argc, char** argv) {
     fprintf(f, "static isel_match isel_matches[%d] = {\n", match_count + 1);
     for (gfu_uword i = 0; i < match_count; i++) {
         isel_match match = matches[i];
-        fprintf(f, "    {\n");
+        fprintf(f, "    [%u] = {\n", i);
         fprintf(f, "        .mnemonic = GFUAS_MNEM_%s,\n", defined_mnemonics[match.mnemonic].constant);
         if (match.operand_count > 0) {
             fprintf(f, "        .operand_count = %d,\n", match.operand_count);
@@ -231,7 +231,7 @@ int main(int argc, char** argv) {
     fprintf(f, "static isel_emit isel_emits[%d] = {\n", emit_count + 1);
     for (gfu_uword i = 0; i < emit_count; i++) {
         isel_emit emit = emits[i];
-        fprintf(f, "    {\n");
+        fprintf(f, "    [%u] = {\n", i);
         fprintf(f, "        .kind = %s,\n", isel_emit_kind_constants[emit.kind]);
         if (emit.kind == ISEL_EMIT_REG) {
             fprintf(f, "        .op.function = %s,\n", isel_function_constants[emit.op.function]);
@@ -265,7 +265,7 @@ int main(int argc, char** argv) {
     fprintf(f, "static isel_pattern isel_patterns[%d] = {\n", pattern_count + 1);
     for (gfu_uword i = 0; i < pattern_count; i++) {
         isel_pattern pattern = patterns[i];
-        fprintf(f, "    {\n");
+        fprintf(f, "    [%u] = {\n", i);
         fprintf(f, "        .var_count = %d,\n", pattern.var_count);
         fprintf(f, "        .match_index = %d,\n", pattern.match_index);
         fprintf(f, "        .match_count = %d,\n", pattern.match_count);

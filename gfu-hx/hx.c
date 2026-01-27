@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <gamefu/hx.h>
+
 static const char* shift(int* argc, char*** argv) {
     if (*argc == 0) return NULL;
     const char* arg = **argv;
@@ -45,39 +47,15 @@ static bool parse_ull(const char* arg, const char* opt, int64_t* ull) {
     return true;
 }
 
-static int64_t minll(int64_t a, int64_t b) {
-    return a < b ? a : b;
-}
-
-static void print_octet_bits(char c) {
-    static char bit[2] = {'0', '1'};
-    for (int j = 0; j < 8; j++) {
-        fputc(bit[(c & 0x80) >> 7], stdout);
-        c <<= 1;
-    }
-}
-
-static void print_octet_hex(char c) {
-    fprintf(stdout, "%02hhX", c);
-}
-
 int main(int argc, char** argv) {
-    bool verbose = false;
-
-    bool print_help = false;
-    bool print_version = false;
-    bool print_bits = false;
-    bool print_plain = false;
-    bool print_cinclude = false;
+    hx_opts opts = hx_default_opts();
 
     const char* input_file_path = NULL;
-    const char* cinclude_name = NULL;
+    int64_t length = -1;
 
-    int64_t column_count = 16;
-    int64_t group_byte_count = 1;
-
-    int64_t seek = 0;
-    int64_t length = INT64_MAX;
+    bool verbose = false;
+    bool print_help = false;
+    bool print_version = false;
 
     const char* program_name = shift(&argc, &argv);
 
@@ -90,25 +68,29 @@ int main(int argc, char** argv) {
         } else if (0 == strcmp(opt, "-v") || 0 == strcmp(opt, "-version") || 0 == strcmp(opt, "--version")) {
             print_version = true;
         } else if (0 == strcmp(opt, "-b") || 0 == strcmp(opt, "-bits") || 0 == strcmp(opt, "--bits") || 0 == strcmp(opt, "--binary")) {
-            print_bits = true;
+            opts.print_bits = true;
         } else if (0 == strcmp(opt, "-p") || 0 == strcmp(opt, "-ps") || 0 == strcmp(opt, "-postscript") || 0 == strcmp(opt, "-plain") || 0 == strcmp(opt, "--plain")) {
-            print_plain = true;
+            opts.print_plain = true;
         } else if (0 == strcmp(opt, "-i") || 0 == strcmp(opt, "-include") || 0 == strcmp(opt, "--include")) {
-            print_cinclude = true;
+            opts.print_cinclude = true;
         } else if (0 == strcmp(opt, "-n") || 0 == strcmp(opt, "--name")) {
-            cinclude_name = shift(&argc, &argv);
-            if (cinclude_name == NULL) {
+            opts.cinclude_name = shift(&argc, &argv);
+            if (opts.cinclude_name == NULL) {
                 fprintf(stderr, "error: '%s' requires an argument.\n", opt);
                 return 1;
             }
         } else if (0 == strcmp(opt, "-c") || 0 == strcmp(opt, "-cols") || 0 == strcmp(opt, "--columns")) {
-            if (!parse_ull(shift(&argc, &argv), opt, &column_count)) return 1;
+            if (!parse_ull(shift(&argc, &argv), opt, &opts.column_count)) return 1;
         } else if (0 == strcmp(opt, "-g") || 0 == strcmp(opt, "-groupsize") || 0 == strcmp(opt, "--group") || 0 == strcmp(opt, "--group-size")) {
-            if (!parse_ull(shift(&argc, &argv), opt, &group_byte_count)) return 1;
+            if (!parse_ull(shift(&argc, &argv), opt, &opts.group_byte_count)) return 1;
         } else if (0 == strcmp(opt, "-s") || 0 == strcmp(opt, "-seek") || 0 == strcmp(opt, "--seek") || 0 == strcmp(opt, "--offset")) {
-            if (!parse_ull(shift(&argc, &argv), opt, &seek)) return 1;
+            if (!parse_ull(shift(&argc, &argv), opt, &opts.offset)) return 1;
         } else if (0 == strcmp(opt, "-l") || 0 == strcmp(opt, "-len") || 0 == strcmp(opt, "--length") || 0 == strcmp(opt, "--count")) {
             if (!parse_ull(shift(&argc, &argv), opt, &length)) return 1;
+            if (length < 0) {
+                fprintf(stderr, "error: length must not be negative.\n");
+                return 1;
+            }
         } else {
             input_file_path = opt;
         }
@@ -116,22 +98,17 @@ int main(int argc, char** argv) {
 
     bool options_errors = false;
 
-    if (column_count < 1 || column_count > 256) {
+    if (opts.column_count < 1 || opts.column_count > 256) {
         fprintf(stderr, "error: column count must be in the range [1, 256].\n");
         options_errors = true;
     }
 
-    if (group_byte_count < 1 || group_byte_count > 256) {
+    if (opts.group_byte_count < 1 || opts.group_byte_count > 256) {
         fprintf(stderr, "error: group byte count must be in the range [1, 256].\n");
         options_errors = true;
     }
 
-    if (length < 0) {
-        fprintf(stderr, "error: length must not be negative.\n");
-        options_errors = true;
-    }
-
-    if (print_cinclude && cinclude_name == NULL) {
+    if (opts.print_cinclude && opts.cinclude_name == NULL) {
         fprintf(stderr, "error: C include mode requires a name.\n");
         options_errors = true;
     }
@@ -148,95 +125,62 @@ int main(int argc, char** argv) {
         }
     }
 
-    if (seek > 0) {
+    errno = 0;
+    if (0 != fseek(stream, 0, SEEK_END)) {
+        fprintf(stderr, "error: failed to seek input: %s.\n", strerror(errno));
+        if (input_file_path != NULL) fclose(stream);
+        return 1;
+    }
+
+    errno = 0;
+    long file_size = ftell(stream);
+    if (file_size < 0) {
+        fprintf(stderr, "error: failed to retrieve file size: %s.\n", strerror(errno));
+        if (input_file_path != NULL) fclose(stream);
+        return 1;
+    }
+
+    rewind(stream);
+
+    if (opts.offset > 0) {
         errno = 0;
-        if (0 != fseek(stream, (long)seek, SEEK_CUR)) {
+        if (0 != fseek(stream, (long)opts.offset, SEEK_CUR)) {
             fprintf(stderr, "error: failed to seek input: %s.\n", strerror(errno));
             if (input_file_path != NULL) fclose(stream);
             return 1;
         }
 
-        seek = ftell(stream);
-    } else if (seek < 0) {
+        opts.offset = ftell(stream);
+    } else if (opts.offset < 0) {
         errno = 0;
-        if (0 != fseek(stream, (long)-seek, SEEK_END)) {
+        if (0 != fseek(stream, (long)-opts.offset, SEEK_END)) {
             fprintf(stderr, "error: failed to seek input: %s.\n", strerror(errno));
             if (input_file_path != NULL) fclose(stream);
             return 1;
         }
 
-        seek = ftell(stream);
+        opts.offset = ftell(stream);
     }
 
-    char buffer[256];
-    int nread = 0;
-
-    int64_t total_read = 0;
-    int64_t group_counter = 0;
-    size_t next_read_count = 0;
-
-    void (*print_octet)(char) = print_bits ? print_octet_bits : print_octet_hex;
-
-    if (print_cinclude) {
-        fprintf(stdout, "unsigned char %s[] = {\n", cinclude_name);
+    if (length < 0) {
+        length = file_size;
     }
 
-    setvbuf(stdout, NULL, _IONBF, 0);
-    while (next_read_count = (size_t)minll(length - total_read, column_count), errno = 0, nread = fread(buffer, 1, next_read_count, stream), nread > 0) {
-        total_read += nread;
-        group_counter = 0;
+    void *buffer = malloc(length);
+    assertn(buffer != NULL);
 
-        if (print_plain) {
-            for (int i = 0; i < nread; i++)
-                print_octet(buffer[i]);
-            for (int i = nread; i < column_count; i++)
-                fprintf(stdout, "%s", print_bits ? "        " : "  ");
-            fputc('\n', stdout);
-        } else if (print_cinclude) {
-            fprintf(stdout, "    ");
-            for (int i = 0; i < nread; i++)
-                fprintf(stdout, "0x%02hhX, ", buffer[i]);
-            fputc('\n', stdout);
-        } else {
-            fprintf(stdout, "%016"PRIX64": ", seek + total_read - nread);
-
-            for (int i = 0; i < nread; i++, group_counter++) {
-                if (group_counter == group_byte_count) {
-                    group_counter = 0;
-                    fputc(' ', stdout);
-                }
-
-                print_octet(buffer[i]);
-            }
-
-            for (int i = nread; i < column_count; i++, group_counter++) {
-                if (group_counter == group_byte_count) {
-                    group_counter = 0;
-                    fputc(' ', stdout);
-                }
-
-                fprintf(stdout, "%s", print_bits ? "        " : "  ");
-            }
-
-            fprintf(stdout, "  ");
-            for (int i = 0; i < nread; i++) {
-                int c = buffer[i];
-                if (c >= 32 && c <= 127)
-                    fputc(c, stdout);
-                else fputc('.', stdout);
-            }
-
-            for (int i = nread; i < column_count; i++)
-                fputc(' ', stdout);
-
-            fputc('\n', stdout);
-        }
+    errno = 0;
+    fread(buffer, 1, length, stream);
+    if (ferror(stream)) {
+        fprintf(stderr, "error: failed to read input: %s.\n", strerror(errno));
+        if (buffer) free(buffer);
+        if (input_file_path != NULL) fclose(stream);
+        return 1;
     }
 
-    if (print_cinclude) {
-        fprintf(stdout, "};\nunsigned long long %s_len = %"PRIi64";\n", cinclude_name, total_read);
-    }
+    hx_dump_opt(stdout, buffer, length, opts);
 
+    if (buffer) free(buffer);
     if (input_file_path != NULL) fclose(stream);
 
     return 0;
