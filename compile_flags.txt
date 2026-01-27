@@ -14,4 +14,11 @@
 -Iiselgen/include
 -Ivendor/glfw3/include
 -Wall
+-Wno-unused-variable
+-Wno-unused-function
+-Wno-unused-label
+-Wno-unused-but-set-variable
+-Wreturn-type
+-Werror
+-pedantic
 -pedantic-errors

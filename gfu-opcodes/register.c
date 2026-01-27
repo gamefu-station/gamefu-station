@@ -24,22 +24,22 @@ gfu_gpr gfu_gpr_from_string(const char* s, size_t length) {
 }
 
 static struct {
-    gfu_cp0r cp0r;
+    gfu_c0r cp0r;
     const char* name;
     size_t name_length;
-} gfu_cp0r_names[] = {
-#define C0R(Id, Name) { GFU_CP0R_##Id, "" Name "", sizeof(Name) - 1 },
+} gfu_c0r_names[] = {
+#define C0R(Id, Name) { GFU_C0R_##Id, "" Name "", sizeof(Name) - 1 },
 #include "x/registers.h"
-    {GFU_CP0R_INVALID, nullptr, 0},
+    {GFU_C0R_INVALID, nullptr, 0},
 };
 
-gfu_cp0r gfu_cp0r_from_string(const char* s, size_t length) {
-    for (int i = 0; gfu_cp0r_names[i].cp0r != GFU_CP0R_INVALID; i++) {
-        if (length != gfu_cp0r_names[i].name_length) continue;
-        if (0 == strncmp(s, gfu_cp0r_names[i].name, length)) {
-            return gfu_cp0r_names[i].cp0r;
+gfu_c0r gfu_c0r_from_string(const char* s, size_t length) {
+    for (int i = 0; gfu_c0r_names[i].cp0r != GFU_C0R_INVALID; i++) {
+        if (length != gfu_c0r_names[i].name_length) continue;
+        if (0 == strncmp(s, gfu_c0r_names[i].name, length)) {
+            return gfu_c0r_names[i].cp0r;
         }
     }
 
-    return GFU_CP0R_INVALID;
+    return GFU_C0R_INVALID;
 }

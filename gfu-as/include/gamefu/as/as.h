@@ -2,6 +2,7 @@
 #define GAMEFU_GFUAS_ASM_H_
 
 #include <gamefu/common.h>
+#include <gamefu/bfd/object.h>
 
 #include "../gfu-opcodes/instruction.h"
 #include "../gfu-opcodes/register.h"
@@ -93,132 +94,23 @@ typedef struct gfuas_builder {
     gfuas_stmt* current;
 } gfuas_builder;
 
-char* gfuas_assemble(source source, gfu_uword* rom_size);
-char* gfuas_assemble_ir(gfuas_stmt* ir, gfu_uword* rom_size);
+GAMEFU_API gfuobj_raw* gfuas_source_assemble(source source);
+GAMEFU_API gfuobj_raw* gfuas_builder_assemble(gfuas_builder* builder);
 
-void gfuas_builder_position_at_start(gfuas_builder* b);
-void gfuas_builder_position_at_end(gfuas_builder* b);
-void gfuas_builder_position_before(gfuas_builder* b, gfuas_stmt* stmt);
-void gfuas_builder_position_after(gfuas_builder* b, gfuas_stmt* stmt);
-void gfuas_builder_insert(gfuas_builder* b, gfuas_stmt* stmt);
+GAMEFU_API void gfuas_builder_position_at_start(gfuas_builder* b);
+GAMEFU_API void gfuas_builder_position_at_end(gfuas_builder* b);
+GAMEFU_API void gfuas_builder_position_before(gfuas_builder* b, gfuas_stmt* stmt);
+GAMEFU_API void gfuas_builder_position_after(gfuas_builder* b, gfuas_stmt* stmt);
+GAMEFU_API void gfuas_builder_insert(gfuas_builder* b, gfuas_stmt* stmt);
 
-static inline void gfuas_set_location(gfuas_stmt* stmt, source source, gfu_uword location) {
-    if (stmt == nullptr) return;
-    stmt->source = source;
-    stmt->location = location;
-}
-
-static inline gfuas_stmt* gfuas_build_directive(
-    gfuas_builder* b,
-    gfuas_directive directive
-) {
-    if (b == nullptr) return nullptr;
-    gfuas_stmt* stmt = gfu_arena_alloc(&b->arena, sizeof *stmt);
-    *stmt = (gfuas_stmt) {
-        .directive = directive,
-    };
-    gfuas_builder_insert(b, stmt);
-    return stmt;
-}
-
-static inline gfuas_stmt* gfuas_build_label(
-    gfuas_builder* b,
-    const char* label,
-    bool is_local
-) {
-    if (b == nullptr) return nullptr;
-    gfuas_stmt* stmt = gfu_arena_alloc(&b->arena, sizeof *stmt);
-    *stmt = (gfuas_stmt) {
-        .label = label,
-        .is_label_local = is_local,
-    };
-    gfuas_builder_insert(b, stmt);
-    return stmt;
-}
-
-static inline gfuas_stmt* gfuas_build_instruction0(
-    gfuas_builder* b,
-    gfuas_mnemonic mnemonic
-) {
-    if (b == nullptr) return nullptr;
-    gfuas_stmt* stmt = gfu_arena_alloc(&b->arena, sizeof *stmt);
-    *stmt = (gfuas_stmt) {
-        .mnemonic = mnemonic,
-    };
-    gfuas_builder_insert(b, stmt);
-    return stmt;
-}
-
-static inline gfuas_stmt* gfuas_build_instruction1(
-    gfuas_builder* b,
-    gfuas_mnemonic mnemonic,
-    gfuas_expr op1
-) {
-    if (b == nullptr) return nullptr;
-    gfuas_stmt* stmt = gfu_arena_alloc(&b->arena, sizeof *stmt);
-    *stmt = (gfuas_stmt) {
-        .mnemonic = mnemonic,
-        .operand_count = 1,
-        .operands[0] = op1,
-    };
-    gfuas_builder_insert(b, stmt);
-    return stmt;
-}
-
-static inline gfuas_stmt* gfuas_build_instruction2(
-    gfuas_builder* b,
-    gfuas_mnemonic mnemonic,
-    gfuas_expr op1,
-    gfuas_expr op2
-) {
-    if (b == nullptr) return nullptr;
-    gfuas_stmt* stmt = gfu_arena_alloc(&b->arena, sizeof *stmt);
-    *stmt = (gfuas_stmt) {
-        .mnemonic = mnemonic,
-        .operand_count = 2,
-        .operands[0] = op1,
-        .operands[1] = op2,
-    };
-    gfuas_builder_insert(b, stmt);
-    return stmt;
-}
-
-static inline gfuas_stmt* gfuas_build_instruction3(
-    gfuas_builder* b,
-    gfuas_mnemonic mnemonic,
-    gfuas_expr op1,
-    gfuas_expr op2,
-    gfuas_expr op3
-) {
-    if (b == nullptr) return nullptr;
-    gfuas_stmt* stmt = gfu_arena_alloc(&b->arena, sizeof *stmt);
-    *stmt = (gfuas_stmt) {
-        .mnemonic = mnemonic,
-        .operand_count = 3,
-        .operands[0] = op1,
-        .operands[1] = op2,
-        .operands[2] = op3,
-    };
-    gfuas_builder_insert(b, stmt);
-    return stmt;
-}
-
-static inline gfuas_stmt* gfuas_build_instruction(
-    gfuas_builder* b,
-    gfuas_mnemonic mnemonic,
-    gfuas_expr* ops,
-    int count
-) {
-    if (b == nullptr) return nullptr;
-    assertf(count >= 0 && count <= 3, "Instruction argument count out of range: %d is not in the range [0, 3].", count);
-    switch (count) {
-        default: unreachable; return nullptr;
-        case 0: return gfuas_build_instruction0(b, mnemonic);
-        case 1: return gfuas_build_instruction1(b, mnemonic, ops[0]);
-        case 2: return gfuas_build_instruction2(b, mnemonic, ops[0], ops[1]);
-        case 3: return gfuas_build_instruction3(b, mnemonic, ops[0], ops[1], ops[2]);
-    }
-}
+GAMEFU_API void gfuas_set_location(gfuas_stmt* stmt, source source, gfu_uword location);
+GAMEFU_API gfuas_stmt* gfuas_build_directive(gfuas_builder* b, gfuas_directive directive);
+GAMEFU_API gfuas_stmt* gfuas_build_label(gfuas_builder* b, const char* label, bool is_local);
+GAMEFU_API gfuas_stmt* gfuas_build_instruction0(gfuas_builder* b, gfuas_mnemonic mnemonic);
+GAMEFU_API gfuas_stmt* gfuas_build_instruction1(gfuas_builder* b, gfuas_mnemonic mnemonic, gfuas_expr op1);
+GAMEFU_API gfuas_stmt* gfuas_build_instruction2(gfuas_builder* b, gfuas_mnemonic mnemonic, gfuas_expr op1, gfuas_expr op2);
+GAMEFU_API gfuas_stmt* gfuas_build_instruction3(gfuas_builder* b, gfuas_mnemonic mnemonic, gfuas_expr op1, gfuas_expr op2, gfuas_expr op3);
+GAMEFU_API gfuas_stmt* gfuas_build_instruction(gfuas_builder* b, gfuas_mnemonic mnemonic, gfuas_expr* ops, int count);
 
 GAMEFU_API int gfuas_driver_main(int argc, char** argv);
 GAMEFU_API int gfuas_driver_fuzz(const char* text, size_t length);

@@ -9,13 +9,13 @@ typedef enum gfu_gpr {
     GFU_GPR_INVALID = 0xFF,
 } gfu_gpr;
 
-typedef enum gfu_cp0r {
-#define C0R(Id, Image) GFU_CP0R_##Id,
+typedef enum gfu_c0r {
+#define C0R(Id, Image) GFU_C0R_##Id,
 #include "x/registers.h"
-    GFU_CP0R_INVALID = 0xFF,
-} gfu_cp0r;
+    GFU_C0R_INVALID = 0xFF,
+} gfu_c0r;
 
 gfu_gpr gfu_gpr_from_string(const char* s, size_t length);
-gfu_cp0r gfu_cp0r_from_string(const char* s, size_t length);
+gfu_c0r gfu_c0r_from_string(const char* s, size_t length);
 
 #endif /* GAMEFU_OPCODES_REGISTER_H_ */

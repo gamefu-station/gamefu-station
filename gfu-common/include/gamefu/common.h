@@ -151,6 +151,10 @@ typedef struct source {
     int32_t length;
 } source;
 
+typedef struct sources {
+    GFU_DA_FIELDS(source);
+} sources;
+
 bool load_source_from_file(const char* path, source* source);
 
 #define NOSOURCE (struct source) {0}, 0

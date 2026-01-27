@@ -1,5 +1,6 @@
 CompileFlags:
   Add:
+    - "-std=c99"
     - "-Iinclude"
     - "-Igfu-common/include"
     - "-Igfu-ar/include"
@@ -14,11 +15,13 @@ CompileFlags:
     - "-Igfu-sx/include"
     - "-Iiselgen/include"
     - "-Ivendor/glfw3/include"
-    - "-DGFUSX_PLATFORM_GLFW"
+    - "-Wall"
     - "-Wno-unused-variable"
     - "-Wno-unused-function"
     - "-Wno-unused-label"
-    - "-std=c99"
+    - "-Wno-unused-but-set-variable"
+    - "-Wreturn-type"
+    - "-Werror"
     - "-pedantic"
     - "-pedantic-errors"
 

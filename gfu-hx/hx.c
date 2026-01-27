@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
         errno = 0;
         stream = fopen(input_file_path, "rb");
         if (stream == NULL) {
-            fprintf(stderr, "error: failed to open '%s': %s.", input_file_path, strerror(errno));
+            fprintf(stderr, "error: failed to open '%s': %s.\n", input_file_path, strerror(errno));
             return 1;
         }
     }
@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
     if (seek > 0) {
         errno = 0;
         if (0 != fseek(stream, (long)seek, SEEK_CUR)) {
-            fprintf(stderr, "error: failed to seek input: %s.", strerror(errno));
+            fprintf(stderr, "error: failed to seek input: %s.\n", strerror(errno));
             if (input_file_path != NULL) fclose(stream);
             return 1;
         }
@@ -160,7 +160,7 @@ int main(int argc, char** argv) {
     } else if (seek < 0) {
         errno = 0;
         if (0 != fseek(stream, (long)-seek, SEEK_END)) {
-            fprintf(stderr, "error: failed to seek input: %s.", strerror(errno));
+            fprintf(stderr, "error: failed to seek input: %s.\n", strerror(errno));
             if (input_file_path != NULL) fclose(stream);
             return 1;
         }

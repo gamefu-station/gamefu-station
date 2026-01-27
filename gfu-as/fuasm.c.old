@@ -3,8 +3,6 @@
 
 #include <gamefu/bfd/system.h>
 
-#include "../gfu-bfd/object.h"
-
 #if defined(__linux__)
 #  include <unistd.h>
 #endif
@@ -20,6 +18,9 @@
 #include <gamefu/as/as.h>
 
 #define VERSION "0.0.1.0"
+
+#define GFUOBJ_ADDRSPACE_BIOS 0x01
+#define GFUOBJ_ADDRSPACE_USER 0x02
 
 typedef struct gfuas_options {
     const char* program;
@@ -105,6 +106,9 @@ static void show_help(void);
 static void show_version(void);
 static bool gfuas_options_parse(int argc, char** argv, gfuas_options* options);
 static void print_verbose(gfuas_state* state, const char* format, ...);
+
+static char* gfuas_assemble_ir2(gfuas_stmt* ir, gfu_uword* rom_size);
+static char* gfuas_assemble2(source source, gfu_uword* rom_size);
 
 static char* gfuas_assemble_ir_internal(gfuas_state* state, gfu_uword* rom_size);
 static char* gfuas_assemble_internal(gfuas_state* state, gfu_uword* rom_size);
@@ -218,7 +222,7 @@ defer:;
     return result;
 }
 
-char* gfuas_assemble_ir(gfuas_stmt* ir, gfu_uword* rom_size) {
+char* gfuas_assemble_ir2(gfuas_stmt* ir, gfu_uword* rom_size) {
     gfuas_state state = {
         .ir = ir,
     };
@@ -241,7 +245,7 @@ char* gfuas_assemble_ir(gfuas_stmt* ir, gfu_uword* rom_size) {
     return rom_data;
 }
 
-char* gfuas_assemble(source source, gfu_uword* rom_size) {
+char* gfuas_assemble2(source source, gfu_uword* rom_size) {
     gfuas_state state = {0};
 
     state.options.source_count = 1;
