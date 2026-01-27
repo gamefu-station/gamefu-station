@@ -28,10 +28,6 @@ typedef struct gfuas_options {
     const char* output;
 } gfuas_options;
 
-typedef struct gfuas_strings {
-    GFU_DA_FIELDS(char*);
-} gfuas_strings;
-
 #define GFUOBJ_ADDRSPACE_USER 0
 #define GFUOBJ_ADDRSPACE_BIOS 1
 
@@ -677,7 +673,7 @@ static bool gfuas_parse_expr(gfuas_parser* parser, gfuas_expr* out_expr) {
         expr.as.address.location = parser->tk.location;
         expr.as.address.as.label = parser->tk.as.label;
         gfuas_parser_advance(parser);
-    } else if (parser->tk.kind == GFUAS_TK_REGISTER) {
+    } else if (parser->tk.kind == GFUAS_TK_GPR) {
         expr.kind = GFUAS_EXPR_REG;
         expr.as._register = parser->tk.as._register;
         gfuas_parser_advance(parser);
@@ -807,7 +803,7 @@ static gfuas_stmt* parse_statement(gfuas_parser* parser) {
                 };
 
                 gfuas_token tk;
-                if (!gfuas_parser_expect(parser, GFUAS_TK_REGISTER, "a register name", &tk)) {
+                if (!gfuas_parser_expect(parser, GFUAS_TK_GPR, "a register name", &tk)) {
                     return nullptr;
                 }
 
@@ -1419,7 +1415,7 @@ static gfuas_token gfuas_lexer_read(etok_lexer* lexer) {
             }
 
             if (token.as._register != 255)  {
-                token.kind = GFUAS_TK_REGISTER;
+                token.kind = GFUAS_TK_GPR;
                 break;
             }
 
@@ -1527,7 +1523,3 @@ return_token:;
     token.end = lexer->source_current;
     return token;
 }
-
-#include "../gfu-common/diagnostic.c"
-#include "../gfu-common/arena.c"
-#include "../gfu-common/source.c"

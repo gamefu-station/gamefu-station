@@ -17,3 +17,5 @@ fuzz/
 *.bak
 
 *.bat
+
+build/config.h
