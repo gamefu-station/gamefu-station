@@ -1,21 +1,18 @@
-fuasm
-fucc
-gfusx
-hxd
-libglfw3.a
-
-!fuasm/
-!fucc/
-!gfusx/
-!hxd/
-
+bin/
+out/
 bin/
 fuzz/
+
+nob
+nob.exe
+nob.old
+nob.exe.old
 
 *.gfo
 *.gfu
 *.bak
 
 *.bat
+*.sh
 
 build/config.h
