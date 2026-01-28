@@ -21,7 +21,7 @@ SPDX-License-Identifier: GPL-2.0-only
     "-Wtype-limits", \
     "-Wparentheses", \
     "-Wno-unknown-warning-option", \
-    "-Werror", "-Wpedantic", "-Wpedantic-errors", \
+    "-Werror", "-pedantic", "-pedantic-errors", \
     "-Iinclude")
 #endif
 
@@ -519,7 +519,6 @@ build_as(void) {
     if (!read_entire_dir_recursive_ext("gfu-as", ".c", &as_sources)) {
         goto fail;
     }
-
 
     Nob_File_Paths as_objects = {0};
     for (size_t i = 0; i < as_sources.count; i++) {
