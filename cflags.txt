@@ -14,5 +14,3 @@
 -pedantic
 -pedantic-errors
 -O3
--ggdb
--fsanitize=address

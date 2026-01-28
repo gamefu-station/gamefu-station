@@ -1,10 +1,16 @@
+/* -----------------------------------------------------------------------------
+Part of the GameFU Station Project under the GNU General Public License v2.0.
+See the LICENSE file and LICENSES directory for more information.
+SPDX-License-Identifier: GPL-2.0-only
+----------------------------------------------------------------------------- */
+
 #include <gamefu/common.h>
 
 #include <gamefu/iselgen/data.h>
 
-#include "../gfu-opcodes/instruction.h"
-#include "../gfu-opcodes/register.h"
-#include "../gfu-opcodes/syscall.h"
+#include <gamefu/opcodes/instruction.h>
+#include <gamefu/opcodes/register.h>
+#include <gamefu/opcodes/syscall.h>
 
 #if defined(__linux__)
 #  include <unistd.h>
@@ -99,7 +105,7 @@ static int mnemonic_count = 0;
 
 static const char* isel_register_constants[] = {
 #define GPR(Id, Image) [GFU_GPR_##Id] = "GFU_GPR_" #Id,
-#include "../gfu-opcodes/x/registers.h"
+#include <gamefu/opcodes/x/registers.h>
 };
 
 static const char* isel_opcode_constants[] = {
@@ -185,7 +191,7 @@ int main(int argc, char** argv) {
     fprintf(stderr, "Emit storage required: %d bytes (%d items)\n", isel_emit_allocated, emit_count);
     fprintf(stderr, "Pattern storage required: %d bytes (%d items)\n", isel_pattern_allocated, pattern_count);
 
-    f = fopen("./gfu-as/include/gamefu/as/x/mnemonics.h", "w");
+    f = fopen("./include/gamefu/as/x/mnemonics.h", "w");
 
     fprintf(f, "#ifndef MNEM\n");
     fprintf(f, "#  define MNEM(Id, ...)\n");
@@ -198,6 +204,8 @@ int main(int argc, char** argv) {
     fclose(f);
     f = fopen("./gfu-as/isel_tables.c", "w");
 
+    fprintf(f, "#include <gamefu/as.h>\n");
+    fprintf(f, "#include <gamefu/iselgen/data.h>\n");
     fprintf(f, "#define ISEL_MATCH_COUNT %d\n", match_count);
     fprintf(f, "static isel_match isel_matches[%d] = {\n", match_count + 1);
     for (gfu_uword i = 0; i < match_count; i++) {
@@ -276,7 +284,7 @@ int main(int argc, char** argv) {
     fprintf(f, "    {0},\n");
     fprintf(f, "};\n");
 
-    fprintf(stderr, "Wrote table output to './lib/isel_tables.c'.\n");
+    fprintf(stderr, "Wrote table output to './gfu-as/isel_tables.c'.\n");
 
 defer:;
     if (f != nullptr) fclose(f);
@@ -585,7 +593,7 @@ static bool isel_etok_comment_consumer(etok_lexer* lexer) {
 }
 
 static void isel_lexer_init(etok_lexer* lexer) {
-    etok_lexer_init(lexer, "fuasm.isel", isel_source.text, isel_source.text + isel_source.length);
+    etok_lexer_init(lexer, "gfu-iselgen/isel.txt", isel_source.text, isel_source.text + isel_source.length);
     lexer->error_callback = isel_etok_error_callback;
     lexer->comment_consumer = isel_etok_comment_consumer;
 }
@@ -647,7 +655,7 @@ static struct {
     const char* image;
 } isel_registers[] = {
 #define GPR(Id, Image) { GFU_GPR_##Id, "" Image "" },
-#include "../gfu-opcodes/x/registers.h"
+#include <gamefu/opcodes/x/registers.h>
     {0},
 };
 
@@ -887,6 +895,3 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
     token.end = lexer->source_current;
     return token;
 }
-
-#include "../gfu-common/diagnostic.c"
-#include "../gfu-common/source.c"

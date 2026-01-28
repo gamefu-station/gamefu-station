@@ -963,7 +963,7 @@ NOBDEF bool nob_mkdir_if_not_exists(const char *path)
     if (result < 0) {
         if (errno == EEXIST) {
 #ifndef NOB_NO_ECHO
-            nob_log(NOB_INFO, "directory `%s` already exists", path);
+            // nob_log(NOB_INFO, "directory `%s` already exists", path);
 #endif // NOB_NO_ECHO
             return true;
         }

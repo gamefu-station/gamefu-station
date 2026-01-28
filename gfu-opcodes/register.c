@@ -1,6 +1,12 @@
+/* -----------------------------------------------------------------------------
+Part of the GameFU Station Project under the GNU General Public License v2.0.
+See the LICENSE file and LICENSES directory for more information.
+SPDX-License-Identifier: GPL-2.0-only
+----------------------------------------------------------------------------- */
+
 #include <gamefu/common.h>
 
-#include "register.h"
+#include <gamefu/opcodes/register.h>
 
 static struct {
     gfu_gpr gpr;
@@ -8,7 +14,7 @@ static struct {
     size_t name_length;
 } gfu_gpr_names[] = {
 #define GPR(Id, Name) { GFU_GPR_##Id, "" Name "", sizeof(Name) - 1 },
-#include "x/registers.h"
+#include <gamefu/opcodes/x/registers.h>
     {GFU_GPR_INVALID, nullptr, 0},
 };
 
@@ -29,7 +35,7 @@ static struct {
     size_t name_length;
 } gfu_c0r_names[] = {
 #define C0R(Id, Name) { GFU_C0R_##Id, "" Name "", sizeof(Name) - 1 },
-#include "x/registers.h"
+#include <gamefu/opcodes/x/registers.h>
     {GFU_C0R_INVALID, nullptr, 0},
 };
 

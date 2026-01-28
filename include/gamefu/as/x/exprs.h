@@ -4,12 +4,17 @@ See the LICENSE file and LICENSES directory for more information.
 SPDX-License-Identifier: GPL-2.0-only
 ----------------------------------------------------------------------------- */
 
-#ifndef GAMEFU_NOB_BUILD_DIRECTORIES_H_
-#define GAMEFU_NOB_BUILD_DIRECTORIES_H_
+#ifndef EXPR
+#  define EXPR(Id)
+#endif
 
-#include "platform.h"
+EXPR(REG)
+EXPR(IMM)
+EXPR(IMM_UPPER)
+EXPR(IMM_LOWER)
+EXPR(ADDR)
+EXPR(ADDR_UPPER)
+EXPR(ADDR_LOWER)
+EXPR(BYTE_STRING)
 
-#define BUILD_DIR  "build"
-#define BUILD_OUTPUT_DIR  "out"
-
-#endif /* GAMEFU_NOB_BUILD_DIRECTORIES_H_ */
+#undef EXPR

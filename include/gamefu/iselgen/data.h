@@ -1,10 +1,16 @@
-#ifndef GAMEFU_ISEL_H_
-#define GAMEFU_ISEL_H_
+/* -----------------------------------------------------------------------------
+Part of the GameFU Station Project under the GNU General Public License v2.0.
+See the LICENSE file and LICENSES directory for more information.
+SPDX-License-Identifier: GPL-2.0-only
+----------------------------------------------------------------------------- */
+
+#ifndef GAMEFU_ISELGEN_DATA_H_
+#define GAMEFU_ISELGEN_DATA_H_
 
 #include <gamefu/common.h>
 
-#include "../gfu-opcodes/instruction.h"
-#include "../gfu-opcodes/register.h"
+#include <gamefu/opcodes/instruction.h>
+#include <gamefu/opcodes/register.h>
 
 typedef enum isel_type {
     ISEL_TY_INVALID,
@@ -81,4 +87,4 @@ typedef struct isel_pattern {
     gfu_uword emit_index, emit_count;
 } isel_pattern, isel_pattern_t;
 
-#endif /* GAMEFU_ISEL_H_ */
+#endif /* GAMEFU_ISELGEN_DATA_H_ */

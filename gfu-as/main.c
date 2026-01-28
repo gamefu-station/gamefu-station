@@ -1,3 +1,9 @@
+/* -----------------------------------------------------------------------------
+Part of the GameFU Station Project under the GNU General Public License v2.0.
+See the LICENSE file and LICENSES directory for more information.
+SPDX-License-Identifier: GPL-2.0-only
+----------------------------------------------------------------------------- */
+
 #include <gamefu/common.h>
 
 #if defined(_WIN32)
@@ -12,15 +18,10 @@
 
 #include <gamefu/bfd/object.h>
 
-#include <gamefu/as/as.h>
+#include <gamefu/as.h>
 
 int main(int argc, char** argv) {
-    if (argc >= 2 && 0 == strcmp(argv[1], "-as1")) {
-        return gfuas_driver_main(argc, argv);
-    }
-
-    int fuasm_driver_main(int argc, char** argv);
-    return fuasm_driver_main(argc, argv);
+    return gfuas_driver_main(argc, argv);
 }
 
 #define VERSION "0.2.0"
@@ -376,7 +377,7 @@ static gfuas_token gfuas_read_token(gfuas_state* state) {
         const char* image;
     } gprs[] = {
 #define GPR(Id, Image) { GFU_GPR_##Id, Image },
-#include "../gfu-opcodes/x/registers.h"
+#include <gamefu/opcodes/x/registers.h>
         {0},
     };
 

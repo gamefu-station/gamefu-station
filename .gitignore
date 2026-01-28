@@ -15,4 +15,13 @@ nob.exe.old
 *.bat
 *.sh
 
+.old/
+*.old
+
 build/config.h
+
+gfu-as/fuasm.c.old
+gfu-as/fuasm.h.old
+gfu-as/isel_tables.c
+gfu-iselgen/isel_source.h
+include/gamefu/as/x/mnemonics.h
