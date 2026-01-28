@@ -271,6 +271,14 @@ link_executable(const char* exe_path, Nob_File_Paths object_paths, Nob_File_Path
     nob_da_append_many(&cmd, object_paths.items, object_paths.count);
     nob_da_append_many(&cmd, library_paths.items, library_paths.count);
     nob_cc_flags(&cmd);
+    if (CONFIG_SANITIZER != NULL) {
+#if defined(_WIN32)
+#else
+        nob_cmd_append(&cmd,
+            nob_temp_sprintf("-fsanitize=%s,undefined,leak,integer", (char*) CONFIG_SANITIZER)
+        );
+#endif
+    }
     if (!nob_cmd_run(&cmd, 0)) goto fail;
 
 success:;
