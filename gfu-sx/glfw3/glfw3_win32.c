@@ -1,3 +1,9 @@
+/* -----------------------------------------------------------------------------
+Part of the GameFU Station Project under the GNU General Public License v2.0.
+See the LICENSE file and LICENSES directory for more information.
+SPDX-License-Identifier: GPL-2.0-only
+----------------------------------------------------------------------------- */
+
 #if defined(_WIN32)
 #  define _GLFW_WIN32
 #elif defined(__linux__)
@@ -14,5 +20,5 @@
 #  include "../../vendor/glfw3/src/win32_time.c"
 #  include "../../vendor/glfw3/src/win32_window.c"
 #else
-static void _win32_glfw_dummy() { }
+static void _win32_glfw_dummy(void) { }
 #endif

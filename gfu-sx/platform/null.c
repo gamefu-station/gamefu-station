@@ -7,13 +7,12 @@ SPDX-License-Identifier: GPL-2.0-only
 #include "../prologue.h"
 #include "../platform.h"
 
-#include <unistd.h>
+bool gfusx_platform_init(gfusx_t* vm) {
+    return true;
+}
 
-void gfusx_platform_sleep(gfusx_t* vm, gfu_udouble nanoseconds) {
-    useconds_t microseconds = (useconds_t)(nanoseconds / 1000);
-    if (microseconds == 0 && nanoseconds != 0) {
-        microseconds = 1;
-    }
+void gfusx_platform_deinit(gfusx_t* vm) {
+}
 
-    usleep(microseconds);
+void gfusx_platform_main_loop(gfusx_t* vm) {
 }

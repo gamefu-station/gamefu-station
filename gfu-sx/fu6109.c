@@ -1,8 +1,14 @@
+/* -----------------------------------------------------------------------------
+Part of the GameFU Station Project under the GNU General Public License v2.0.
+See the LICENSE file and LICENSES directory for more information.
+SPDX-License-Identifier: GPL-2.0-only
+----------------------------------------------------------------------------- */
+
 #include <gamefu/common.h>
 
-#include "../gfu-opcodes/instruction.h"
-#include "../gfu-opcodes/register.h"
-#include "../gfu-opcodes/syscall.h"
+#include <gamefu/opcodes/instruction.h>
+#include <gamefu/opcodes/register.h>
+#include <gamefu/opcodes/syscall.h>
 
 #include "prologue.h"
 #include "fu6109.h"
@@ -48,7 +54,7 @@
 
 static const char* regname[] = {
 #define GPR(Id, Name) [GFU_GPR_##Id] = "" Name,
-#include "../gfu-opcodes/x/registers.h"
+#include <gamefu/opcodes/x/registers.h>
     nullptr,
 };
 
