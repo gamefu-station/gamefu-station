@@ -78,7 +78,9 @@ read_entire_dir_ext(const char* dir, const char* ext, Nob_File_Paths* out_paths)
         size_t child_length = strlen(child);
 
         if (*child == '.' || child_length < 1 + ext_length) continue;
-        if (0 != strncmp(child + child_length - ext_length, ext, ext_length)) continue;
+        if (0 != strncmp(child + child_length - ext_length, ext, ext_length)) {
+            continue;
+        }
 
         nob_da_append(out_paths, nob_temp_sprintf("%s/%s", dir, child));
     }
@@ -91,8 +93,11 @@ fail:;
 }
 
 static bool
-read_entire_dir_recursive_ext(const char* dir, const char* ext, Nob_File_Paths* out_paths)
-{
+read_entire_dir_recursive_ext(
+    const char* dir,
+    const char* ext,
+    Nob_File_Paths* out_paths
+) {
     if (!nob_file_exists(dir)) return true;
 
     Nob_File_Paths all = {0};
@@ -108,10 +113,16 @@ read_entire_dir_recursive_ext(const char* dir, const char* ext, Nob_File_Paths* 
 
         const char* child_path = nob_temp_sprintf("%s/%s", dir, child);
         if (NOB_FILE_DIRECTORY == nob_get_file_type(child_path)) {
-            if (!read_entire_dir_recursive_ext(child_path, ext, out_paths)) goto fail;
+            if (!read_entire_dir_recursive_ext(child_path, ext, out_paths)) {
+                goto fail;
+            }
         } else {
             if (child_length < 1 + ext_length) continue;
-            if (0 != strncmp(child + child_length - ext_length, ext, ext_length)) continue;
+            if (0 != strncmp(
+                child + child_length - ext_length, ext, ext_length)
+            ) {
+                continue;
+            }
             nob_da_append(out_paths, child_path);
         }
     }
@@ -152,6 +163,26 @@ get_file_name_without_extension(const char* path)
     return result;
 }
 
+static void
+cmd_append_sanitizer(Nob_Cmd* cmd) {
+    if (CONFIG_SANITIZER != NULL) {
+#if defined(_WIN32)
+#elif defined(__clang__)
+        nob_cmd_append(cmd,
+            nob_temp_sprintf(
+                "-fsanitize=%s,undefined,leak,integer", (char*) CONFIG_SANITIZER
+            )
+        );
+#else
+        nob_cmd_append(cmd,
+            nob_temp_sprintf(
+                "-fsanitize=%s,undefined,leak", (char*) CONFIG_SANITIZER
+            )
+        );
+#endif
+    }
+}
+
 static bool
 build_object(
     Nob_File_Paths* out_object_paths,
@@ -186,7 +217,9 @@ build_object(
 
     bool needs_rebuild = false;
     needs_rebuild |= nob_needs_rebuild1(object_path, source_path);
-    needs_rebuild |= nob_needs_rebuild(object_path, dependencies.items, dependencies.count);
+    needs_rebuild |= nob_needs_rebuild(
+        object_path, dependencies.items, dependencies.count
+    );
 
     if (!needs_rebuild) goto success;
 
@@ -200,14 +233,7 @@ build_object(
 #endif
     nob_cc_inputs(&cmd, source_path);
     nob_cc_flags(&cmd);
-    if (CONFIG_SANITIZER != NULL) {
-#if defined(_WIN32)
-#else
-        nob_cmd_append(&cmd,
-            nob_temp_sprintf("-fsanitize=%s,undefined,leak,integer", (char*) CONFIG_SANITIZER)
-        );
-#endif
-    }
+    cmd_append_sanitizer(&cmd);
     if (!nob_cmd_run(&cmd, 0)) goto fail;
 
 success:;
@@ -230,16 +256,21 @@ archive_library(
     );
     *out_library_path = library_path;
 
-    if (!nob_mkdir_if_not_exists(BUILD_OUTPUT_DIR BUILD_PATH_SEP "lib")) goto fail;
+    if (!nob_mkdir_if_not_exists(BUILD_OUTPUT_DIR BUILD_PATH_SEP "lib")) {
+        goto fail;
+    }
 
     bool needs_rebuild = false;
-    needs_rebuild |= nob_needs_rebuild(library_path, object_paths.items, object_paths.count);
+    needs_rebuild |= nob_needs_rebuild(
+        library_path, object_paths.items, object_paths.count);
 
     if (!needs_rebuild) goto success;
 
     Nob_Cmd cmd = {0};
 #if defined(_WIN32)
-    nob_cmd_append(&cmd, "lib", "/NOLOGO", nob_temp_sprintf("/OUT:%s", library_path));
+    nob_cmd_append(
+        &cmd, "lib", "/NOLOGO", nob_temp_sprintf("/OUT:%s", library_path)
+    );
 #else
     nob_cmd_append(&cmd, "ar", "rcs", library_path);
 #endif
@@ -253,32 +284,35 @@ fail:;
 }
 
 static bool
-link_executable(const char* exe_path, Nob_File_Paths object_paths, Nob_File_Paths library_paths) {
+link_executable(
+    const char* exe_path,
+    Nob_File_Paths object_paths,
+    Nob_File_Paths library_paths
+) {
     bool result = false;
 
     bool needs_rebuild = false;
-    needs_rebuild |= nob_needs_rebuild(exe_path, object_paths.items, object_paths.count);
-    needs_rebuild |= nob_needs_rebuild(exe_path, library_paths.items, library_paths.count);
+    needs_rebuild |= nob_needs_rebuild(
+        exe_path, object_paths.items, object_paths.count
+    );
+    needs_rebuild |= nob_needs_rebuild(
+        exe_path, library_paths.items, library_paths.count
+    );
 
     if (!needs_rebuild) goto success;
 
     Nob_Cmd cmd = {0};
 #if defined(_WIN32)
-    nob_cmd_append(&cmd, "link", "/NOLOGO", nob_temp_sprintf("/OUT:%s", library_path));
+    nob_cmd_append(
+        &cmd, "link", "/NOLOGO", nob_temp_sprintf("/OUT:%s", library_path)
+    );
 #else
     nob_cmd_append(&cmd, "cc", "-o", exe_path);
 #endif
     nob_da_append_many(&cmd, object_paths.items, object_paths.count);
     nob_da_append_many(&cmd, library_paths.items, library_paths.count);
     nob_cc_flags(&cmd);
-    if (CONFIG_SANITIZER != NULL) {
-#if defined(_WIN32)
-#else
-        nob_cmd_append(&cmd,
-            nob_temp_sprintf("-fsanitize=%s,undefined,leak,integer", (char*) CONFIG_SANITIZER)
-        );
-#endif
-    }
+    cmd_append_sanitizer(&cmd);
     if (!nob_cmd_run(&cmd, 0)) goto fail;
 
 success:;
@@ -294,8 +328,12 @@ build_common(void) {
     Nob_File_Paths common_deps = {0};
 
     /* Build library. */
-    nob_da_append_many(&common_deps, common_headers.items, common_headers.count);
-    nob_da_append_many(&common_deps, common_headers.items, common_headers.count);
+    nob_da_append_many(
+        &common_deps, common_headers.items, common_headers.count
+    );
+    nob_da_append_many(
+        &common_deps, common_headers.items, common_headers.count
+    );
 
     Nob_File_Paths common_sources = {0};
     if (!read_entire_dir_recursive_ext("gfu-common", ".c", &common_sources)) {
@@ -327,8 +365,12 @@ build_opcodes(void) {
     Nob_File_Paths opcodes_deps = {0};
 
     /* Build library. */
-    nob_da_append_many(&opcodes_deps, opcodes_headers.items, opcodes_headers.count);
-    nob_da_append_many(&opcodes_deps, opcodes_headers.items, opcodes_headers.count);
+    nob_da_append_many(
+        &opcodes_deps, opcodes_headers.items, opcodes_headers.count
+    );
+    nob_da_append_many(
+        &opcodes_deps, opcodes_headers.items, opcodes_headers.count
+    );
 
     Nob_File_Paths opcodes_sources = {0};
     if (!read_entire_dir_recursive_ext("gfu-opcodes", ".c", &opcodes_sources)) {
@@ -339,13 +381,18 @@ build_opcodes(void) {
     for (size_t i = 0; i < opcodes_sources.count; i++) {
         const char* source_name =
             get_file_name_without_extension(opcodes_sources.items[i]);
-        if (!build_object(
-            &opcodes_objects, "opcodes", "gfu-opcodes", source_name, opcodes_deps)
+        if (
+            !build_object(
+                &opcodes_objects, "opcodes", "gfu-opcodes",
+                source_name, opcodes_deps
+            )
         ) {
             goto fail;
         }
     }
-    if (!archive_library(&opcodes_lib, "gfu-opcodes", opcodes_objects)) goto fail;
+    if (!archive_library(&opcodes_lib, "gfu-opcodes", opcodes_objects)) {
+        goto fail;
+    }
 
 success:;
     result = true;
@@ -372,8 +419,11 @@ build_bfd(void) {
     for (size_t i = 0; i < bfd_sources.count; i++) {
         const char* source_name =
             get_file_name_without_extension(bfd_sources.items[i]);
-        if (!build_object(
-            &bfd_objects, "bfd", "gfu-bfd", source_name, bfd_deps)
+        if (
+            !build_object(
+                &bfd_objects, "bfd", "gfu-bfd",
+                source_name, bfd_deps
+            )
         ) {
             goto fail;
         }
@@ -430,12 +480,19 @@ build_readobj(void) {
     Nob_File_Paths readobj_deps = {0};
 
     /* Build executable. */
-    nob_da_append_many(&readobj_deps, common_headers.items, common_headers.count);
+    nob_da_append_many(
+        &readobj_deps, common_headers.items, common_headers.count
+    );
     nob_da_append_many(&readobj_deps, hx_headers.items, hx_headers.count);
     nob_da_append_many(&readobj_deps, bfd_headers.items, bfd_headers.count);
 
     Nob_File_Paths readobj_objects = {0};
-    if (!build_object(&readobj_objects, "readobj", "gfu-readobj", "main", readobj_deps)) {
+    if (
+        !build_object(
+            &readobj_objects, "readobj", "gfu-readobj",
+            "main", readobj_deps
+        )
+    ) {
         goto fail;
     }
 
@@ -443,8 +500,11 @@ build_readobj(void) {
     nob_da_append(&readobj_deps, common_lib);
     nob_da_append(&readobj_deps, hx_lib);
     nob_da_append(&readobj_deps, bfd_lib);
-    if (!link_executable(
-        BUILD_OUTPUT_DIR BUILD_PATH_SEP "readobj", readobj_objects, readobj_deps)
+    if (
+        !link_executable(
+            BUILD_OUTPUT_DIR BUILD_PATH_SEP "readobj",
+            readobj_objects, readobj_deps
+        )
     ) {
         goto fail;
     }
@@ -476,19 +536,30 @@ build_iselgen(void) {
     }
 
     /* Build executable. */
-    nob_da_append_many(&iselgen_deps, common_headers.items, common_headers.count);
+    nob_da_append_many(
+        &iselgen_deps, common_headers.items, common_headers.count
+    );
     nob_da_append_many(&iselgen_deps, hx_headers.items, hx_headers.count);
-    nob_da_append_many(&iselgen_deps, iselgen_headers.items, iselgen_headers.count);
+    nob_da_append_many(
+        &iselgen_deps, iselgen_headers.items, iselgen_headers.count
+    );
 
     Nob_File_Paths iselgen_objects = {0};
-    if (!build_object(&iselgen_objects, "iselgen", "gfu-iselgen", "main", iselgen_deps)) {
+    if (
+        !build_object(
+            &iselgen_objects, "iselgen", "gfu-iselgen", "main", iselgen_deps
+        )
+    ) {
         goto fail;
     }
 
     iselgen_deps.count = 0;
     nob_da_append(&iselgen_deps, common_lib);
-    if (!link_executable(
-        BUILD_OUTPUT_DIR BUILD_PATH_SEP "iselgen", iselgen_objects, iselgen_deps)
+    if (
+        !link_executable(
+            BUILD_OUTPUT_DIR BUILD_PATH_SEP "iselgen",
+            iselgen_objects, iselgen_deps
+        )
     ) {
         goto fail;
     }
@@ -507,8 +578,14 @@ build_as(void) {
 
     /* Build sources. */
     if (
-        nob_needs_rebuild1("gfu-as/isel_tables.c", BUILD_OUTPUT_DIR BUILD_PATH_SEP "iselgen") ||
-        nob_needs_rebuild1("include/gamefu/as/x/mnemonics.h", BUILD_OUTPUT_DIR BUILD_PATH_SEP "iselgen")
+        nob_needs_rebuild1(
+            "gfu-as/isel_tables.c",
+            BUILD_OUTPUT_DIR BUILD_PATH_SEP "iselgen"
+        ) ||
+        nob_needs_rebuild1(
+            "include/gamefu/as/x/mnemonics.h",
+            BUILD_OUTPUT_DIR BUILD_PATH_SEP "iselgen"
+        )
     ) {
         Nob_Cmd cmd = {0};
         nob_cmd_append(&cmd, \
@@ -586,16 +663,24 @@ main(int argc, char** argv) {
     }
 
     nob_da_append(&opcodes_headers, "include/gamefu/opcodes.h");
-    if (!read_entire_dir_ext("include/gamefu/opcodes", ".h", &opcodes_headers)) {
+    if (
+        !read_entire_dir_ext("include/gamefu/opcodes", ".h", &opcodes_headers)
+    ) {
         goto fail;
     }
 
-    if (!read_entire_dir_ext("include/gamefu/bfd", ".h", &bfd_headers)) goto fail;
+    if (!read_entire_dir_ext("include/gamefu/bfd", ".h", &bfd_headers)) {
+        goto fail;
+    }
 
     nob_da_append(&hx_headers, "include/gamefu/hx.h");
     if (!read_entire_dir_ext("include/gamefu/hx", ".h", &hx_headers)) goto fail;
 
-    if (!read_entire_dir_ext("include/gamefu/iselgen", ".h", &iselgen_headers)) goto fail;
+    if (
+        !read_entire_dir_ext("include/gamefu/iselgen", ".h", &iselgen_headers)
+    ) {
+        goto fail;
+    }
 
     if (!build_common()) goto fail;
     if (!build_opcodes()) goto fail;

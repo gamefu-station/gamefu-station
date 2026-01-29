@@ -41,8 +41,12 @@ delete_directory_recursively(const char *path)
                 if (strcmp(children.items[i], ".") == 0) continue;
                 if (strcmp(children.items[i], "..") == 0) continue;
 
-                const char* child_path = nob_temp_sprintf("%s/%s", path, children.items[i]);
-                if (!delete_directory_recursively(child_path)) nob_return_defer(false);
+                const char* child_path = nob_temp_sprintf(
+                    "%s/%s", path, children.items[i]
+                );
+                if (!delete_directory_recursively(child_path)) {
+                    nob_return_defer(false);
+                }
             }
 
 #if defined(_WIN32)
@@ -63,7 +67,9 @@ delete_directory_recursively(const char *path)
         } break;
 
         case NOB_FILE_SYMLINK: {
-            nob_log(NOB_WARNING, "TODO: Deleting symlinks is not supported yet.");
+            nob_log(
+                NOB_WARNING, "TODO: Deleting symlinks is not supported yet."
+            );
         } break;
 
         case NOB_FILE_OTHER: {
@@ -83,7 +89,12 @@ defer:
 }
 
 static bool
-configure(const char* program_name, int* argc, char*** argv, const char* config_header_path) {
+configure(
+    const char* program_name,
+    int* argc,
+    char*** argv,
+    const char* config_header_path
+) {
     bool result = false;
     Config config = {0};
 
@@ -105,7 +116,11 @@ configure(const char* program_name, int* argc, char*** argv, const char* config_
             } else if (0 == strcmp(arg, "memory")) {
                 config.sanitize = "memory";
             } else {
-                nob_log(NOB_ERROR, "Unrecognized argument to option '--san': '%s'. Expected 'on', 'off', 'address', 'thread' or 'memory'.", arg);
+                nob_log(
+                    NOB_ERROR, "Unrecognized argument to option '--san': "
+                    "'%s'. Expected 'on', 'off', 'address', "
+                    "'thread' or 'memory'.", arg
+                );
                 goto fail;
             }
         } else if (0 == strcmp(opt, "--san")) {
@@ -123,7 +138,11 @@ configure(const char* program_name, int* argc, char*** argv, const char* config_
             } else if (0 == strcmp(arg, "memory")) {
                 config.sanitize = "memory";
             } else {
-                nob_log(NOB_ERROR, "Unrecognized argument to option '--san': '%s'. Expected 'on', 'off', 'address', 'thread' or 'memory'.", arg);
+                nob_log(
+                    NOB_ERROR, "Unrecognized argument to option '--san': "
+                    "'%s'. Expected 'on', 'off', 'address', "
+                    "'thread' or 'memory'.", arg
+                );
                 goto fail;
             }
         } else {
@@ -164,7 +183,9 @@ configure(const char* program_name, int* argc, char*** argv, const char* config_
     nob_log(NOB_INFO, "configuring...");
     clean();
 
-    if (!nob_write_entire_file(config_header_path, sb.items, sb.count - 1)) goto fail;
+    if (!nob_write_entire_file(config_header_path, sb.items, sb.count - 1)) {
+        goto fail;
+    }
     nob_log(NOB_INFO, "created file '%s'", config_header_path);
 
 success:;
@@ -183,7 +204,8 @@ bootstrap_build_tool(const char* exe_path, const char* source_path) {
     const char* build_platform_h = BUILD_DIR BUILD_PATH_SEP "platform.h";
 
     const char* exe_deps[] = {
-        source_path, build_nob_h, build_config_h, build_directories_h, build_platform_h
+        source_path, build_nob_h, build_config_h,
+        build_directories_h, build_platform_h
     };
 
     bool needs_rebuild = nob_needs_rebuild(
@@ -207,7 +229,9 @@ run_build(int argc, char** argv) {
     bool result = false;
 
     const char* build_src = BUILD_DIR BUILD_PATH_SEP "build.c";
-    const char* build_exe = "." BUILD_PATH_SEP BUILD_OUTPUT_DIR BUILD_PATH_SEP "build" BUILD_EXE_EXT;
+    const char* build_exe =
+        "." BUILD_PATH_SEP BUILD_OUTPUT_DIR
+        BUILD_PATH_SEP "build" BUILD_EXE_EXT;
     if (!bootstrap_build_tool(build_exe, build_src)) goto fail;
 
     Nob_Cmd cmd = {0};
@@ -229,7 +253,9 @@ delete_file_if_exists(const char* path) {
 
 static bool
 clean(void) {
-    if (!delete_file_if_exists(BUILD_DIR BUILD_PATH_SEP "config.h")) return false;
+    if (!delete_file_if_exists(BUILD_DIR BUILD_PATH_SEP "config.h")) {
+        return false;
+    }
     if (!delete_file_if_exists("gfu-iselgen/isel_source.h")) return false;
     if (!delete_file_if_exists("gfu-as/isel_tables.c")) return false;
     if (!nob_file_exists(BUILD_OUTPUT_DIR)) return true;

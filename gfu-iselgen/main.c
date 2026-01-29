@@ -508,7 +508,7 @@ static void isel_parse_pattern(isel_parser* parser) {
         diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected a match clause.");
     }
 
-    const char* vars[pattern->var_count];
+    const char* vars[pattern->var_count <= 0 ? 1 : pattern->var_count];
     for (gfu_uword i = 0, var_index = 0; i < pattern->match_count; i++) {
         isel_match* match = &matches[i];
         for (gfu_uword j = 0; j < match->operand_count; j++) {
