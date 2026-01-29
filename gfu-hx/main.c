@@ -52,6 +52,7 @@ int main(int argc, char** argv) {
 
     const char* input_file_path = NULL;
     int64_t length = -1;
+    int64_t offset = 0;
 
     bool verbose = false;
     bool print_help = false;
@@ -84,7 +85,7 @@ int main(int argc, char** argv) {
         } else if (0 == strcmp(opt, "-g") || 0 == strcmp(opt, "-groupsize") || 0 == strcmp(opt, "--group") || 0 == strcmp(opt, "--group-size")) {
             if (!parse_ull(shift(&argc, &argv), opt, &opts.group_byte_count)) return 1;
         } else if (0 == strcmp(opt, "-s") || 0 == strcmp(opt, "-seek") || 0 == strcmp(opt, "--seek") || 0 == strcmp(opt, "--offset")) {
-            if (!parse_ull(shift(&argc, &argv), opt, &opts.offset)) return 1;
+            if (!parse_ull(shift(&argc, &argv), opt, &offset)) return 1;
         } else if (0 == strcmp(opt, "-l") || 0 == strcmp(opt, "-len") || 0 == strcmp(opt, "--length") || 0 == strcmp(opt, "--count")) {
             if (!parse_ull(shift(&argc, &argv), opt, &length)) return 1;
             if (length < 0) {
@@ -115,73 +116,118 @@ int main(int argc, char** argv) {
 
     if (options_errors) return 1;
 
-    FILE* stream = stdin;
+    void *buff = NULL;
+    size_t buff_size = 0;
+
     if (input_file_path != NULL) {
         errno = 0;
-        stream = fopen(input_file_path, "rb");
+        FILE* stream = fopen(input_file_path, "rb");
         if (stream == NULL) {
             fprintf(stderr, "error: failed to open '%s': %s.\n", input_file_path, strerror(errno));
             return 1;
         }
-    }
 
-    errno = 0;
-    if (0 != fseek(stream, 0, SEEK_END)) {
-        fprintf(stderr, "error: failed to seek input: %s.\n", strerror(errno));
-        if (input_file_path != NULL) fclose(stream);
-        return 1;
-    }
-
-    errno = 0;
-    long file_size = ftell(stream);
-    if (file_size < 0) {
-        fprintf(stderr, "error: failed to retrieve file size: %s.\n", strerror(errno));
-        if (input_file_path != NULL) fclose(stream);
-        return 1;
-    }
-
-    rewind(stream);
-
-    if (opts.offset > 0) {
         errno = 0;
-        if (0 != fseek(stream, (long)opts.offset, SEEK_CUR)) {
+        if (0 != fseek(stream, 0, SEEK_END)) {
             fprintf(stderr, "error: failed to seek input: %s.\n", strerror(errno));
-            if (input_file_path != NULL) fclose(stream);
+            fclose(stream);
             return 1;
         }
 
-        opts.offset = ftell(stream);
-    } else if (opts.offset < 0) {
         errno = 0;
-        if (0 != fseek(stream, (long)-opts.offset, SEEK_END)) {
-            fprintf(stderr, "error: failed to seek input: %s.\n", strerror(errno));
-            if (input_file_path != NULL) fclose(stream);
+        long file_size = ftell(stream);
+        if (file_size < 0) {
+            fprintf(stderr, "error: failed to retrieve file size: %s.\n", strerror(errno));
+            fclose(stream);
             return 1;
         }
 
-        opts.offset = ftell(stream);
+        rewind(stream);
+
+        if (offset > 0) {
+            errno = 0;
+            if (0 != fseek(stream, (long)offset, SEEK_CUR)) {
+                fprintf(stderr, "error: failed to seek input: %s.\n", strerror(errno));
+                fclose(stream);
+                return 1;
+            }
+
+            offset = ftell(stream);
+        } else if (offset < 0) {
+            errno = 0;
+            if (0 != fseek(stream, (long)-offset, SEEK_END)) {
+                fprintf(stderr, "error: failed to seek input: %s.\n", strerror(errno));
+                fclose(stream);
+                return 1;
+            }
+
+            offset = ftell(stream);
+        }
+
+        if (length < 0) {
+            length = file_size;
+        }
+
+        if (offset > length) {
+            fprintf(stderr, "warning: offset was specified past the length of input\n");
+            offset = length;
+        }
+
+        buff = malloc(length);
+        assertn(buff != NULL);
+
+        errno = 0;
+        buff_size = fread(buff, 1, length, stream);
+        if (ferror(stream)) {
+            fprintf(stderr, "error: failed to read input: %s.\n", strerror(errno));
+            free(buff);
+            fclose(stream);
+            return 1;
+        }
+
+        fclose(stream);
+    } else {
+#define WINDOW_CAP 1024
+        char *stdin_buff = NULL;
+        size_t stdin_buff_size = 0;
+
+        char window[WINDOW_CAP];
+        while (fgets(window, WINDOW_CAP, stdin)) {
+            size_t window_size = strlen(window);
+            stdin_buff = realloc(stdin_buff, stdin_buff_size + window_size);
+            assertn(stdin_buff != NULL);
+            memcpy((char*)stdin_buff + stdin_buff_size, window, window_size);
+            stdin_buff_size += window_size;
+        }
+        if (ferror(stdin)) {
+            fprintf(stderr, "error: failed to read input: %s.\n", strerror(errno));
+            if (stdin_buff) free(stdin_buff);
+            return 1;
+        }
+
+        while (offset < 0) {
+            offset = (int64_t) stdin_buff_size + offset;
+        }
+        if (stdin_buff_size < (size_t) offset) {
+            fprintf(stderr, "warning: offset was specified past the length of input\n");
+            offset = stdin_buff_size;
+        }
+
+        buff = malloc(stdin_buff_size);
+        memcpy(buff, stdin_buff + offset, stdin_buff_size - offset);
+        buff_size = stdin_buff_size - offset;
+
+        if (buff_size > (size_t) length) {
+            buff_size = length;
+        }
+
+        free(stdin_buff);
+#undef WINDOW_SIZE
     }
 
-    if (length < 0) {
-        length = file_size;
-    }
+    opts.visual_offset = offset;
+    hx_dump_opt(stdout, buff, buff_size, opts);
 
-    void *buffer = malloc(length);
-    assertn(buffer != NULL);
-
-    errno = 0;
-    fread(buffer, 1, length, stream);
-    if (ferror(stream)) {
-        fprintf(stderr, "error: failed to read input: %s.\n", strerror(errno));
-        if (buffer) free(buffer);
-        if (input_file_path != NULL) fclose(stream);
-        return 1;
-    }
-
-    hx_dump_opt(stdout, buffer, length, opts);
-
-    if (buffer) free(buffer);
-    if (input_file_path != NULL) fclose(stream);
-
+    if (buff) free(buff);
     return 0;
 }

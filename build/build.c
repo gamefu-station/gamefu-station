@@ -11,6 +11,7 @@ SPDX-License-Identifier: GPL-2.0-only
 #else
 #  define nob_cc_flags(cmd) nob_cmd_append(cmd, \
     "-std=c99", \
+    "-ggdb",  \
     "-Wall", "-Wextra", \
     "-Wreturn-type", \
     "-Wno-unused", \

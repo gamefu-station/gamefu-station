@@ -92,8 +92,8 @@ int main(int argc, char** argv) {
             }
 
             hx_opts opts = hx_default_opts();
-            opts.offset = section->offset;
-            hx_dump_opt(stdout, obj, section->size, opts);
+            opts.visual_offset = section->offset;
+            hx_dump_opt(stdout, gfuobj_raw_get_pointer(obj, section->offset), section->size, opts);
         }
     }
 

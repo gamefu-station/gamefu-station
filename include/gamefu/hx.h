@@ -8,7 +8,7 @@ typedef struct {
     bool print_plain;
     bool print_cinclude;
     const char* cinclude_name;
-    int64_t offset;
+    int64_t visual_offset;
     int64_t column_count;
     int64_t group_byte_count;
 } hx_opts;

@@ -41,11 +41,7 @@ void hx_dump_opt(FILE* out_stream, void* buff, size_t length, hx_opts opts) {
 
     int64_t total_read = 0;
     int64_t group_counter = 0;
-
-    size_t pointer = opts.offset;
-    if (pointer >= length) {
-        return;
-    }
+    size_t pointer = 0;
 
     void (*print_octet)(char) = opts.print_bits ? print_octet_bits : print_octet_hex;
 
@@ -70,7 +66,7 @@ void hx_dump_opt(FILE* out_stream, void* buff, size_t length, hx_opts opts) {
                 fprintf(out_stream, "0x%02hhX, ", window[i]);
             fputc('\n', out_stream);
         } else {
-            fprintf(out_stream, "%016"PRIX64": ", opts.offset + total_read - nread);
+            fprintf(out_stream, "%016"PRIX64": ", opts.visual_offset + total_read - nread);
 
             for (int i = 0; i < nread; i++, group_counter++) {
                 if (group_counter == opts.group_byte_count) {
