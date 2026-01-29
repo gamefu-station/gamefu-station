@@ -69,6 +69,15 @@ gfuas_token gfuas_read_token(gfuas_state* state);
 gfuobj_raw* gfuas_assemble_internal(gfuas_state* state);
 gfuobj_raw* gfuas_assemble_ir_internal(gfuas_state* state);
 
+static inline void gfuas_print_verbose(gfuas_state* state, const char* format, ...) {
+    if (!state->verbose) return;
+    va_list v;
+    va_start(v, format);
+    vfprintf(stderr, format, v);
+    va_end(v);
+    fprintf(stderr, "\n");
+}
+
 static inline bool gfuas_lexer_at_end(gfuas_state* state) {
     return state->lex_position >= (gfu_uword) state->source.length;
 }

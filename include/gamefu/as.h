@@ -4,8 +4,8 @@ See the LICENSE file and LICENSES directory for more information.
 SPDX-License-Identifier: GPL-2.0-only
 ----------------------------------------------------------------------------- */
 
-#ifndef GAMEFU_GFUAS_ASM_H_
-#define GAMEFU_GFUAS_ASM_H_
+#ifndef GAMEFU_AS_H_
+#define GAMEFU_AS_H_
 
 #include <gamefu/common.h>
 #include <gamefu/bfd/object.h>
@@ -121,4 +121,4 @@ GAMEFU_API gfuas_stmt* gfuas_build_instruction(gfuas_builder* b, gfuas_mnemonic 
 GAMEFU_API int gfuas_driver_main(int argc, char** argv);
 GAMEFU_API int gfuas_driver_fuzz(const char* text, size_t length);
 
-#endif /* GAMEFU_GFUAS_ASM_H_ */
+#endif /* GAMEFU_AS_H_ */

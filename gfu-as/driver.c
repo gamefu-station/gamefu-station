@@ -93,15 +93,6 @@ static void gfuas_show_version(void) {
     );
 }
 
-static inline void gfuas_print_verbose(gfuas_state* state, const char* format, ...) {
-    if (!state->verbose) return;
-    va_list v;
-    va_start(v, format);
-    vfprintf(stderr, format, v);
-    va_end(v);
-    fprintf(stderr, "\n");
-}
-
 GAMEFU_API int gfuas_driver_main(int argc, char** argv) {
     int result = 1;
     FILE* f = nullptr;
