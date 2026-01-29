@@ -308,9 +308,14 @@ link_executable(
     );
 #else
     nob_cmd_append(&cmd, "cc", "-o", exe_path);
+    nob_cmd_append(&cmd, "-Wl,--start-group");
 #endif
     nob_da_append_many(&cmd, object_paths.items, object_paths.count);
     nob_da_append_many(&cmd, library_paths.items, library_paths.count);
+#if defined(_WIN32)
+#else
+    nob_cmd_append(&cmd, "-Wl,--end-group");
+#endif
     nob_cc_flags(&cmd);
     cmd_append_sanitizer(&cmd);
     if (!nob_cmd_run(&cmd, 0)) goto fail;
@@ -462,7 +467,7 @@ build_hx(void) {
     nob_da_append(&hx_deps, common_lib);
     nob_da_append(&hx_deps, hx_lib);
     if (!link_executable(
-        BUILD_OUTPUT_DIR BUILD_PATH_SEP "hx", hx_objects, hx_deps)
+        BUILD_OUTPUT_DIR BUILD_PATH_SEP "gfu-hx", hx_objects, hx_deps)
     ) {
         goto fail;
     }
@@ -502,7 +507,7 @@ build_readobj(void) {
     nob_da_append(&readobj_deps, bfd_lib);
     if (
         !link_executable(
-            BUILD_OUTPUT_DIR BUILD_PATH_SEP "readobj",
+            BUILD_OUTPUT_DIR BUILD_PATH_SEP "gfu-readobj",
             readobj_objects, readobj_deps
         )
     ) {
@@ -527,7 +532,7 @@ build_iselgen(void) {
     ) {
         Nob_Cmd cmd = {0};
         nob_cmd_append(&cmd, \
-            (BUILD_OUTPUT_DIR BUILD_PATH_SEP "hx"), "gfu-iselgen/isel.txt", \
+            (BUILD_OUTPUT_DIR BUILD_PATH_SEP "gfu-hx"), "gfu-iselgen/isel.txt", \
             "-i", "-n", "isel"
         );
         if (!nob_cmd_run(&cmd, .stdout_path = "gfu-iselgen/isel_source.h")) {
@@ -547,7 +552,7 @@ build_iselgen(void) {
     Nob_File_Paths iselgen_objects = {0};
     if (
         !build_object(
-            &iselgen_objects, "iselgen", "gfu-iselgen", "main", iselgen_deps
+            &iselgen_objects, "gfu-iselgen", "gfu-iselgen", "main", iselgen_deps
         )
     ) {
         goto fail;
@@ -557,7 +562,7 @@ build_iselgen(void) {
     nob_da_append(&iselgen_deps, common_lib);
     if (
         !link_executable(
-            BUILD_OUTPUT_DIR BUILD_PATH_SEP "iselgen",
+            BUILD_OUTPUT_DIR BUILD_PATH_SEP "gfu-iselgen",
             iselgen_objects, iselgen_deps
         )
     ) {
@@ -577,20 +582,13 @@ build_as(void) {
     Nob_File_Paths as_deps = {0};
 
     /* Build sources. */
+    const char* iselgen_exe = BUILD_OUTPUT_DIR BUILD_PATH_SEP "gfu-iselgen";
     if (
-        nob_needs_rebuild1(
-            "gfu-as/isel_tables.c",
-            BUILD_OUTPUT_DIR BUILD_PATH_SEP "iselgen"
-        ) ||
-        nob_needs_rebuild1(
-            "include/gamefu/as/x/mnemonics.h",
-            BUILD_OUTPUT_DIR BUILD_PATH_SEP "iselgen"
-        )
+        nob_needs_rebuild1("gfu-as/isel_tables.c", iselgen_exe) ||
+        nob_needs_rebuild1("include/gamefu/as/x/mnemonics.h", iselgen_exe)
     ) {
         Nob_Cmd cmd = {0};
-        nob_cmd_append(&cmd, \
-            (BUILD_OUTPUT_DIR BUILD_PATH_SEP "iselgen")
-        );
+        nob_cmd_append(&cmd, iselgen_exe);
         if (!nob_cmd_run(&cmd, 0)) goto fail;
     }
 
@@ -599,6 +597,10 @@ build_as(void) {
     nob_da_append_many(&as_deps, opcodes_headers.items, opcodes_headers.count);
     nob_da_append_many(&as_deps, bfd_headers.items, bfd_headers.count);
     nob_da_append_many(&as_deps, as_headers.items, as_headers.count);
+
+    if (!read_entire_dir_recursive_ext("gfu-as", ".h", &as_deps)) {
+        goto fail;
+    }
 
     Nob_File_Paths as_sources = {0};
     if (!read_entire_dir_recursive_ext("gfu-as", ".c", &as_sources)) {
@@ -629,8 +631,10 @@ build_as(void) {
     nob_da_append(&as_deps, opcodes_lib);
     nob_da_append(&as_deps, bfd_lib);
     nob_da_append(&as_deps, as_lib);
-    if (!link_executable(
-        BUILD_OUTPUT_DIR BUILD_PATH_SEP "as", as_objects, as_deps)
+    if (
+        !link_executable(
+            BUILD_OUTPUT_DIR BUILD_PATH_SEP "gfu-as", as_objects, as_deps
+        )
     ) {
         goto fail;
     }
