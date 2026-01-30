@@ -12,7 +12,21 @@ Submit patch requests: patch@gamefu-station.org
 
 ## Building from source
 
-Currently the projcet comes with a single `build.sh` for Linux systems. It only depends on a standard-compliant C99 compiler and its associated toolchain, and of course the shell to run the script. You can, of course, manually run each step without the shell if you happen to be lacking one.
+To build the projects in this repository, bootstrap the build tool by compiling the `nob.c` build source.
+
+```sh
+$ cc -o nob nob.c
+```
+
+```bat
+> cl -o nob.exe nob.c
+```
+
+Running the resulting executable will, by default, configure and build all projects.
+
+The build tool comes with a `config` command used to specify compilation options or features.
+For example, `--san=address` will enable the address sanitizer as well as any other compatible sanitizers.
+Any time the configuration is changed, a full rebuild is triggered.
 
 ## Contributing to the GameFU Station project
 
