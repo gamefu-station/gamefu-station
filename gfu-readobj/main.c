@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
     if (obj == nullptr) return_defer(1);
 
     if (!GFUOBJ_VERIFY_MAGIC(obj->header.magic)) {
-        diag_issue(DIAG_ERROR, NOSOURCE, "Provided file is not a GameFU object.");
+        gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, "Provided file is not a GameFU object.");
         return_defer(1);
     }
 
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
 
 defer:;
     free(obj);
-    diag_flush();
+    gfu_diag_flush();
     return result;
 }
 
@@ -121,7 +121,7 @@ static bool readobj_parse_flags(int argc, char** argv, readobj_options* options)
 
         if (*option != '-') {
             if (options->obj_file_path != nullptr) {
-                diag_issue(DIAG_ERROR, NOSOURCE, "Cannot provide more than one object file.");
+                gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, "Cannot provide more than one object file.");
                 return_defer(false);
             }
             options->obj_file_path = option;
@@ -137,18 +137,18 @@ static bool readobj_parse_flags(int argc, char** argv, readobj_options* options)
         } else if (strcmp(option, "-d") == 0) {
             options->show_section_data = true;
         } else {
-            diag_issue(DIAG_ERROR, NOSOURCE, "Unknown flag: '%s'.", option);
+            gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, "Unknown flag: '%s'.", option);
             return_defer(false);
         }
     }
 
     if (options->obj_file_path == nullptr) {
-        diag_issue(DIAG_ERROR, NOSOURCE, "No object file provided.");
+        gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, "No object file provided.");
         return_defer(false);
     }
 
 defer:
-    diag_flush();
+    gfu_diag_flush();
     return result;
 }
 

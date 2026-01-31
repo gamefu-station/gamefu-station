@@ -47,15 +47,15 @@ bool gfuas_options_parse(int argc, char** argv, gfuas_state* state) {
         } else if (0 == strcmp(opt, "-o")) {
             const char* path = SHIFT;
             if (path == nullptr) {
-                diag_issue(DIAG_ERROR, NOSOURCE, "Option '-o' requires an argument.");
+                gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, "Option '-o' requires an argument.");
                 goto fail;
             }
         } else {
             if (state->source.name != nullptr) {
-                diag_issue(DIAG_ERROR, NOSOURCE, "Only one source file may be assembled at a time.");
+                gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, "Only one source file may be assembled at a time.");
                 goto fail;
             }
-            if (!load_source_from_file(opt, &state->source)) {
+            if (!gfu_source_load_from_file(opt, &state->source)) {
                 goto fail;
             }
         }
@@ -63,7 +63,7 @@ bool gfuas_options_parse(int argc, char** argv, gfuas_state* state) {
 
     result = true;
 fail:;
-    diag_flush();
+    gfu_diag_flush();
     return result;
 }
 
@@ -93,11 +93,11 @@ static void gfuas_show_version(void) {
     );
 }
 
-GAMEFU_API int gfuas_driver_main(int argc, char** argv) {
+__GAMEFU_API__ int gfuas_driver_main(int argc, char** argv) {
     int result = 1;
     FILE* f = nullptr;
 
-    diag_color_output(isatty(fileno(stderr)));
+    gfu_diag_color_output(isatty(fileno(stderr)));
 
     gfuas_state state = {
         .entry_name = "_start",
@@ -120,7 +120,7 @@ GAMEFU_API int gfuas_driver_main(int argc, char** argv) {
     if (state.source.name == nullptr) {
         gfuas_show_help(state.program);
         fprintf(stderr, "\n");
-        diag_issue(DIAG_ERROR, NOSOURCE, "No source file provided.");
+        gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, "No source file provided.");
         goto fail;
     }
 
@@ -156,7 +156,7 @@ GAMEFU_API int gfuas_driver_main(int argc, char** argv) {
     errno = 0;
     f = fopen(output_name, "wb");
     if (f == nullptr) {
-        diag_issue(DIAG_ERROR, NOSOURCE, "Failed to open output file '%s': %s", output_name, strerror(errno));
+        gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, "Failed to open output file '%s': %s", output_name, strerror(errno));
         goto fail;
     }
 
@@ -164,7 +164,7 @@ GAMEFU_API int gfuas_driver_main(int argc, char** argv) {
     fwrite(rom_data, (size_t) rom_data->header.rom_size, 1, f);
     free(rom_data);
     if (ferror(f)) {
-        diag_issue(DIAG_ERROR, NOSOURCE, "Failed to write to output file '%s': %s", output_name, strerror(errno));
+        gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, "Failed to write to output file '%s': %s", output_name, strerror(errno));
         goto fail;
     }
 
@@ -172,13 +172,13 @@ GAMEFU_API int gfuas_driver_main(int argc, char** argv) {
 success:;
     result = 0;
 fail:;
-    diag_flush();
+    gfu_diag_flush();
     if (f != nullptr) fclose(f);
     free((void*) state.source.text);
     gfu_arena_deinit(&state.arena);
     return result;
 }
 
-GAMEFU_API int gfuas_driver_fuzz(const char* text, size_t length) {
+__GAMEFU_API__ int gfuas_driver_fuzz(const char* text, size_t length) {
     return 0;
 }

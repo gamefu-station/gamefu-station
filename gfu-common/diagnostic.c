@@ -18,7 +18,13 @@ static const char* level_colors[] = {
     "\x1b[35m", // magenta
 };
 
-static void seek_line_column(source source, int32_t location, int32_t* line, int32_t* column) {
+static void
+seek_line_column(
+    gfu_source source,
+    int32_t location,
+    int32_t* line,
+    int32_t* column
+) {
     if (location > source.length) location = source.length;
 
     const char* line_start = source.text;
@@ -35,34 +41,53 @@ static void seek_line_column(source source, int32_t location, int32_t* line, int
     *column = 1 + (end - line_start);
 }
 
-#ifdef FUZZ
+#ifdef GAMEFU_FUZZ
 
 static thread_local bool has_issued_error;
 
-void diag_flush(void) {
+void
+gfu_diag_flush(__GAMEFU_VOIDPROTO__) {
 }
 
-void diag_pause_error_flush(void) {
+void
+gfu_diag_pause_error_flush(__GAMEFU_VOIDPROTO__) {
 }
 
-void diag_color_output(bool enable) {
+void
+gfu_diag_color_output(bool enable) {
 }
 
-void diag_exit_on_error(bool enable) {
+void
+gfu_diag_exit_on_error(bool enable) {
 }
 
-bool diag_has_issued_error(void) {
+bool
+gfu_diag_has_issued_error(__GAMEFU_VOIDPROTO__) {
     return has_issued_error;
 }
 
-void diag_issue(diag_level level, source source, int32_t location, const char* format, ...) {
+void
+gfu_diag_issue(
+    gfu_diag_level level,
+    gfu_source source,
+    int32_t location,
+    const char* format,
+    ...
+) {
     va_list v;
     va_start(v, format);
-    diag_issue_v(level, source, location, format, v);
+    gfu_diag_issue_v(level, source, location, format, v);
     va_end(v);
 }
 
-void diag_issue_v(diag_level level, source source, int32_t location, const char* format, va_list v) {
+void
+gfu_diag_issue_v(
+    gfu_diag_level level,
+    gfu_source source,
+    int32_t location,
+    const char* format,
+    va_list v
+) {
     if (level == DIAG_IGNORED) return;
 
     fputs(level_names[level], stderr);
@@ -72,7 +97,10 @@ void diag_issue_v(diag_level level, source source, int32_t location, const char*
         //fprintf(stderr, ": %s[%" PRIi32 "]: ", source.name, location);
         int32_t line, column;
         seek_line_column(source, location, &line, &column);
-        fprintf(stderr, ": %s(%" PRIi32 ",%" PRIi32 "): ", source.name, line, column);
+        fprintf(
+            stderr, ": %s(%" PRIi32 ",%" PRIi32 "): ",
+            source.name, line, column
+        );
     }
 
     vfprintf(stderr, format, v);
@@ -85,32 +113,33 @@ void diag_issue_v(diag_level level, source source, int32_t location, const char*
 
 #define DIAG_MAX (16)
 
-typedef struct diag {
-    diag_level level;
-    source source;
-    int32_t location;
+typedef struct gfu_diag {
+    gfu_diag_level level;
+    gfu_source source;
+    gfu_word location;
     char* message;
-} diag;
+} gfu_diag;
 
 struct {
-    diag group[DIAG_MAX];
-    int32_t count;
+    gfu_diag group[DIAG_MAX];
+    gfu_word count;
     bool color_output;
     bool pause_error_flush;
     bool exit_on_error;
-    int32_t error_limit, error_count;
-} diag_state = {0};
+    gfu_word error_limit, error_count;
+} gfu_diag_state = {0};
 
-void diag_flush(void) {
-    if (diag_state.count <= 0) return;
-    diag_level level = diag_state.group[0].level;
+void
+gfu_diag_flush(__GAMEFU_VOIDPROTO__) {
+    if (gfu_diag_state.count <= 0) return;
+    gfu_diag_level level = gfu_diag_state.group[0].level;
 
-    for (int32_t i = 0; i < diag_state.count; i++) {
-        diag d = diag_state.group[i];
+    for (int32_t i = 0; i < gfu_diag_state.count; i++) {
+        gfu_diag d = gfu_diag_state.group[i];
 
-        if (diag_state.color_output) fputs(level_colors[d.level], stderr);
+        if (gfu_diag_state.color_output) fputs(level_colors[d.level], stderr);
         fputs(level_names[d.level], stderr);
-        if (diag_state.color_output) fputs("\x1b[0m", stderr);
+        if (gfu_diag_state.color_output) fputs("\x1b[0m", stderr);
 
         if (d.source.text == nullptr) {
             fprintf(stderr, ": ");
@@ -125,45 +154,63 @@ void diag_flush(void) {
         free(d.message);
     }
 
-    diag_state.count = 0;
+    gfu_diag_state.count = 0;
 
     if (level == DIAG_ERROR) {
-        diag_state.error_count++;
-        if (diag_state.exit_on_error) exit(1);
+        gfu_diag_state.error_count++;
+        if (gfu_diag_state.exit_on_error) exit(1);
     }
 
     if (level == DIAG_FATAL) abort();
 }
 
-void diag_pause_error_flush(void) {
-    diag_state.pause_error_flush = true;
+void
+gfu_diag_pause_error_flush(__GAMEFU_VOIDPROTO__) {
+    gfu_diag_state.pause_error_flush = true;
 }
 
-void diag_color_output(bool enable) {
-    diag_state.color_output = enable;
+void
+gfu_diag_color_output(bool enable) {
+    gfu_diag_state.color_output = enable;
 }
 
-void diag_exit_on_error(bool enable) {
-    diag_state.exit_on_error = enable;
+void
+gfu_diag_exit_on_error(bool enable) {
+    gfu_diag_state.exit_on_error = enable;
 }
 
-bool diag_has_issued_error(void) {
-    return diag_state.error_count > 0;
+bool
+gfu_diag_has_issued_error(__GAMEFU_VOIDPROTO__) {
+    return gfu_diag_state.error_count > 0;
 }
 
-void diag_issue(diag_level level, source source, int32_t location, const char* format, ...) {
+void
+gfu_diag_issue(
+    gfu_diag_level level,
+    gfu_source source,
+    int32_t location,
+    const char* format,
+    ...
+) {
     va_list v;
     va_start(v, format);
-    diag_issue_v(level, source, location, format, v);
+    gfu_diag_issue_v(level, source, location, format, v);
     va_end(v);
 }
 
-void diag_issue_v(diag_level level, source source, int32_t location, const char* format, va_list v) {
+void
+gfu_diag_issue_v(
+    gfu_diag_level level,
+    gfu_source source,
+    int32_t location,
+    const char* format,
+    va_list v
+) {
     if (level == DIAG_IGNORED) return;
-    if (level == DIAG_NOTE && diag_state.count == 0) return;
+    if (level == DIAG_NOTE && gfu_diag_state.count == 0) return;
 
-    if (diag_state.count >= DIAG_MAX) diag_flush();
-    if (level > DIAG_NOTE && diag_state.count > 0) diag_flush();
+    if (gfu_diag_state.count >= DIAG_MAX) gfu_diag_flush();
+    if (level > DIAG_NOTE && gfu_diag_state.count > 0) gfu_diag_flush();
 
     va_list v0, v1;
     va_copy(v0, v);
@@ -176,15 +223,15 @@ void diag_issue_v(diag_level level, source source, int32_t location, const char*
     (void)vsnprintf(message, (size_t)(length + 1), format, v1);
     va_end(v1);
 
-    diag_state.group[diag_state.count++] = (diag) {
+    gfu_diag_state.group[gfu_diag_state.count++] = (gfu_diag) {
         .level = level,
         .source = source,
         .location = location,
         .message = message,
     };
 
-    if (level >= DIAG_ERROR && !diag_state.pause_error_flush) {
-        diag_flush();
+    if (level >= DIAG_ERROR && !gfu_diag_state.pause_error_flush) {
+        gfu_diag_flush();
     }
 }
 

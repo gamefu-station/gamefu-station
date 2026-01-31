@@ -168,19 +168,19 @@ typedef struct gfuobj_raw {
     gfu_ubyte data[];
 } gfuobj_raw;
 
-GAMEFU_API gfuobj_raw* gfuobj_raw_read_from_file(const char* file_path);
-GAMEFU_API gfuobj_raw* gfuobj_raw_from_data(gfu_ubyte* data, gfu_uword size);
-GAMEFU_API void gfuobj_raw_write_to_file(gfuobj_raw* raw, const char* file_path);
+__GAMEFU_API__ gfuobj_raw* gfuobj_raw_read_from_file(const char* file_path);
+__GAMEFU_API__ gfuobj_raw* gfuobj_raw_from_data(gfu_ubyte* data, gfu_uword size);
+__GAMEFU_API__ void gfuobj_raw_write_to_file(gfuobj_raw* raw, const char* file_path);
 
-GAMEFU_API const char* gfuobj_raw_get_section_name(gfuobj_raw* obj, gfuobj_addr section_name_offset);
+__GAMEFU_API__ const char* gfuobj_raw_get_section_name(gfuobj_raw* obj, gfuobj_addr section_name_offset);
 
-GAMEFU_API void* gfuobj_raw_get_pointer(gfuobj_raw* obj, gfuobj_addr addr);
-GAMEFU_API gfuobj_section* gfuobj_raw_get_section_header(gfuobj_raw* obj, gfuobj_sectidx section_index);
-GAMEFU_API gfuobj_section* gfuobj_raw_get_section_header_by_name(gfuobj_raw* obj, const char* section_name);
-GAMEFU_API gfuobj_symbol* gfuobj_raw_get_symbol_by_index(gfuobj_raw* obj, gfuobj_symidx symbol_index);
-GAMEFU_API gfuobj_symbol* gfuobj_raw_get_symbol_by_name_addr(gfuobj_raw* obj, gfuobj_addr symbol_name_addr);
-GAMEFU_API gfuobj_symbol* gfuobj_raw_get_symbol_by_name(gfuobj_raw* obj, const char* symbol_name);
-GAMEFU_API gfuobj_relocation* gfuobj_raw_get_relocation(gfuobj_raw* obj, gfuobj_relidx relocation_index);
+__GAMEFU_API__ void* gfuobj_raw_get_pointer(gfuobj_raw* obj, gfuobj_addr addr);
+__GAMEFU_API__ gfuobj_section* gfuobj_raw_get_section_header(gfuobj_raw* obj, gfuobj_sectidx section_index);
+__GAMEFU_API__ gfuobj_section* gfuobj_raw_get_section_header_by_name(gfuobj_raw* obj, const char* section_name);
+__GAMEFU_API__ gfuobj_symbol* gfuobj_raw_get_symbol_by_index(gfuobj_raw* obj, gfuobj_symidx symbol_index);
+__GAMEFU_API__ gfuobj_symbol* gfuobj_raw_get_symbol_by_name_addr(gfuobj_raw* obj, gfuobj_addr symbol_name_addr);
+__GAMEFU_API__ gfuobj_symbol* gfuobj_raw_get_symbol_by_name(gfuobj_raw* obj, const char* symbol_name);
+__GAMEFU_API__ gfuobj_relocation* gfuobj_raw_get_relocation(gfuobj_raw* obj, gfuobj_relidx relocation_index);
 
 typedef struct gfuobj_byte_builder {
     GFU_DA_FIELDS(gfu_ubyte);
@@ -230,24 +230,24 @@ typedef struct gfuobj_builder {
     GFU_DA_FIELDS(gfuobj_section_builder);
 } gfuobj_builder;
 
-GAMEFU_API void gfuobj_builder_init(gfuobj_builder* builder);
-GAMEFU_API gfuobj_raw* gfuobj_builder_to_raw(gfuobj_builder* builder);
-GAMEFU_API void gfuobj_builder_deinit(gfuobj_builder* builder);
+__GAMEFU_API__ void gfuobj_builder_init(gfuobj_builder* builder);
+__GAMEFU_API__ gfuobj_raw* gfuobj_builder_to_raw(gfuobj_builder* builder);
+__GAMEFU_API__ void gfuobj_builder_deinit(gfuobj_builder* builder);
 
 /// Returns the relative address from the start of this String section data, which is the index of the string in the table.
-GAMEFU_API gfuobj_addr gfuobj_builder_intern_string(gfuobj_builder* builder, const char* string);
-GAMEFU_API gfuobj_sectidx gfuobj_builder_add_section(gfuobj_builder* builder, const char* section_name);
+__GAMEFU_API__ gfuobj_addr gfuobj_builder_intern_string(gfuobj_builder* builder, const char* string);
+__GAMEFU_API__ gfuobj_sectidx gfuobj_builder_add_section(gfuobj_builder* builder, const char* section_name);
 /// Returned pointer is subject to invalidation; do not store long-term, only store the index and look-up its builder on demand.
-GAMEFU_API gfuobj_section_builder* gfuobj_builder_get_section(gfuobj_builder* builder, gfuobj_sectidx section_index);
+__GAMEFU_API__ gfuobj_section_builder* gfuobj_builder_get_section(gfuobj_builder* builder, gfuobj_sectidx section_index);
 /// Returned pointer is subject to invalidation; do not store long-term, only store the index and look-up its builder on demand.
-GAMEFU_API gfuobj_symbol_builder* gfuobj_builder_get_symbol(gfuobj_builder* builder, gfuobj_symidx symbol_index);
+__GAMEFU_API__ gfuobj_symbol_builder* gfuobj_builder_get_symbol(gfuobj_builder* builder, gfuobj_symidx symbol_index);
 /// Returned pointer is subject to invalidation; do not store long-term, only store the index and look-up its builder on demand.
-GAMEFU_API gfuobj_relocation_builder* gfuobj_builder_get_relocation(gfuobj_builder* builder, gfuobj_relidx relocation_index);
+__GAMEFU_API__ gfuobj_relocation_builder* gfuobj_builder_get_relocation(gfuobj_builder* builder, gfuobj_relidx relocation_index);
 
 /// Returns the relative address from the start of this byte builder, in case that's useful.
-GAMEFU_API gfuobj_addr gfuobj_byte_builder_push_word(gfuobj_byte_builder* byte_builder, gfu_uword word);
+__GAMEFU_API__ gfuobj_addr gfuobj_byte_builder_push_word(gfuobj_byte_builder* byte_builder, gfu_uword word);
 
-GAMEFU_API gfuobj_symidx gfuobj_builder_push_symbol(gfuobj_builder* builder, const char* symbol_name);
-GAMEFU_API gfuobj_relidx gfuobj_builder_push_relocation(gfuobj_builder* builder);
+__GAMEFU_API__ gfuobj_symidx gfuobj_builder_push_symbol(gfuobj_builder* builder, const char* symbol_name);
+__GAMEFU_API__ gfuobj_relidx gfuobj_builder_push_relocation(gfuobj_builder* builder);
 
 #endif /* GAMEFU_BFD_OBJECT_H_ */

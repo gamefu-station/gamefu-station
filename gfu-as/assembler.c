@@ -6,7 +6,7 @@ SPDX-License-Identifier: GPL-2.0-only
 
 #include "internal.h"
 
-GAMEFU_API gfuobj_raw* gfuas_source_assemble(source source) {
+__GAMEFU_API__ gfuobj_raw* gfuas_source_assemble(gfu_source source) {
     gfuas_state state = {0};
     state.source = source;
     gfu_arena_init(&state.arena, 32 * 1024);
@@ -15,9 +15,9 @@ GAMEFU_API gfuobj_raw* gfuas_source_assemble(source source) {
     return rom_data;
 }
 
-GAMEFU_API gfuobj_raw* gfuas_builder_assemble(gfuas_builder* builder) {
+__GAMEFU_API__ gfuobj_raw* gfuas_builder_assemble(gfuas_builder* builder) {
     gfuas_state state = {0};
-    state.source = (source) { .name = "<internal>", .text = "\n", .length = 1 };
+    state.source = (gfu_source) { .name = "<internal>", .text = "\n", .length = 1 };
     state.asmb = *builder;
     gfu_arena_init(&state.arena, 32 * 1024);
     gfuobj_raw* rom_data = gfuas_assemble_ir_internal(&state);

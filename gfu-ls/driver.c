@@ -48,7 +48,7 @@ bool gfuls_options_parse(int argc, char** argv, gfuls_state* state) {
 
     result = true;
 fail:;
-    diag_flush();
+    gfu_diag_flush();
     return result;
 }
 
@@ -74,15 +74,15 @@ static void gfuls_show_version(void) {
     );
 }
 
-GAMEFU_API int gfuls_driver_main(int argc, char** argv) {
+__GAMEFU_API__ int gfuls_driver_main(int argc, char** argv) {
     int result = 1;
 success:;
     result = 0;
 fail:;
-    diag_flush();
+    gfu_diag_flush();
     return result;
 }
 
-GAMEFU_API int gfuls_driver_fuzz(const char* text, size_t length) {
+__GAMEFU_API__ int gfuls_driver_fuzz(const char* text, size_t length) {
     return 0;
 }

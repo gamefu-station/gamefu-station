@@ -152,7 +152,7 @@ gfuas_token gfuas_read_token(gfuas_state* state) {
             }
 
             if (ident_length == 0) {
-                diag_issue(DIAG_ERROR, state->source, token.location, "Expected a directive name.");
+                gfu_diag_issue(DIAG_ERROR, state->source, token.location, "Expected a directive name.");
                 goto super_break;
             }
 
@@ -163,7 +163,7 @@ gfuas_token gfuas_read_token(gfuas_state* state) {
                 }
             }
 
-            diag_issue(DIAG_ERROR, state->source, token.location, "Invalid directive.");
+            gfu_diag_issue(DIAG_ERROR, state->source, token.location, "Invalid directive.");
             goto super_break;
         } break;
 
@@ -188,7 +188,7 @@ gfuas_token gfuas_read_token(gfuas_state* state) {
 
             token.kind = GFUAS_TK_IMMEDIATE;
             if (!gfuas_is_hex_digit(state->lex_character)) {
-                diag_issue(DIAG_ERROR, state->source, state->lex_position, "Expected a hex digit.");
+                gfu_diag_issue(DIAG_ERROR, state->source, state->lex_position, "Expected a hex digit.");
                 goto super_break;
             }
 
@@ -222,7 +222,7 @@ gfuas_token gfuas_read_token(gfuas_state* state) {
                     int digits[2];
                     for (int i = 0; i < 2; i++) {
                         if (gfuas_lexer_at_end(state) || state->lex_character == '\n' || state->lex_character == '"' || (digits[i] = gfuas_get_hex_digit_value(state->lex_character), digits[i] < 0)) {
-                            diag_issue(DIAG_ERROR, state->source, state->lex_position, "Expected hex digit in escape sequence.");
+                            gfu_diag_issue(DIAG_ERROR, state->source, state->lex_position, "Expected hex digit in escape sequence.");
                             digits[i] = 0;
                         }
                         gfuas_next_character(state);
@@ -235,7 +235,7 @@ gfuas_token gfuas_read_token(gfuas_state* state) {
             }
 
             if (state->lex_character != '"') {
-                diag_issue(DIAG_ERROR, state->source, token.location, "Unterminated byte-string constant.");
+                gfu_diag_issue(DIAG_ERROR, state->source, token.location, "Unterminated byte-string constant.");
                 goto super_break;
             }
 
@@ -252,11 +252,11 @@ gfuas_token gfuas_read_token(gfuas_state* state) {
             } else {
                 /* Somewhat catch-all for generic character errors. */
                 if (ch < 32) {
-                    diag_issue(DIAG_ERROR, state->source, token.location, "Invalid or unexpected character in source text (0x%02X).", ch);
+                    gfu_diag_issue(DIAG_ERROR, state->source, token.location, "Invalid or unexpected character in source text (0x%02X).", ch);
                 } else if (ch < 128) {
-                    diag_issue(DIAG_ERROR, state->source, token.location, "Invalid or unexpected character in source text '%c'.", (char)ch);
+                    gfu_diag_issue(DIAG_ERROR, state->source, token.location, "Invalid or unexpected character in source text '%c'.", (char)ch);
                 } else {
-                    diag_issue(DIAG_ERROR, state->source, token.location, "Invalid or unexpected character in source text (0x%08X).", ch);
+                    gfu_diag_issue(DIAG_ERROR, state->source, token.location, "Invalid or unexpected character in source text (0x%08X).", ch);
                 }
 
                 token.kind = GFUAS_TK_INVALID;

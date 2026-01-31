@@ -6,27 +6,27 @@ SPDX-License-Identifier: GPL-2.0-only
 
 #include <gamefu/as.h>
 
-GAMEFU_API void gfuas_builder_position_at_start(gfuas_builder* b) {
+__GAMEFU_API__ void gfuas_builder_position_at_start(gfuas_builder* b) {
     if (b == nullptr) return;
     b->current = nullptr;
 }
 
-GAMEFU_API void gfuas_builder_position_at_end(gfuas_builder* b) {
+__GAMEFU_API__ void gfuas_builder_position_at_end(gfuas_builder* b) {
     if (b == nullptr) return;
     b->current = b->tail;
 }
 
-GAMEFU_API void gfuas_builder_position_before(gfuas_builder* b, gfuas_stmt* stmt) {
+__GAMEFU_API__ void gfuas_builder_position_before(gfuas_builder* b, gfuas_stmt* stmt) {
     if (b == nullptr || stmt == nullptr) return;
     b->current = stmt->prev;
 }
 
-GAMEFU_API void gfuas_builder_position_after(gfuas_builder* b, gfuas_stmt* stmt) {
+__GAMEFU_API__ void gfuas_builder_position_after(gfuas_builder* b, gfuas_stmt* stmt) {
     if (b == nullptr || stmt == nullptr) return;
     b->current = stmt;
 }
 
-GAMEFU_API void gfuas_builder_insert(gfuas_builder* b, gfuas_stmt* stmt) {
+__GAMEFU_API__ void gfuas_builder_insert(gfuas_builder* b, gfuas_stmt* stmt) {
     if (b == nullptr || stmt == nullptr) return;
     if (b->head == nullptr) {
         assertn(b->current == nullptr);
@@ -46,13 +46,13 @@ GAMEFU_API void gfuas_builder_insert(gfuas_builder* b, gfuas_stmt* stmt) {
     }
 }
 
-GAMEFU_API void gfuas_set_location(gfuas_stmt* stmt, source source, gfu_uword location) {
+__GAMEFU_API__ void gfuas_set_location(gfuas_stmt* stmt, gfu_source source, gfu_uword location) {
     if (stmt == nullptr) return;
     stmt->source = source;
     stmt->location = location;
 }
 
-GAMEFU_API gfuas_stmt* gfuas_build_directive(
+__GAMEFU_API__ gfuas_stmt* gfuas_build_directive(
     gfuas_builder* b,
     gfuas_directive directive
 ) {
@@ -65,7 +65,7 @@ GAMEFU_API gfuas_stmt* gfuas_build_directive(
     return stmt;
 }
 
-GAMEFU_API gfuas_stmt* gfuas_build_label(
+__GAMEFU_API__ gfuas_stmt* gfuas_build_label(
     gfuas_builder* b,
     const char* label,
     bool is_local
@@ -80,7 +80,7 @@ GAMEFU_API gfuas_stmt* gfuas_build_label(
     return stmt;
 }
 
-GAMEFU_API gfuas_stmt* gfuas_build_instruction0(
+__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction0(
     gfuas_builder* b,
     gfuas_mnemonic mnemonic
 ) {
@@ -93,7 +93,7 @@ GAMEFU_API gfuas_stmt* gfuas_build_instruction0(
     return stmt;
 }
 
-GAMEFU_API gfuas_stmt* gfuas_build_instruction1(
+__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction1(
     gfuas_builder* b,
     gfuas_mnemonic mnemonic,
     gfuas_expr op1
@@ -109,7 +109,7 @@ GAMEFU_API gfuas_stmt* gfuas_build_instruction1(
     return stmt;
 }
 
-GAMEFU_API gfuas_stmt* gfuas_build_instruction2(
+__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction2(
     gfuas_builder* b,
     gfuas_mnemonic mnemonic,
     gfuas_expr op1,
@@ -127,7 +127,7 @@ GAMEFU_API gfuas_stmt* gfuas_build_instruction2(
     return stmt;
 }
 
-GAMEFU_API gfuas_stmt* gfuas_build_instruction3(
+__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction3(
     gfuas_builder* b,
     gfuas_mnemonic mnemonic,
     gfuas_expr op1,
@@ -147,7 +147,7 @@ GAMEFU_API gfuas_stmt* gfuas_build_instruction3(
     return stmt;
 }
 
-GAMEFU_API gfuas_stmt* gfuas_build_instruction(
+__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction(
     gfuas_builder* b,
     gfuas_mnemonic mnemonic,
     gfuas_expr* ops,

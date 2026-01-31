@@ -45,7 +45,7 @@ typedef struct gfuas_state {
     bool show_help : 1;
     bool show_version : 1;
     bool verbose : 1;
-    source source;
+    gfu_source source;
     const char* output;
 
     gfu_arena arena;

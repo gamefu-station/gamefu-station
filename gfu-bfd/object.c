@@ -6,23 +6,23 @@ SPDX-License-Identifier: GPL-2.0-only
 
 #include <gamefu/bfd/object.h>
 
-GAMEFU_API gfuobj_raw* gfuobj_raw_read_from_file(const char* file_path) {
+__GAMEFU_API__ gfuobj_raw* gfuobj_raw_read_from_file(const char* file_path) {
     gfuobj_raw *result = nullptr;
 
     FILE* f = fopen(file_path, "rb");
     if (f == nullptr) {
-        diag_issue(DIAG_ERROR, NOSOURCE, "Failed to open object file '%s': %s", file_path, strerror(errno));
+        gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, "Failed to open object file '%s': %s", file_path, strerror(errno));
         return_defer(nullptr);
     }
 
     if (0 != fseek(f, 0, SEEK_END)) {
-        diag_issue(DIAG_ERROR, NOSOURCE, "Failed to seek end of object file '%s': %s", file_path, strerror(errno));
+        gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, "Failed to seek end of object file '%s': %s", file_path, strerror(errno));
         return_defer(nullptr);
     }
 
     long file_size = ftell(f);
     if (file_size < 0) {
-        diag_issue(DIAG_ERROR, NOSOURCE, "Failed to tell offset in object file '%s': %s", file_path, strerror(errno));
+        gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, "Failed to tell offset in object file '%s': %s", file_path, strerror(errno));
         return_defer(nullptr);
     }
     rewind(f);
@@ -31,7 +31,7 @@ GAMEFU_API gfuobj_raw* gfuobj_raw_read_from_file(const char* file_path) {
     fread(result, 1, (size_t)file_size, f);
 
     if (ferror(f)) {
-        diag_issue(DIAG_ERROR, NOSOURCE, "Failed to read from object file '%s': %s", file_path, strerror(errno));
+        gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, "Failed to read from object file '%s': %s", file_path, strerror(errno));
         return_defer(nullptr);
     }
 
@@ -40,7 +40,7 @@ defer:
     return result;
 }
 
-GAMEFU_API gfuobj_raw* gfuobj_raw_from_data(gfu_ubyte* data, gfu_uword size) {
+__GAMEFU_API__ gfuobj_raw* gfuobj_raw_from_data(gfu_ubyte* data, gfu_uword size) {
     if (data == nullptr) return nullptr;
     if ((size % 4) == 0) return nullptr;
 
@@ -49,11 +49,11 @@ GAMEFU_API gfuobj_raw* gfuobj_raw_from_data(gfu_ubyte* data, gfu_uword size) {
     return obj;
 }
 
-GAMEFU_API void gfuobj_raw_write_to_file(gfuobj_raw* raw, const char* file_path) {
+__GAMEFU_API__ void gfuobj_raw_write_to_file(gfuobj_raw* raw, const char* file_path) {
     assert(false, "Not implemented: gfuobj_raw_write_to_file");
 }
 
-GAMEFU_API void* gfuobj_raw_get_pointer(gfuobj_raw* obj, gfuobj_addr addr) {
+__GAMEFU_API__ void* gfuobj_raw_get_pointer(gfuobj_raw* obj, gfuobj_addr addr) {
     if (obj == nullptr) return nullptr;
     return (gfu_ubyte*) obj + addr;
 }
@@ -63,7 +63,7 @@ const char* gfuobj_raw_get_section_name(gfuobj_raw* obj, gfuobj_addr section_nam
     return (const char*) obj + string_table_section->offset + section_name_offset;
 }
 
-GAMEFU_API gfuobj_section* gfuobj_raw_get_section_header(gfuobj_raw* obj, gfuobj_sectidx section_index) {
+__GAMEFU_API__ gfuobj_section* gfuobj_raw_get_section_header(gfuobj_raw* obj, gfuobj_sectidx section_index) {
     if (obj == nullptr) return nullptr;
 
     if (obj->header.flags.bits.section_count <= section_index) {
@@ -73,7 +73,7 @@ GAMEFU_API gfuobj_section* gfuobj_raw_get_section_header(gfuobj_raw* obj, gfuobj
     return (gfuobj_section*) obj->data + section_index;
 }
 
-GAMEFU_API gfuobj_section* gfuobj_raw_get_section_header_by_name(gfuobj_raw* obj, const char* section_name) {
+__GAMEFU_API__ gfuobj_section* gfuobj_raw_get_section_header_by_name(gfuobj_raw* obj, const char* section_name) {
     if (obj == nullptr) return nullptr;
 
     for (gfu_uword i = 0; i < obj->header.flags.bits.section_count; ++i) {
@@ -87,7 +87,7 @@ GAMEFU_API gfuobj_section* gfuobj_raw_get_section_header_by_name(gfuobj_raw* obj
     return nullptr;
 }
 
-GAMEFU_API gfuobj_symbol* gfuobj_raw_get_symbol_by_index(gfuobj_raw* obj, gfuobj_symidx symbol_index) {
+__GAMEFU_API__ gfuobj_symbol* gfuobj_raw_get_symbol_by_index(gfuobj_raw* obj, gfuobj_symidx symbol_index) {
     if (obj == nullptr) return nullptr;
 
     gfuobj_section* symbol_section = gfuobj_raw_get_section_header_by_name(obj, GFUOBJ_SYMBOL_SECTION_NAME);

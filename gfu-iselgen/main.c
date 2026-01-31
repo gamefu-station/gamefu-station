@@ -83,7 +83,7 @@ static void isel_token_dump(isel_token token);
 
 static void isel_parse_pattern(isel_parser* parser);
 
-static source isel_source = {0};
+static gfu_source isel_source = {0};
 
 static char isel_string_data[64] = {0};
 gfu_uword isel_string_allocated = 0;
@@ -161,10 +161,10 @@ int main(int argc, char** argv) {
 
     FILE* f = nullptr;
 
-    diag_color_output(isatty(fileno(stderr)));
+    gfu_diag_color_output(isatty(fileno(stderr)));
 
-    isel_source = (source) {
-        .name = "fuasm.isel",
+    isel_source = (gfu_source) {
+        .name = "isel.txt",
         .text = (const char*)isel,
         .length = isel_len,
     };
@@ -312,9 +312,9 @@ static isel_token isel_parser_expect(isel_parser* parser, isel_token_kind kind, 
     if (parser->tk.kind != kind) {
         isel_token_dump(parser->tk);
         if (kind >= ISEL_TK_PRINTABLE_BEGIN && kind <= ISEL_TK_PRINTABLE_END) {
-            diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected '%c'.", kind);
+            gfu_diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected '%c'.", kind);
         } else {
-            diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected %s.", what);
+            gfu_diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected %s.", what);
         }
     }
 
@@ -329,7 +329,7 @@ static isel_type isel_parser_expect_type(isel_parser* parser) {
     if (isel_parser_try(parser, ISEL_TK_ADDR)) return ISEL_TY_ADDR;
     if (isel_parser_try(parser, ISEL_TK_STR)) return ISEL_TY_STR;
     isel_token_dump(parser->tk);
-    diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected a type.");
+    gfu_diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected a type.");
     return ISEL_TY_INVALID;
 }
 
@@ -340,7 +340,7 @@ static isel_emit_kind isel_parser_expect_emit_kind(isel_parser* parser) {
     if (isel_parser_try(parser, ISEL_TK_COP0)) return ISEL_EMIT_COP0;
     if (isel_parser_try(parser, ISEL_TK_BYTES)) return ISEL_EMIT_BYTES;
     isel_token_dump(parser->tk);
-    diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected an instruction kind.");
+    gfu_diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected an instruction kind.");
     return ISEL_EMIT_INVALID;
 }
 
@@ -363,7 +363,7 @@ static void isel_parse_match(isel_parser* parser) {
     if (!isel_parser_is_at_end(parser) && parser->tk.kind != ISEL_TK_EMITS && parser->tk.kind != ISEL_TK_MNEMONIC) {
         do {
             if ((size_t)match->operand_count >= sizeof(match->operands) / sizeof(match->operands[0])) {
-                diag_issue(DIAG_ERROR, isel_source, parser->tk.location, "Too many operands to match.");
+                gfu_diag_issue(DIAG_ERROR, isel_source, parser->tk.location, "Too many operands to match.");
             }
 
             isel_operand* operand = &match->operands[match->operand_count++];
@@ -376,12 +376,12 @@ static void isel_parse_match(isel_parser* parser) {
                 operand->as.immediate = parser->tk.as.immediate;
                 isel_parser_advance(parser);
             } else {
-                diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected a variable name or a constant.");
+                gfu_diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected a variable name or a constant.");
             }
 
             if (parser->tk.kind == '(') {
                 if ((size_t)match->operand_count >= sizeof(match->operands) / sizeof(match->operands[0])) {
-                    diag_issue(DIAG_ERROR, isel_source, parser->tk.location, "Too many operands to match.");
+                    gfu_diag_issue(DIAG_ERROR, isel_source, parser->tk.location, "Too many operands to match.");
                 }
 
                 isel_parser_advance(parser);
@@ -405,7 +405,7 @@ static gfu_uword isel_lookup_var(gfu_uword location, const char* var, const char
         }
     }
 
-    diag_issue(DIAG_FATAL, isel_source, location, "Use of undeclared variable '%s'.", var);
+    gfu_diag_issue(DIAG_FATAL, isel_source, location, "Use of undeclared variable '%s'.", var);
     return -1;
 }
 
@@ -446,11 +446,11 @@ static void isel_parse_emit_argument(isel_parser* parser, isel_argument* argumen
             isel_parser_advance(parser);
         } else {
             isel_token_dump(parser->tk);
-            diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected a variable or an immediate.");
+            gfu_diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected a variable or an immediate.");
         }
     } else {
         isel_token_dump(parser->tk);
-        diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected an argument.");
+        gfu_diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected an argument.");
     }
 }
 
@@ -470,7 +470,7 @@ static void isel_parse_emit(isel_parser* parser, const char** vars, gfu_uword va
 
         while (isel_parser_try(parser, ',')) {
             if (emit->argument_count == sizeof(emit->arguments) / sizeof(emit->arguments[0])) {
-                diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Too many arguments.");
+                gfu_diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Too many arguments.");
             }
 
             isel_argument* argument = &emit->arguments[emit->argument_count++];
@@ -505,7 +505,7 @@ static void isel_parse_pattern(isel_parser* parser) {
     }
 
     if (pattern->match_count == 0) {
-        diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected a match clause.");
+        gfu_diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected a match clause.");
     }
 
     const char* vars[pattern->var_count <= 0 ? 1 : pattern->var_count];
@@ -515,7 +515,7 @@ static void isel_parse_pattern(isel_parser* parser) {
             if (!match->operands[j].is_constant) {
                 for (gfu_uword k = 0; k < var_index; k++) {
                     if (0 == strcmp(match->operands[j].as.var, vars[k])) {
-                        diag_issue(DIAG_FATAL, isel_source, location, "Match claus(es) contain duplicate variable names.");
+                        gfu_diag_issue(DIAG_FATAL, isel_source, location, "Match claus(es) contain duplicate variable names.");
                     }
                 }
                 vars[var_index++] = match->operands[j].as.var;
@@ -532,7 +532,7 @@ static void isel_parse_pattern(isel_parser* parser) {
 
     pattern->emit_count = isel_emit_allocated - pattern->emit_index;
     if (pattern->emit_count == 0) {
-        diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected an emit clause.");
+        gfu_diag_issue(DIAG_FATAL, isel_source, parser->tk.location, "Expected an emit clause.");
     }
 }
 
@@ -578,7 +578,7 @@ static void isel_token_dump(isel_token token) {
 static void isel_etok_error_callback(void* userdata, const char* source_name, const char* source_text, const char* where, uint64_t line, uint64_t column, const char* format, ...) {
     va_list v;
     va_start(v, format);
-    diag_issue_v(DIAG_ERROR, isel_source, (uint32_t)(where - source_text), format, v);
+    gfu_diag_issue_v(DIAG_ERROR, isel_source, (uint32_t)(where - source_text), format, v);
     va_end(v);
 }
 
@@ -707,9 +707,9 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
 
             size_t length = (size_t)(lexer->source_current - name);
             if (length == 0) {
-                diag_issue(DIAG_ERROR, isel_source, token.location, "Expected a lower-case letter to start a variable name.");
+                gfu_diag_issue(DIAG_ERROR, isel_source, token.location, "Expected a lower-case letter to start a variable name.");
             } else if (length > 7) {
-                diag_issue(DIAG_ERROR, isel_source, token.location, "Mnemonic names must be 7 characters or fewer.");
+                gfu_diag_issue(DIAG_ERROR, isel_source, token.location, "Mnemonic names must be 7 characters or fewer.");
             }
 
             token.kind = ISEL_TK_MNEMONIC;
@@ -747,7 +747,7 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
 
             size_t length = (size_t)(lexer->source_current - name);
             if (length == 0) {
-                diag_issue(DIAG_ERROR, isel_source, token.location, "Expected a lower-case letter to start a variable name.");
+                gfu_diag_issue(DIAG_ERROR, isel_source, token.location, "Expected a lower-case letter to start a variable name.");
             }
 
             token.kind = ISEL_TK_VAR;
@@ -826,7 +826,7 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
                 break;
             }
 
-            diag_issue(DIAG_ERROR, isel_source, token.location, "Invalid ISEL opcode word.");
+            gfu_diag_issue(DIAG_ERROR, isel_source, token.location, "Invalid ISEL opcode word.");
         } break;
 
         case 'a': case 'b': case 'c': case 'd': case 'e':
@@ -868,7 +868,7 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
                 break;
             }
 
-            diag_issue(DIAG_ERROR, isel_source, token.location, "Invalid ISEL reserved word. Did you mean '$%.*s'?", (int)length, name);
+            gfu_diag_issue(DIAG_ERROR, isel_source, token.location, "Invalid ISEL reserved word. Did you mean '$%.*s'?", (int)length, name);
         } break;
 
         default: {

@@ -27,7 +27,7 @@ static gfuobj_addr gfuobj_get_string_index(gfuobj_builder* builder, const char* 
     assert(false, "Should only be looking up strings which were already interned.");
 }
 
-GAMEFU_API gfuobj_raw* gfuobj_builder_to_raw(gfuobj_builder* builder) {
+__GAMEFU_API__ gfuobj_raw* gfuobj_builder_to_raw(gfuobj_builder* builder) {
     gfu_uword raw_size = sizeof(gfuobj_header) + (sizeof(gfuobj_section) * builder->count);
     assertn(raw_size == GFUOBJ_ALIGN(raw_size));
 
@@ -89,7 +89,7 @@ GAMEFU_API gfuobj_raw* gfuobj_builder_to_raw(gfuobj_builder* builder) {
     return raw;
 }
 
-GAMEFU_API void gfuobj_builder_init(gfuobj_builder* builder) {
+__GAMEFU_API__ void gfuobj_builder_init(gfuobj_builder* builder) {
     *builder = (gfuobj_builder) {0};
 
     gfuobj_sectidx nul_idx = gfuobj_builder_add_section(builder, GFUOBJ_NUL_SECTION_NAME);
@@ -111,7 +111,7 @@ GAMEFU_API void gfuobj_builder_init(gfuobj_builder* builder) {
     assertn(sym_idx == GFUOBJ_SYMBOL_SECTIDX);
 }
 
-GAMEFU_API void gfuobj_builder_deinit(gfuobj_builder* builder) {
+__GAMEFU_API__ void gfuobj_builder_deinit(gfuobj_builder* builder) {
     for (gfu_uword i = 0; i < builder->count; i++) {
         gfu_da_free(&builder->items[i].data);
     }
@@ -120,7 +120,7 @@ GAMEFU_API void gfuobj_builder_deinit(gfuobj_builder* builder) {
     *builder = (gfuobj_builder) {0};
 }
 
-GAMEFU_API gfuobj_addr gfuobj_builder_intern_string(gfuobj_builder* builder, const char* string) {
+__GAMEFU_API__ gfuobj_addr gfuobj_builder_intern_string(gfuobj_builder* builder, const char* string) {
     if (builder == nullptr || GFUOBJ_STRINGS_SECTIDX >= builder->count) {
         return GFUOBJ_ADDR_INVALID;
     }
@@ -147,7 +147,7 @@ GAMEFU_API gfuobj_addr gfuobj_builder_intern_string(gfuobj_builder* builder, con
     return string_addr;
 }
 
-GAMEFU_API gfuobj_sectidx gfuobj_builder_add_section(gfuobj_builder* builder, const char* section_name) {
+__GAMEFU_API__ gfuobj_sectidx gfuobj_builder_add_section(gfuobj_builder* builder, const char* section_name) {
     if (builder == nullptr || section_name == nullptr) {
         return GFUOBJ_SECTIDX_INVALID;
     }
@@ -172,7 +172,7 @@ GAMEFU_API gfuobj_sectidx gfuobj_builder_add_section(gfuobj_builder* builder, co
     return idx;
 }
 
-GAMEFU_API gfuobj_section_builder* gfuobj_builder_get_section(gfuobj_builder* builder, gfuobj_sectidx section_index) {
+__GAMEFU_API__ gfuobj_section_builder* gfuobj_builder_get_section(gfuobj_builder* builder, gfuobj_sectidx section_index) {
     if (builder == nullptr || section_index == GFUOBJ_SECTIDX_INVALID || section_index >= builder->count) {
         return nullptr;
     }
@@ -180,7 +180,7 @@ GAMEFU_API gfuobj_section_builder* gfuobj_builder_get_section(gfuobj_builder* bu
     return &builder->items[section_index];
 }
 
-GAMEFU_API gfuobj_symbol_builder* gfuobj_builder_get_symbol(gfuobj_builder* builder, gfuobj_symidx symbol_index) {
+__GAMEFU_API__ gfuobj_symbol_builder* gfuobj_builder_get_symbol(gfuobj_builder* builder, gfuobj_symidx symbol_index) {
     if (builder == nullptr || builder->count <= GFUOBJ_SYMBOL_SECTIDX || symbol_index == GFUOBJ_SYMIDX_INVALID) {
         return nullptr;
     }
@@ -195,7 +195,7 @@ GAMEFU_API gfuobj_symbol_builder* gfuobj_builder_get_symbol(gfuobj_builder* buil
     return &((gfuobj_symbol_builder*) symbol_section->data.items)[symbol_index];
 }
 
-GAMEFU_API gfuobj_relocation_builder* gfuobj_builder_get_relocation(gfuobj_builder* builder, gfuobj_relidx relocation_index) {
+__GAMEFU_API__ gfuobj_relocation_builder* gfuobj_builder_get_relocation(gfuobj_builder* builder, gfuobj_relidx relocation_index) {
     if (builder == nullptr || builder->count <= GFUOBJ_RELOCATION_SECTIDX || relocation_index == GFUOBJ_RELIDX_INVALID) {
         return nullptr;
     }
@@ -211,7 +211,7 @@ GAMEFU_API gfuobj_relocation_builder* gfuobj_builder_get_relocation(gfuobj_build
 
 }
 
-GAMEFU_API gfuobj_addr gfuobj_byte_builder_push_word(gfuobj_byte_builder* byte_builder, gfu_uword word) {
+__GAMEFU_API__ gfuobj_addr gfuobj_byte_builder_push_word(gfuobj_byte_builder* byte_builder, gfu_uword word) {
     if (byte_builder == nullptr) {
         return GFUOBJ_ADDR_INVALID;
     }
@@ -225,7 +225,7 @@ GAMEFU_API gfuobj_addr gfuobj_byte_builder_push_word(gfuobj_byte_builder* byte_b
     return address;
 }
 
-GAMEFU_API gfuobj_symidx gfuobj_builder_push_symbol(gfuobj_builder* builder, const char* symbol_name) {
+__GAMEFU_API__ gfuobj_symidx gfuobj_builder_push_symbol(gfuobj_builder* builder, const char* symbol_name) {
     if (builder == nullptr) {
         return GFUOBJ_SYMIDX_INVALID;
     }
@@ -249,7 +249,7 @@ GAMEFU_API gfuobj_symidx gfuobj_builder_push_symbol(gfuobj_builder* builder, con
     return index;
 }
 
-GAMEFU_API gfuobj_relidx gfuobj_builder_push_relocation(gfuobj_builder* builder) {
+__GAMEFU_API__ gfuobj_relidx gfuobj_builder_push_relocation(gfuobj_builder* builder) {
     if (builder == nullptr) {
         return GFUOBJ_SYMIDX_INVALID;
     }

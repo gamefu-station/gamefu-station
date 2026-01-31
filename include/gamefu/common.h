@@ -4,15 +4,15 @@ See the LICENSE file and LICENSES directory for more information.
 SPDX-License-Identifier: GPL-2.0-only
 ----------------------------------------------------------------------------- */
 
-#ifndef GAMEFU_COMMON_H_
-#define GAMEFU_COMMON_H_
+#ifndef __GAMEFU_COMMON_H__
+#define __GAMEFU_COMMON_H__
+
 
 #include <gamefu/common/prelude.h>
 
-#define nullptr NULL
 
-#define PPSTR_(X) #X
-#define PPSTR(X) PPSTR_(X)
+__GAMEFU_C_HEADER_PROLOGUE__
+
 
 #ifdef GFU_NDEBUG
 #  define assert(Cond, Message) do { } while (0)
@@ -21,19 +21,23 @@ SPDX-License-Identifier: GPL-2.0-only
 #else /* !GFU_NDEBUG */
 #  define assertn(Cond) do { \
         if (!(Cond)) { \
-            (void)fprintf(stderr, __FILE__ ":" PPSTR(__LINE__) ": Assertion '" #Cond "' failed.\n"); \
+            (void)fprintf(stderr, __FILE__ ":" GFU_PPSTR(__LINE__) \
+                ": Assertion '" #Cond "' failed.\n"); \
             abort(); \
         } \
     } while (0)
 #  define assert(Cond, Message) do { \
         if (!(Cond)) { \
-            (void)fprintf(stderr, __FILE__ ":" PPSTR(__LINE__) ": Assertion '" #Cond "' failed:\n    " Message "\n"); \
+            (void)fprintf(stderr, __FILE__ ":" GFU_PPSTR(__LINE__) \
+                ": Assertion '" #Cond "' failed:\n    " Message "\n"); \
             abort(); \
         } \
     } while (0)
 #  define assertf(Cond, Message, ...) do { \
         if (!(Cond)) { \
-            (void)fprintf(stderr, __FILE__ ":" PPSTR(__LINE__) ": Assertion '" #Cond "' failed:\n    " Message "\n", __VA_ARGS__); \
+            (void)fprintf(stderr, __FILE__ ":" GFU_PPSTR(__LINE__) \
+                ": Assertion '" #Cond "' failed:\n    " Message "\n", \
+                __VA_ARGS__); \
             abort(); \
         } \
     } while (0)
@@ -49,7 +53,7 @@ SPDX-License-Identifier: GPL-2.0-only
 
 #define return_defer(Result) do { result = (Result); goto defer; } while (0)
 
-#if GFU_COMPILER_CLANG || GFU_COMPILER_GCC
+#if __GAMEFU_HOSTCC_CLANG__ || __GAMEFU_HOSTCC_GCC__
 #  define unreachable __builtin_unreachable()
 #else
 #  define unreachable do { assertn(false); } while (0)
@@ -151,36 +155,44 @@ static inline gfu_udouble gfu_maxud(gfu_udouble a, gfu_udouble b) { return a > b
         memset((DA), 0, sizeof *(DA));          \
     } while(0);
 
-typedef struct source {
+typedef struct gfu_source {
     const char* name;
     const char* text;
-    int32_t length;
-} source;
+    gfu_word length;
+} gfu_source;
 
-typedef struct sources {
-    GFU_DA_FIELDS(source);
-} sources;
+typedef struct gfu_sources {
+    GFU_DA_FIELDS(gfu_source);
+} gfu_sources;
 
-bool load_source_from_file(const char* path, source* source);
+__GAMEFU_API__ bool gfu_source_load_from_file(
+    const char* path, gfu_source* source
+);
 
-#define NOSOURCE (struct source) {0}, 0
+#define GFU_NOSOURCE (struct gfu_source) {0}, 0
 
-typedef enum diag_level {
+typedef enum gfu_diag_level {
     DIAG_IGNORED,
     DIAG_NOTE,
     DIAG_REMARK,
     DIAG_WARNING,
     DIAG_ERROR,
     DIAG_FATAL,
-} diag_level;
+} gfu_diag_level;
 
-void diag_flush(void);
-void diag_pause_error_flush(void);
-void diag_color_output(bool enable);
-void diag_exit_on_error(bool enable);
-bool diag_has_issued_error(void);
-void diag_issue(diag_level level, source source, int32_t location, const char* format, ...);
-void diag_issue_v(diag_level level, source source, int32_t location, const char* format, va_list v);
+__GAMEFU_API__ void gfu_diag_flush(__GAMEFU_VOIDPROTO__);
+__GAMEFU_API__ void gfu_diag_pause_error_flush(__GAMEFU_VOIDPROTO__);
+__GAMEFU_API__ void gfu_diag_color_output(bool enable);
+__GAMEFU_API__ void gfu_diag_exit_on_error(bool enable);
+__GAMEFU_API__ bool gfu_diag_has_issued_error(__GAMEFU_VOIDPROTO__);
+__GAMEFU_API__ void gfu_diag_issue(
+    gfu_diag_level level, gfu_source source, gfu_word location,
+    const char* format, ...
+);
+__GAMEFU_API__ void gfu_diag_issue_v(
+    gfu_diag_level level, gfu_source source, gfu_word location,
+    const char* format, va_list v
+);
 
 typedef struct gfu_chunk {
     char* memory;
@@ -194,8 +206,14 @@ typedef struct gfu_arena {
     gfu_uword default_capacity_per_chunk;
 } gfu_arena;
 
-void gfu_arena_init(gfu_arena* arena, gfu_uword default_capacity_per_chunk);
-void gfu_arena_deinit(gfu_arena* arena);
-void* gfu_arena_alloc(gfu_arena* arena, gfu_uword size);
+__GAMEFU_API__ void gfu_arena_init(
+    gfu_arena* arena, gfu_uword default_capacity_per_chunk
+);
+__GAMEFU_API__ void gfu_arena_deinit(gfu_arena* arena);
+__GAMEFU_API__ void* gfu_arena_alloc(gfu_arena* arena, gfu_uword size);
 
-#endif /* GAMEFU_COMMON_H_ */
+
+__GAMEFU_C_HEADER_EPILOGUE__
+
+
+#endif /* __GAMEFU_COMMON_H__ */

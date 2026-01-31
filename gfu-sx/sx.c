@@ -85,7 +85,7 @@ static bool gfusx_parse_options(int argc, char** argv, gfusx_options_t* options)
             options->headless = true;
         } else {
             if (options->rom_path != nullptr) {
-                diag_issue(DIAG_ERROR, NOSOURCE, "Can only run a single ROM.");
+                gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, "Can only run a single ROM.");
                 return false;
             }
 
@@ -94,10 +94,10 @@ static bool gfusx_parse_options(int argc, char** argv, gfusx_options_t* options)
     }
 
     if (options->rom_path == nullptr) {
-        diag_issue(DIAG_WARNING, NOSOURCE, "No ROM file provided. The BIOS will temporarily halt rather than running a ROM or a shell.");
+        gfu_diag_issue(DIAG_WARNING, GFU_NOSOURCE, "No ROM file provided. The BIOS will temporarily halt rather than running a ROM or a shell.");
     }
 
-    diag_flush();
+    gfu_diag_flush();
     return true;
 }
 
