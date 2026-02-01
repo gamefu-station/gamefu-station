@@ -4,66 +4,177 @@ See the LICENSE file and LICENSES directory for more information.
 SPDX-License-Identifier: GPL-2.0-only
 ----------------------------------------------------------------------------- */
 
-#ifndef GAMEFU_BFD_OBJECT_H_
-#define GAMEFU_BFD_OBJECT_H_
+#ifndef __GAMEFU_BFD__OBJECT_H_
+#define __GAMEFU_BFD__OBJECT_H_
+
 
 #include <gamefu/common.h>
 
-#define GFUOBJ_MAGIC 0xF0FF6109
-#define GFUOBJ_VERIFY_MAGIC(Magic) (((Magic) & 0xF0FFFFFF) == (GFUOBJ_MAGIC & 0xF0FFFFFF))
-#define GFUOBJ_GET_VERSION(Magic)  (((Magic) & 0x0F000000) >> 24)
-#define GFUOBJ_MAGIC_VERSION(Version) ((GFUOBJ_MAGIC) | (((Version) & 0x0F) << 24))
 
-#define GFUOBJ_CURRENT_VERSION 2
+__GAMEFU_C_HEADER_PROLOGUE__
 
-#define GFUOBJ_ALIGN(Value) ((Value) + ((sizeof(gfu_uword) - ((Value) % sizeof(gfu_uword))) % sizeof(gfu_uword)))
 
-#define GFUOBJ_RAM_SIZE_SMALL 0
-#define GFUOBJ_RAM_SIZE_LARGE 1
+/*
+The current object file format version number.
+Version 0 is skipped to allow unambiguously specifying a version number when
+using a bit-mask.
 
-/* No relocation needs to be applied. */
-#define GFUOBJ_R_NONE 0x00
-/* A single 16-bit absolute address relocation.
-   `gfu_inst::imm.value`, likely right-shifted to be 18 bits (word aligned) address. */
-#define GFUOBJ_R_16 0x01
-/* A single 26-bit absolute address relocation.
-   `gfu_inst::addr.value`, likely right-shifted to be 28 bits (word aligned) address. */
-#define GFUOBJ_R_26 0x02
-/* A single 32-bit absolute address relocation. */
-#define GFUOBJ_R_32 0x03
-/* A single 16-bit absolute address relocation.
-   `gfu_inst::imm.value` treated as the high 16-bits of an address. */
-#define GFUOBJ_R_HI16 0x04
-/* A single 16-bit absolute address relocation.
-   `gfu_inst::imm.value` treated as the low 16-bits of an address. */
-#define GFUOBJ_R_LO16 0x05
-/* PC-relative, 16-bit address relocation.
- * Relative addresses only need relocated when they refer to external symbols. */
-#define GFUOBJ_R_PC16 0x06
+Version history:
+- 1: Overhauling the object file format to support custom sections.
+     Kept simple, but generally inspired by the ELF object file format.
+*/
+#define GFUOBJ_CURRENT_VERSION  1
 
-#define GFUOBJ_NUL_SECTION_NAME ""
-#define GFUOBJ_STRINGS_SECTION_NAME ".str"
-#define GFUOBJ_RELOCATION_SECTION_NAME ".rel"
-#define GFUOBJ_SYMBOL_SECTION_NAME ".sym"
-#define GFUOBJ_DEFAULT_DATA_SECTION_NAME ".dat"
-#define GFUOBJ_DEFAULT_TEXT_SECTION_NAME ".txt"
-#define GFUOBJ_DEFAULT_BSS_SECTION_NAME ".bss"
+/*
+The "Magic" value associated with object files with the version number bits
+unset for bit-making purposes.
+The four least significant bits of a Magic specify the object file's
+version number between 1 and 14.
+*/
+#define GFUOBJ_MAGIC_VALUE  0x0961FFF0
+
+/*
+Creates a object file format Magic with the specified version.
+The version is not checked for validity.
+*/
+#define GFUOBJ_MAGIC(Version)  ( \
+        (GFUOBJ_MAGIC_VALUE) | ((Version) & 0x0F) \
+    )
+
+/*
+Results in the version number specified by the object file format Magic.
+The Magic is not checked for validity.
+*/
+#define GFUOBJ_MAGIC_GET_VERSION(Magic)  ( \
+        ((Magic) & 0x0F) \
+    )
+
+/*
+Determines if a value is a valid object file format Magic.
+Magics have the form 0x0961FFFX where X is a hex digit other than 0 or F.
+Results in true if the given value is a valid object file format Magic, else
+false if it is of the wrong form or if the version is invalid.
+*/
+#define GFUOBJ_VERIFY_MAGIC(Magic)  ( \
+        (((Magic) & 0xFFFFFFF0) == (GFUOBJ_MAGIC_VALUE & 0xFFFFFFF0)) && \
+        (GFUOBJ_MAGIC_GET_VERSION(Magic) != 0x00) && \
+        (GFUOBJ_MAGIC_GET_VERSION(Magic) != 0x0F) \
+    )
+
+
+/*
+Results in the given value aligned to the next 32 bits, the size of a word.
+*/
+#define GFUOBJ_ALIGN(Value)  ( \
+        (Value) + ( \
+            ( \
+                sizeof(gfu_uword) - ((Value) % sizeof(gfu_uword)) \
+            ) % sizeof(gfu_uword) \
+        ) \
+    )
+
+
+/*
+The type of an address, an unsigned word.
+*/
+typedef gfu_uword gfuobj_addr;
+
+/*
+The type of a relative offset, a signed word.
+*/
+typedef gfu_word  gfuobj_offs;
+
+/*
+The type of a section index, an unsigned half word.
+*/
+typedef gfu_uhalf gfuobj_sectidx;
+
+/*
+The type of a symbol index, an unsigned word.
+*/
+typedef gfu_uword gfuobj_symidx;
+
+/*
+The type of a relocation index, an unsigned word.
+*/
+typedef gfu_uword gfuobj_relidx;
+
+
+/*
+Defines values for the "Ram Size" flag in the object file format header.
+This flag is one bit wide, accepting only 0 or 1 as values.
+The BIOS/kernel uses this flag, to set the system's ram size to the requested
+value when loading user ROMs.
+*/
+typedef enum gfuobj_ramsize {
+    /*
+    Indicates the ROM expects the ram size to be "small" (4 MiB).
+    */
+    GFUOBJ_RAM_SIZE_SMALL = 0,
+    /*
+    Indicates the ROM expects the ram size to be "large" (16 MiB).
+    */
+    GFUOBJ_RAM_SIZE_LARGE = 1,
+} gfuobj_ramsize;
+
+
+typedef enum gfuobj_relocation_kind {
+    /*
+    No relocation needs to be applied.
+    */
+    GFUOBJ_R_NONE = 0x00,
+    /*
+    A single 16-bit absolute address relocation.
+    `gfu_inst::imm.value`, right-shifted to be 18 bits (word aligned) address.
+    */
+    GFUOBJ_R_16 = 0x01,
+    /*
+    A single 26-bit absolute address relocation.
+    `gfu_inst::addr.value`, right-shifted to be 28 bits (word aligned) address.
+    */
+    GFUOBJ_R_26 = 0x02,
+    /*
+    A single 32-bit absolute address relocation.
+    */
+    GFUOBJ_R_32 = 0x03,
+    /*
+    A single 16-bit absolute address relocation.
+    `gfu_inst::imm.value` treated as the high 16-bits of an address.
+    */
+    GFUOBJ_R_HI16 = 0x04,
+    /*
+    A single 16-bit absolute address relocation.
+    `gfu_inst::imm.value` treated as the low 16-bits of an address.
+    */
+    GFUOBJ_R_LO16 = 0x05,
+    /*
+    PC-relative, 16-bit address relocation.
+    Relative addresses only need relocated when they refer to external symbols.
+    */
+    GFUOBJ_R_PC16 = 0x06,
+} gfuobj_relocation_kind;
+
+
+#define GFUOBJ_NUL_SECTION_NAME  ""
+#define GFUOBJ_STRINGS_SECTION_NAME  ".str"
+#define GFUOBJ_RELOCATION_SECTION_NAME  ".rel"
+#define GFUOBJ_SYMBOL_SECTION_NAME  ".sym"
+#define GFUOBJ_DEFAULT_DATA_SECTION_NAME  ".dat"
+#define GFUOBJ_DEFAULT_TEXT_SECTION_NAME  ".txt"
+#define GFUOBJ_DEFAULT_BSS_SECTION_NAME  ".bss"
+
 
 #define GFUOBJ_NUL_SECTIDX 0
 #define GFUOBJ_STRINGS_SECTIDX 1
 #define GFUOBJ_RELOCATION_SECTIDX 2
 #define GFUOBJ_SYMBOL_SECTIDX 3
 
-typedef gfu_uword gfuobj_addr;
-typedef gfu_word  gfuobj_offs;
-typedef gfu_uhalf gfuobj_sectidx;
-typedef gfu_uword gfuobj_symidx;
-typedef gfu_uword gfuobj_relidx;
 
 #define GFUOBJ_ADDR_INVALID 0xFFFFFFFF
 #define GFUOBJ_SECTIDX_INVALID 0xFFFF
 #define GFUOBJ_SYMIDX_INVALID 0xFFFFFFFF
 #define GFUOBJ_RELIDX_INVALID 0xFFFFFFFF
+
 
 /*
 
@@ -82,14 +193,14 @@ typedef union gfuobj_flags {
     gfu_uword raw[1];
     struct {
         /* 0 if small RAM size, 1 if large RAM size. */
-        gfu_uword ram_size : 1;
+        gfuobj_ramsize ram_size : 1;
         gfu_uword padding0 : 7;
         /* The number of sections in this object file. */
         gfu_uword section_count : 24;
     } bits;
 } gfuobj_flags;
 
-static_assert(sizeof(gfuobj_flags) == 1 * sizeof(gfu_uword), "GameFU Object flags expected to be 1 32-bit word.");
+gfu_static_assert(sizeof(gfuobj_flags) == 1 * sizeof(gfu_uword), "GameFU Object flags expected to be 1 32-bit word.");
 
 typedef struct gfuobj_header {
     gfu_uword magic;
@@ -102,7 +213,7 @@ typedef struct gfuobj_header {
     gfu_uword rom_size;
 } gfuobj_header;
 
-static_assert(sizeof(gfuobj_header) == 4 * sizeof(gfu_uword), "GameFU Object header expected to be 4 32-bit words.");
+gfu_static_assert(sizeof(gfuobj_header) == 4 * sizeof(gfu_uword), "GameFU Object header expected to be 4 32-bit words.");
 
 typedef enum gfuobj_section_class {
     GFUOBJ_CLASS_META,
@@ -127,7 +238,7 @@ typedef struct gfuobj_section {
     gfuobj_addr virtual_address;
 } gfuobj_section;
 
-static_assert(sizeof(gfuobj_section) == 5 * sizeof(gfu_uword), "GameFU Section header expected to be 5 32-bit words.");
+gfu_static_assert(sizeof(gfuobj_section) == 5 * sizeof(gfu_uword), "GameFU Section header expected to be 5 32-bit words.");
 
 typedef struct gfuobj_symbol {
     /* The name of this symbol.
@@ -145,7 +256,7 @@ typedef struct gfuobj_symbol {
     gfu_uword size;
 } gfuobj_symbol;
 
-static_assert(sizeof(gfuobj_symbol) == 4 * sizeof(gfu_uword), "GameFU Symbol entry expected to be 4 32-bit words.");
+gfu_static_assert(sizeof(gfuobj_symbol) == 4 * sizeof(gfu_uword), "GameFU Symbol entry expected to be 4 32-bit words.");
 
 typedef struct gfuobj_relocation {
     /* The absolute location in the ROM data to apply the relocation to. */
@@ -154,19 +265,20 @@ typedef struct gfuobj_relocation {
         gfu_uword raw;
         struct {
             /* The type of relocation to apply. */
-            gfu_uword type : 8;
+            gfuobj_relocation_kind kind : 8;
             /* The index of a referenced symbol, if any. */
             gfu_uword symbol_index : 24;
         } bits;
     } info;
 } gfuobj_relocation;
 
-static_assert(sizeof(gfuobj_relocation) == 2 * sizeof(gfu_uword), "GameFU Relocation entry expected to be 2 32-bit words.");
+gfu_static_assert(sizeof(gfuobj_relocation) == 2 * sizeof(gfu_uword), "GameFU Relocation entry expected to be 2 32-bit words.");
 
 typedef struct gfuobj_raw {
     gfuobj_header header;
     gfu_ubyte data[];
 } gfuobj_raw;
+
 
 __GAMEFU_API__ gfuobj_raw* gfuobj_raw_read_from_file(const char* file_path);
 __GAMEFU_API__ gfuobj_raw* gfuobj_raw_from_data(gfu_ubyte* data, gfu_uword size);
@@ -181,6 +293,7 @@ __GAMEFU_API__ gfuobj_symbol* gfuobj_raw_get_symbol_by_index(gfuobj_raw* obj, gf
 __GAMEFU_API__ gfuobj_symbol* gfuobj_raw_get_symbol_by_name_addr(gfuobj_raw* obj, gfuobj_addr symbol_name_addr);
 __GAMEFU_API__ gfuobj_symbol* gfuobj_raw_get_symbol_by_name(gfuobj_raw* obj, const char* symbol_name);
 __GAMEFU_API__ gfuobj_relocation* gfuobj_raw_get_relocation(gfuobj_raw* obj, gfuobj_relidx relocation_index);
+
 
 typedef struct gfuobj_byte_builder {
     GFU_DA_FIELDS(gfu_ubyte);
@@ -230,6 +343,7 @@ typedef struct gfuobj_builder {
     GFU_DA_FIELDS(gfuobj_section_builder);
 } gfuobj_builder;
 
+
 __GAMEFU_API__ void gfuobj_builder_init(gfuobj_builder* builder);
 __GAMEFU_API__ gfuobj_raw* gfuobj_builder_to_raw(gfuobj_builder* builder);
 __GAMEFU_API__ void gfuobj_builder_deinit(gfuobj_builder* builder);
@@ -250,4 +364,8 @@ __GAMEFU_API__ gfuobj_addr gfuobj_byte_builder_push_word(gfuobj_byte_builder* by
 __GAMEFU_API__ gfuobj_symidx gfuobj_builder_push_symbol(gfuobj_builder* builder, const char* symbol_name);
 __GAMEFU_API__ gfuobj_relidx gfuobj_builder_push_relocation(gfuobj_builder* builder);
 
-#endif /* GAMEFU_BFD_OBJECT_H_ */
+
+__GAMEFU_C_HEADER_EPILOGUE__
+
+
+#endif /* __GAMEFU_BFD__OBJECT_H_ */

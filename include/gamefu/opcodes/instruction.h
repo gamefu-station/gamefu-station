@@ -141,6 +141,6 @@ typedef union gfu_inst {
     } addr;
 } gfu_inst;
 
-static_assert(sizeof(gfu_inst) == sizeof(gfu_uword), "Ensure that the union of bitfields does not change the size of the instruction type.");
+gfu_static_assert(sizeof(gfu_inst) == sizeof(gfu_uword), "Ensure that the union of bitfields does not change the size of the instruction type.");
 
 #endif /* GAMEFU_OPCODES_INSTRUCTION_H_ */

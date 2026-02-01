@@ -38,7 +38,7 @@ bool gfuas_options_parse(int argc, char** argv, gfuas_state* state) {
 
     while (argc > 0) {
         const char* opt = SHIFT;
-        assertn(opt != nullptr);
+        gfu_assertn(opt != nullptr);
 
         if (0 == strcmp(opt, "-as1")) {
             continue;

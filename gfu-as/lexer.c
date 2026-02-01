@@ -266,6 +266,6 @@ gfuas_token gfuas_read_token(gfuas_state* state) {
     }
 
 super_break:;
-    assertn(token.kind != GFUAS_TK_INVALID);
+    gfu_assertn(token.kind != GFUAS_TK_INVALID);
     return token;
 }

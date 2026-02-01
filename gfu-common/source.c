@@ -43,7 +43,7 @@ gfu_source_load_from_file(const char* path, gfu_source* source) {
 
     errno = 0;
     gfu_word nread = (gfu_word) fread(text, 1, (size_t) length, f);
-    assertn(nread == length);
+    gfu_assertn(nread == length);
     if (ferror(f)) {
         gfu_diag_pause_error_flush();
         gfu_diag_issue(DIAG_ERROR, GFU_NOSOURCE, \

@@ -88,7 +88,7 @@
       Redefine default behaviors of nob.h.
 
       - NOBDEF - Appends additional things to function declarations. You can do something like `#define NOBDEF static inline`.
-      - NOB_ASSERT(condition) - Redefine which assert() nob.h shall use.
+      - NOB_ASSERT(condition) - Redefine which gfu_assert() nob.h shall use.
       - NOB_REALLOC(oldptr, size) - Redefine which realloc() nob.h shall use.
       - NOB_FREE(ptr) - Redefine which free() nob.h shall use.
       - NOB_DEPRECATED(message) - Redefine how nob.h shall mark functions as deprecated.

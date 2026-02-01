@@ -14,83 +14,55 @@ SPDX-License-Identifier: GPL-2.0-only
 __GAMEFU_C_HEADER_PROLOGUE__
 
 
-#ifdef GFU_NDEBUG
-#  define assert(Cond, Message) do { } while (0)
-#  define assertf(Cond, Message, ...) do { } while (0)
-#  define static_assert(Cond, Message)
-#else /* !GFU_NDEBUG */
-#  define assertn(Cond) do { \
-        if (!(Cond)) { \
-            (void)fprintf(stderr, __FILE__ ":" GFU_PPSTR(__LINE__) \
-                ": Assertion '" #Cond "' failed.\n"); \
-            abort(); \
-        } \
-    } while (0)
-#  define assert(Cond, Message) do { \
-        if (!(Cond)) { \
-            (void)fprintf(stderr, __FILE__ ":" GFU_PPSTR(__LINE__) \
-                ": Assertion '" #Cond "' failed:\n    " Message "\n"); \
-            abort(); \
-        } \
-    } while (0)
-#  define assertf(Cond, Message, ...) do { \
-        if (!(Cond)) { \
-            (void)fprintf(stderr, __FILE__ ":" GFU_PPSTR(__LINE__) \
-                ": Assertion '" #Cond "' failed:\n    " Message "\n", \
-                __VA_ARGS__); \
-            abort(); \
-        } \
-    } while (0)
-#  ifdef _WIN32
-#    undef static_assert
-#  endif
-#  if !defined(static_assert)
-#    define static_assert(Cond, Message) extern int (*_static_assert(void))[!!sizeof(struct { int _error_if_negative[(Cond) ? 2 : -1]; })]
-#  else
-#    define static_assert(Cond, Message) static_assert(Cond, Message)
-#  endif
-#endif /* GFU_NDEBUG */
-
-#define return_defer(Result) do { result = (Result); goto defer; } while (0)
-
-#if __GAMEFU_HOSTCC_CLANG__ || __GAMEFU_HOSTCC_GCC__
-#  define unreachable __builtin_unreachable()
-#else
-#  define unreachable do { assertn(false); } while (0)
-#endif
-
-#include <limits.h>
-
+/* A signed 8-bit integer; a single byte. */
 typedef int8_t gfu_byte;
+/* An unsigned 8-bit integer; a single byte. */
 typedef uint8_t gfu_ubyte;
+
+/* A signed 16-bit integer; a half word. */
 typedef int16_t gfu_half;
+/* An unsigned 16-bit integer; a half word. */
 typedef uint16_t gfu_uhalf;
+
+/* A signed 32-bit integer; a word. */
 typedef int32_t gfu_word;
+/* An unsigned 32-bit integer; a word. */
 typedef uint32_t gfu_uword;
+
+/* A signed 64-bit integer; a double word. */
 typedef int64_t gfu_double;
+/* An unsigned 64-bit integer; a double word. */
 typedef uint64_t gfu_udouble;
 
-#define GFU_BYTE_MIN INT8_MIN
-#define GFU_BYTE_MAX INT8_MAX
-#define GFU_UBYTE_MAX UINT8_MAX
 
-#define GFU_HALF_MIN INT16_MIN
-#define GFU_HALF_MAX INT16_MAX
-#define GFU_UHALF_MAX UINT16_MAX
+/* The minimum value of a signed byte (-128). */
+#define GFU_BYTE_MIN  INT8_MIN
+/* The maximum value of a signed byte (127). */
+#define GFU_BYTE_MAX  INT8_MAX
+/* The maximum value of an unsigned byte (255). */
+#define GFU_UBYTE_MAX  UINT8_MAX
 
-#define GFU_WORD_MIN INT32_MIN
-#define GFU_WORD_MAX INT32_MAX
-#define GFU_UWORD_MAX UINT32_MAX
+/* The minimum value of a signed half word (-32,768). */
+#define GFU_HALF_MIN  INT16_MIN
+/* The maximum value of a signed half word (32,767). */
+#define GFU_HALF_MAX  INT16_MAX
+/* The maximum value of an unsigned half word (65,535). */
+#define GFU_UHALF_MAX  UINT16_MAX
 
-#define GFU_DOUBLE_MIN INT64_MIN
-#define GFU_DOUBLE_MAX INT64_MAX
-#define GFU_UDOUBLE_MAX UINT64_MAX
+/* The minimum value of a signed word (-2,147,483,648). */
+#define GFU_WORD_MIN  INT32_MIN
+/* The maximum value of a signed word (2,147,483,647). */
+#define GFU_WORD_MAX  INT32_MAX
+/* The maximum value of an unsigned word (4,294,967,295). */
+#define GFU_UWORD_MAX  UINT32_MAX
 
-#define cast(T, V) ((T)(V))
-#define sext(I, O, V) ((gfu_u##O)(gfu_##O)(gfu_##I)(V))
+/* The minimum value of a signed double word (-9,223,372,036,854,775,808). */
+#define GFU_DOUBLE_MIN  INT64_MIN
+/* The maximum value of a signed double word (9,223,372,036,854,775,807). */
+#define GFU_DOUBLE_MAX  INT64_MAX
+/* The maximum value of an unsigned double word (18,446,744,073,709,551,615). */
+#define GFU_UDOUBLE_MAX  UINT64_MAX
 
-#define SWAP16(V) (V)
-#define SWAP32(V) (V)
 
 #define gfu_max(X, Y) (((X) > (Y)) ? (X) : (Y))
 #define gfu_min(X, Y) (((X) < (Y)) ? (X) : (Y))
@@ -114,6 +86,14 @@ static inline gfu_double gfu_mind(gfu_double a, gfu_double b) { return a < b ? a
 static inline gfu_double gfu_maxd(gfu_double a, gfu_double b) { return a > b ? a : b; }
 static inline gfu_udouble gfu_minud(gfu_udouble a, gfu_udouble b) { return a < b ? a : b; }
 static inline gfu_udouble gfu_maxud(gfu_udouble a, gfu_udouble b) { return a > b ? a : b; }
+
+
+#define cast(T, V) ((T)(V))
+#define sext(I, O, V) ((gfu_u##O)(gfu_##O)(gfu_##I)(V))
+
+#define SWAP16(V) (V)
+#define SWAP32(V) (V)
+
 
 #define GFU_DA_INIT_CAP 1024
 #define GFU_DA_FIELDS(Type) \
@@ -150,10 +130,11 @@ static inline gfu_udouble gfu_maxud(gfu_udouble a, gfu_udouble b) { return a > b
 
 #define gfu_da_free(DA)                         \
     do {                                        \
-        assertn((DA) != nullptr);               \
+        gfu_assertn((DA) != nullptr);               \
         free((DA)->items);                      \
         memset((DA), 0, sizeof *(DA));          \
     } while(0);
+
 
 typedef struct gfu_source {
     const char* name;
@@ -170,6 +151,7 @@ __GAMEFU_API__ bool gfu_source_load_from_file(
 );
 
 #define GFU_NOSOURCE (struct gfu_source) {0}, 0
+
 
 typedef enum gfu_diag_level {
     DIAG_IGNORED,
@@ -193,6 +175,7 @@ __GAMEFU_API__ void gfu_diag_issue_v(
     gfu_diag_level level, gfu_source source, gfu_word location,
     const char* format, va_list v
 );
+
 
 typedef struct gfu_chunk {
     char* memory;

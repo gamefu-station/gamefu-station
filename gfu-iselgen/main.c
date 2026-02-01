@@ -891,7 +891,7 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
         } break;
     }
 
-    assert(token.kind != ISEL_TK_INVALID, "Did not properly populate token info");
+    gfu_assert(token.kind != ISEL_TK_INVALID, "Did not properly populate token info");
     token.end = lexer->source_current;
     return token;
 }

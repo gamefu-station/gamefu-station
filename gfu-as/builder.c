@@ -29,15 +29,15 @@ __GAMEFU_API__ void gfuas_builder_position_after(gfuas_builder* b, gfuas_stmt* s
 __GAMEFU_API__ void gfuas_builder_insert(gfuas_builder* b, gfuas_stmt* stmt) {
     if (b == nullptr || stmt == nullptr) return;
     if (b->head == nullptr) {
-        assertn(b->current == nullptr);
-        assertn(b->tail == nullptr);
+        gfu_assertn(b->current == nullptr);
+        gfu_assertn(b->tail == nullptr);
         b->head = b->tail = stmt;
     } else if (b->current == nullptr) {
-        assertn(b->head != nullptr);
+        gfu_assertn(b->head != nullptr);
         stmt->next = b->head;
         b->head = stmt;
     } else {
-        assertn(b->current != nullptr);
+        gfu_assertn(b->current != nullptr);
         b->current->prev->next = stmt;
         stmt->prev = b->current->prev;
         b->current->prev = stmt;
@@ -154,7 +154,7 @@ __GAMEFU_API__ gfuas_stmt* gfuas_build_instruction(
     int count
 ) {
     if (b == nullptr) return nullptr;
-    assertf(count >= 0 && count <= 3, "Instruction argument count out of range: %d is not in the range [0, 3].", count);
+    gfu_assertf(count >= 0 && count <= 3, "Instruction argument count out of range: %d is not in the range [0, 3].", count);
     switch (count) {
         default: unreachable; return nullptr;
         case 0: return gfuas_build_instruction0(b, mnemonic);

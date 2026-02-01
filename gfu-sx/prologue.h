@@ -24,7 +24,7 @@ typedef struct gfusx_uwpair {
     gfu_uword r;
 } gfusx_uwpair_t;
 
-static_assert(sizeof(gfusx_uwpair_t) == sizeof(gfu_udouble), "uwpair should be two uwords, or one ulong in size.");
+gfu_static_assert(sizeof(gfusx_uwpair_t) == sizeof(gfu_udouble), "uwpair should be two uwords, or one ulong in size.");
 
 #define GFUSX_UWPAIR(L, R) ((gfusx_uwpair_t){(L), (R)})
 

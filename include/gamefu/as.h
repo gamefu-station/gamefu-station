@@ -4,15 +4,22 @@ See the LICENSE file and LICENSES directory for more information.
 SPDX-License-Identifier: GPL-2.0-only
 ----------------------------------------------------------------------------- */
 
-#ifndef GAMEFU_AS_H_
-#define GAMEFU_AS_H_
+#ifndef __GAMEFU_AS_H__
+#define __GAMEFU_AS_H__
+
 
 #include <gamefu/common.h>
+
+
+__GAMEFU_C_HEADER_PROLOGUE__
+
+
 #include <gamefu/bfd/object.h>
 
 #include <gamefu/opcodes/instruction.h>
 #include <gamefu/opcodes/register.h>
 #include <gamefu/opcodes/syscall.h>
+
 
 typedef enum gfuas_mnemonic {
     GFUAS_MNEM_INVALID,
@@ -100,25 +107,56 @@ typedef struct gfuas_builder {
     gfuas_stmt* current;
 } gfuas_builder;
 
+
 __GAMEFU_API__ gfuobj_raw* gfuas_source_assemble(gfu_source source);
 __GAMEFU_API__ gfuobj_raw* gfuas_builder_assemble(gfuas_builder* builder);
 
+
 __GAMEFU_API__ void gfuas_builder_position_at_start(gfuas_builder* b);
 __GAMEFU_API__ void gfuas_builder_position_at_end(gfuas_builder* b);
-__GAMEFU_API__ void gfuas_builder_position_before(gfuas_builder* b, gfuas_stmt* stmt);
-__GAMEFU_API__ void gfuas_builder_position_after(gfuas_builder* b, gfuas_stmt* stmt);
+__GAMEFU_API__ void gfuas_builder_position_before(
+    gfuas_builder* b, gfuas_stmt* stmt
+);
+__GAMEFU_API__ void gfuas_builder_position_after(
+    gfuas_builder* b, gfuas_stmt* stmt
+);
 __GAMEFU_API__ void gfuas_builder_insert(gfuas_builder* b, gfuas_stmt* stmt);
 
-__GAMEFU_API__ void gfuas_set_location(gfuas_stmt* stmt, gfu_source source, gfu_uword location);
-__GAMEFU_API__ gfuas_stmt* gfuas_build_directive(gfuas_builder* b, gfuas_directive directive);
-__GAMEFU_API__ gfuas_stmt* gfuas_build_label(gfuas_builder* b, const char* label, bool is_local);
-__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction0(gfuas_builder* b, gfuas_mnemonic mnemonic);
-__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction1(gfuas_builder* b, gfuas_mnemonic mnemonic, gfuas_expr op1);
-__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction2(gfuas_builder* b, gfuas_mnemonic mnemonic, gfuas_expr op1, gfuas_expr op2);
-__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction3(gfuas_builder* b, gfuas_mnemonic mnemonic, gfuas_expr op1, gfuas_expr op2, gfuas_expr op3);
-__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction(gfuas_builder* b, gfuas_mnemonic mnemonic, gfuas_expr* ops, int count);
+
+__GAMEFU_API__ void gfuas_set_location(
+    gfuas_stmt* stmt, gfu_source source, gfu_uword location
+);
+
+
+__GAMEFU_API__ gfuas_stmt* gfuas_build_directive(
+    gfuas_builder* b, gfuas_directive directive
+);
+__GAMEFU_API__ gfuas_stmt* gfuas_build_label(
+    gfuas_builder* b, const char* label, bool is_local
+);
+__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction0(
+    gfuas_builder* b, gfuas_mnemonic mnemonic
+);
+__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction1(
+    gfuas_builder* b, gfuas_mnemonic mnemonic, gfuas_expr op1
+);
+__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction2(
+    gfuas_builder* b, gfuas_mnemonic mnemonic, gfuas_expr op1, gfuas_expr op2
+);
+__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction3(
+    gfuas_builder* b, gfuas_mnemonic mnemonic,
+    gfuas_expr op1, gfuas_expr op2, gfuas_expr op3
+);
+__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction(
+    gfuas_builder* b, gfuas_mnemonic mnemonic, gfuas_expr* ops, int count
+);
+
 
 __GAMEFU_API__ int gfuas_driver_main(int argc, char** argv);
 __GAMEFU_API__ int gfuas_driver_fuzz(const char* text, size_t length);
 
-#endif /* GAMEFU_AS_H_ */
+
+__GAMEFU_C_HEADER_EPILOGUE__
+
+
+#endif /* __GAMEFU_AS_H__ */

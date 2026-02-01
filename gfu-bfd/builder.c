@@ -7,8 +7,8 @@ SPDX-License-Identifier: GPL-2.0-only
 #include <gamefu/bfd/object.h>
 
 static gfuobj_addr gfuobj_get_string_index(gfuobj_builder* builder, const char* string) {
-    assertn(builder != nullptr);
-    assertn(GFUOBJ_STRINGS_SECTIDX < builder->count);
+    gfu_assertn(builder != nullptr);
+    gfu_assertn(GFUOBJ_STRINGS_SECTIDX < builder->count);
 
     size_t string_length = strlen(string);
 
@@ -24,12 +24,12 @@ static gfuobj_addr gfuobj_get_string_index(gfuobj_builder* builder, const char* 
 
     // unreachable;
     fprintf(stderr, "missing string: \"%s\"\n", string);
-    assert(false, "Should only be looking up strings which were already interned.");
+    gfu_assert(false, "Should only be looking up strings which were already interned.");
 }
 
 __GAMEFU_API__ gfuobj_raw* gfuobj_builder_to_raw(gfuobj_builder* builder) {
     gfu_uword raw_size = sizeof(gfuobj_header) + (sizeof(gfuobj_section) * builder->count);
-    assertn(raw_size == GFUOBJ_ALIGN(raw_size));
+    gfu_assertn(raw_size == GFUOBJ_ALIGN(raw_size));
 
     gfu_uword section_offsets[builder->count];
     // NOTE(local): calculating the size of this is not as easy as just summing section builder lengths, because symbols need to translate their string point to an index.
@@ -43,11 +43,11 @@ __GAMEFU_API__ gfuobj_raw* gfuobj_builder_to_raw(gfuobj_builder* builder) {
         }
     }
 
-    assertn(raw_size == GFUOBJ_ALIGN(raw_size));
+    gfu_assertn(raw_size == GFUOBJ_ALIGN(raw_size));
     gfuobj_raw* raw = calloc(1, raw_size);
 
     gfuobj_header* header = (void*) raw;
-    header->magic = GFUOBJ_MAGIC_VERSION(GFUOBJ_CURRENT_VERSION);
+    header->magic = GFUOBJ_MAGIC(GFUOBJ_CURRENT_VERSION);
     memcpy(&header->flags, &builder->flags, sizeof(gfuobj_flags));
     header->entry_address = builder->entry_address;
     header->rom_size = raw_size;
@@ -93,10 +93,10 @@ __GAMEFU_API__ void gfuobj_builder_init(gfuobj_builder* builder) {
     *builder = (gfuobj_builder) {0};
 
     gfuobj_sectidx nul_idx = gfuobj_builder_add_section(builder, GFUOBJ_NUL_SECTION_NAME);
-    assertn(nul_idx == GFUOBJ_NUL_SECTIDX);
+    gfu_assertn(nul_idx == GFUOBJ_NUL_SECTIDX);
 
     gfuobj_sectidx str_idx = gfuobj_builder_add_section(builder, GFUOBJ_STRINGS_SECTION_NAME);
-    assertn(str_idx == GFUOBJ_STRINGS_SECTIDX);
+    gfu_assertn(str_idx == GFUOBJ_STRINGS_SECTIDX);
 
     gfuobj_section_builder* string_section = gfuobj_builder_get_section(builder, GFUOBJ_STRINGS_SECTIDX);
     gfu_da_push(&string_section->data, 0);
@@ -105,10 +105,10 @@ __GAMEFU_API__ void gfuobj_builder_init(gfuobj_builder* builder) {
     (void) gfuobj_builder_intern_string(builder, GFUOBJ_STRINGS_SECTION_NAME);
 
     gfuobj_sectidx rel_idx = gfuobj_builder_add_section(builder, GFUOBJ_RELOCATION_SECTION_NAME);
-    assertn(rel_idx == GFUOBJ_RELOCATION_SECTIDX);
+    gfu_assertn(rel_idx == GFUOBJ_RELOCATION_SECTIDX);
 
     gfuobj_sectidx sym_idx = gfuobj_builder_add_section(builder, GFUOBJ_SYMBOL_SECTION_NAME);
-    assertn(sym_idx == GFUOBJ_SYMBOL_SECTIDX);
+    gfu_assertn(sym_idx == GFUOBJ_SYMBOL_SECTIDX);
 }
 
 __GAMEFU_API__ void gfuobj_builder_deinit(gfuobj_builder* builder) {
@@ -186,7 +186,7 @@ __GAMEFU_API__ gfuobj_symbol_builder* gfuobj_builder_get_symbol(gfuobj_builder* 
     }
 
     gfuobj_section_builder* symbol_section = gfuobj_builder_get_section(builder, GFUOBJ_SYMBOL_SECTIDX);
-    assertn(symbol_section != nullptr);
+    gfu_assertn(symbol_section != nullptr);
 
     if (symbol_section->data.capacity < symbol_index * sizeof(gfuobj_symbol_builder)) {
         return nullptr;
@@ -201,7 +201,7 @@ __GAMEFU_API__ gfuobj_relocation_builder* gfuobj_builder_get_relocation(gfuobj_b
     }
 
     gfuobj_section_builder* relocation_section = gfuobj_builder_get_section(builder, GFUOBJ_RELOCATION_SECTIDX);
-    assertn(relocation_section != nullptr);
+    gfu_assertn(relocation_section != nullptr);
 
     if (relocation_section->data.capacity < relocation_index * sizeof(gfuobj_relocation_builder)) {
         return nullptr;

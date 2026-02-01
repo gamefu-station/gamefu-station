@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
         }
 
         buff = malloc(length);
-        assertn(buff != NULL);
+        gfu_assertn(buff != NULL);
 
         errno = 0;
         buff_size = fread(buff, 1, length, stream);
@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
         while (fgets(window, WINDOW_CAP, stdin)) {
             size_t window_size = strlen(window);
             stdin_buff = realloc(stdin_buff, stdin_buff_size + window_size);
-            assertn(stdin_buff != NULL);
+            gfu_assertn(stdin_buff != NULL);
             memcpy((char*)stdin_buff + stdin_buff_size, window, window_size);
             stdin_buff_size += window_size;
         }

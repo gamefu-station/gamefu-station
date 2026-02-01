@@ -31,40 +31,40 @@ KSEG0      KSEG1
 #define GFU_WRAM_BASE 0x00000000u
 #define GFU_WRAM_SIZE 0x01000000u
 #define GFU_BIOS_RAM_SIZE 0x00010000u
-static_assert(GFU_BIOS_RAM_SIZE == (64 * 1024), "BIOS RAM should be 64 KiB.");
+gfu_static_assert(GFU_BIOS_RAM_SIZE == (64 * 1024), "BIOS RAM should be 64 KiB.");
 #define GFU_MAIN0_RAM_SIZE 0x003F0000u
-static_assert(GFU_BIOS_RAM_SIZE + GFU_MAIN0_RAM_SIZE == (4 * 1024 * 1024), "Main RAM Type-0 (small, default) should be 4 MiB.");
-static_assert(GFU_BIOS_RAM_SIZE + GFU_MAIN0_RAM_SIZE <= GFU_WRAM_SIZE, "Main RAM Type-0 (small, default) size exceeds Main RAM size total.");
+gfu_static_assert(GFU_BIOS_RAM_SIZE + GFU_MAIN0_RAM_SIZE == (4 * 1024 * 1024), "Main RAM Type-0 (small, default) should be 4 MiB.");
+gfu_static_assert(GFU_BIOS_RAM_SIZE + GFU_MAIN0_RAM_SIZE <= GFU_WRAM_SIZE, "Main RAM Type-0 (small, default) size exceeds Main RAM size total.");
 #define GFU_MAIN1_RAM_SIZE 0x00FF0000u
-static_assert(GFU_BIOS_RAM_SIZE + GFU_MAIN1_RAM_SIZE == (16 * 1024 * 1024), "Main RAM Type-1 (large, opt-in) should be 16 MiB.");
-static_assert(GFU_BIOS_RAM_SIZE + GFU_MAIN1_RAM_SIZE <= GFU_WRAM_SIZE, "Main RAM Type-1 (large, opt-in) size exceeds Main RAM size total.");
+gfu_static_assert(GFU_BIOS_RAM_SIZE + GFU_MAIN1_RAM_SIZE == (16 * 1024 * 1024), "Main RAM Type-1 (large, opt-in) should be 16 MiB.");
+gfu_static_assert(GFU_BIOS_RAM_SIZE + GFU_MAIN1_RAM_SIZE <= GFU_WRAM_SIZE, "Main RAM Type-1 (large, opt-in) size exceeds Main RAM size total.");
 #define GFU_WRAM_STACK_SIZE 0x00010000u
 
 #define GFU_BIOS_ROM_BASE 0x10000000u
 #define GFU_BIOS_ROM_SIZE 0x00080000u
-static_assert(GFU_BIOS_ROM_SIZE == (512 * 1024), "BIOS ROM should be 512 KiB.");
+gfu_static_assert(GFU_BIOS_ROM_SIZE == (512 * 1024), "BIOS ROM should be 512 KiB.");
 
 #define GFU_EXP1_BASE 0x1F000000u
 #define GFU_EXP1_SIZE 0x00800000u
-static_assert(GFU_EXP1_SIZE == (8 * 1024 * 1024), "Scratchpad should be 8 MiB.");
+gfu_static_assert(GFU_EXP1_SIZE == (8 * 1024 * 1024), "Scratchpad should be 8 MiB.");
 
 #define GFU_EXP1_HWREG_BASE (GFU_EXP1_BASE + 0x00800000u)
 #define GFU_EXP1_HWREG_SIZE 0x00010000u
 
 #define GFU_EXP1_SCRATCH_BASE GFU_EXP1_HWREG_BASE
 #define GFU_EXP1_SCRATCH_SIZE 0x00001000u
-static_assert(GFU_EXP1_SCRATCH_SIZE == (4 * 1024), "Scratchpad should be 4 KiB.");
-static_assert(GFU_EXP1_SCRATCH_BASE == (GFU_EXP1_BASE + GFU_EXP1_SIZE), "Scratchpad should be exactly after Expansion 1 RAM/ROM.");
+gfu_static_assert(GFU_EXP1_SCRATCH_SIZE == (4 * 1024), "Scratchpad should be 4 KiB.");
+gfu_static_assert(GFU_EXP1_SCRATCH_BASE == (GFU_EXP1_BASE + GFU_EXP1_SIZE), "Scratchpad should be exactly after Expansion 1 RAM/ROM.");
 
 #define GFU_EXP1_IOPORT_BASE (GFU_EXP1_SCRATCH_BASE + 0x00001000u)
 #define GFU_EXP1_IOPORT_SIZE 0x00001000u
-static_assert(GFU_EXP1_IOPORT_SIZE == (4 * 1024), "Expansion 1 I/O ports should be 4 KiB.");
-static_assert(GFU_EXP1_IOPORT_BASE == (GFU_EXP1_SCRATCH_BASE + GFU_EXP1_SCRATCH_SIZE), "Expansion 1 I/O ports should be exactly after Scratchpad.");
+gfu_static_assert(GFU_EXP1_IOPORT_SIZE == (4 * 1024), "Expansion 1 I/O ports should be 4 KiB.");
+gfu_static_assert(GFU_EXP1_IOPORT_BASE == (GFU_EXP1_SCRATCH_BASE + GFU_EXP1_SCRATCH_SIZE), "Expansion 1 I/O ports should be exactly after Scratchpad.");
 
 #define GFU_EXP2_IOPORT_BASE (GFU_EXP1_IOPORT_BASE + 0x00001000u)
 #define GFU_EXP2_IOPORT_SIZE 0x00001000u
-static_assert(GFU_EXP2_IOPORT_SIZE == (4 * 1024), "Expansion 2 I/O ports should be 4 KiB.");
-static_assert(GFU_EXP2_IOPORT_BASE == (GFU_EXP1_IOPORT_BASE + GFU_EXP1_IOPORT_SIZE), "Expansion 2 I/O ports should be exactly after Expansion 1 I/O ports.");
+gfu_static_assert(GFU_EXP2_IOPORT_SIZE == (4 * 1024), "Expansion 2 I/O ports should be 4 KiB.");
+gfu_static_assert(GFU_EXP2_IOPORT_BASE == (GFU_EXP1_IOPORT_BASE + GFU_EXP1_IOPORT_SIZE), "Expansion 2 I/O ports should be exactly after Expansion 1 I/O ports.");
 
 #define GFU_RAM_SIZE_ADDR (GFU_EXP1_IOPORT_BASE + 0x0060)
 #define GFU_RAM_SIZE_SMALL 0x3F88

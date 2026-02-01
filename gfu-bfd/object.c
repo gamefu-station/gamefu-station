@@ -50,7 +50,7 @@ __GAMEFU_API__ gfuobj_raw* gfuobj_raw_from_data(gfu_ubyte* data, gfu_uword size)
 }
 
 __GAMEFU_API__ void gfuobj_raw_write_to_file(gfuobj_raw* raw, const char* file_path) {
-    assert(false, "Not implemented: gfuobj_raw_write_to_file");
+    gfu_assert(false, "Not implemented: gfuobj_raw_write_to_file");
 }
 
 __GAMEFU_API__ void* gfuobj_raw_get_pointer(gfuobj_raw* obj, gfuobj_addr addr) {

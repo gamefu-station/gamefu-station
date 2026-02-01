@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
             printf(" %02X", ((unsigned char*)&header->magic)[i]);
         }
         printf("\n");
-        printf("  Version:        %u\n", GFUOBJ_GET_VERSION(obj->header.magic));
+        printf("  Version:        %u\n", GFUOBJ_MAGIC_GET_VERSION(obj->header.magic));
         printf("  Section count:  %u\n", header->flags.bits.section_count);
         printf("  RAM size:       %s\n", (header->flags.bits.ram_size) ? "Large" : "Small");
         printf("  Entry address:  0x%08X\n", header->entry_address);
@@ -109,7 +109,7 @@ static const char *readobj_class_to_cstr(gfuobj_section_class class) {
     case GFUOBJ_CLASS_DATA: return "DATA";
     case GFUOBJ_CLASS_TEXT: return "TEXT";
     case GFUOBJ_CLASS_BSS:  return "BSS ";
-    default: assert(false, "Non-exhaustive handling of gfuobj_section_class");
+    default: gfu_assert(false, "Non-exhaustive handling of gfuobj_section_class");
     }
 }
 

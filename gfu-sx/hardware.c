@@ -343,7 +343,7 @@ void gfusx_dma_exec(gfusx_t* vm, gfu_uhalf channel, gfu_uword chcr) {
         return;
     }
 
-    assert(start_transfer && is_dma_channel_enabled, "We should have early-exited if either condition was false.");
+    gfu_assert(start_transfer && is_dma_channel_enabled, "We should have early-exited if either condition was false.");
     gfusx_logf(vm, "Begin DMA%u exec", channel);
 
     gfu_uword madr = gfusx_memory_get_dma_madr(vm, channel);

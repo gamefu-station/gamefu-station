@@ -108,8 +108,12 @@ SPDX-License-Identifier: GPL-2.0-only
 #elif defined(_MSC_VER)
 #  undef __GAMEFU_HOSTCC_MSVC__
 #  define __GAMEFU_HOSTCC_MSVC__  (1)
-/* NOTE: Many compilers define GCC macros such as __GNUC__ to indicate GNU extension compatibility.
-         To prevent false positives it is therefore necessary to check for __GNUC__ after all other compilers which could define it. */
+/*
+NOTE: Many compilers define GCC macros such as __GNUC__ to indicate GNU
+extension compatibility.
+To prevent false positives it is therefore necessary to check for
+__GNUC__ after all other compilers which could define it.
+*/
 #elif defined(__GNUC__)
 #  undef __GAMEFU_HOSTCC_GCC__
 #  define __GAMEFU_HOSTCC_GCC__  (1)
@@ -131,9 +135,15 @@ SPDX-License-Identifier: GPL-2.0-only
 #define __GAMEFU_STDC_VERSION_C99__  199901L
 #define __GAMEFU_STDC_VERSION_C11__  201100L
 #define __GAMEFU_STDC_VERSION_C17__  201700L
-/* NOTE: GCC, even years after C23 was standardized, may still define __STDC_VERSION__ as 202000L. */
+/*
+NOTE: GCC, even years after C23 was standardized, may still define
+__STDC_VERSION__ as 202000L.
+*/
 #define __GAMEFU_STDC_VERSION_C23__  202000L
-/* NOTE: At time of writing, C2y is still unreleased and in development. 202400L is a reasonable minimum expectation. */
+/*
+NOTE: At time of writing, C2y is still unreleased and in development. 202400L
+is a reasonable minimum expectation.
+*/
 #define __GAMEFU_STDC_VERSION_C2Y__  202400L
 
 #if (__GAMEFU_STDC_VERSION__ - 0 >= __GAMEFU_STDC_VERSION_C89__)
@@ -228,9 +238,14 @@ SPDX-License-Identifier: GPL-2.0-only
 
 
 #if __GAMEFU_HOSTOS_WINDOWS__
-/* NOTE: CMake defines {libname}_EXPORTS for shared libraries by default.
-         While CMake is not the default build system provided by this project, it doesn't hurt to use GAMEFU_EXPORTS rather than a bespoke, more explicit macro.
-         We'd otherwise be checking at least two potential configuration macros or requiring extra work of anyone writing their own CMake build script for GAMEFU. */
+/*
+NOTE: CMake defines {libname}_EXPORTS for shared libraries by default.
+While CMake is not the default build system provided by this project,
+it doesn't hurt to use GAMEFU_EXPORTS rather than a bespoke, more
+explicit macro.
+We'd otherwise be checking at least two potential configuration macros
+or requiring extra work of anyone writing their own CMake build script
+for GAMEFU. */
 #  if defined(GAMEFU_EXPORTS)
 #    define __GAMEFU_API__  __GAMEFU_EXTERN__ __declspec(dllexport)
 #  else
@@ -242,12 +257,16 @@ SPDX-License-Identifier: GPL-2.0-only
 
 
 #if __GAMEFU_C23__ || __GAMEFU_CXX__
+#  define __GAMEFU_HAS_NORETURN__  (1)
 #  define __GAMEFU_NORETURN__  [[noreturn]]
 #elif __GAMEFU_C11__
+#  define __GAMEFU_HAS_NORETURN__  (1)
 #  define __GAMEFU_NORETURN__  _Noreturn
 #elif __GAMEFU_HOSTCC_CLANG__ || __GAMEFU_HOSTCC_GCC__
+#  define __GAMEFU_HAS_NORETURN__  (1)
 #  define __GAMEFU_NORETURN__  __attribute__((noreturn))
 #else
+#  define __GAMEFU_HAS_NORETURN__  (0)
 #  define __GAMEFU_NORETURN__
 #endif
 
@@ -279,6 +298,13 @@ SPDX-License-Identifier: GPL-2.0-only
 __GAMEFU_C_HEADER_PROLOGUE__
 
 
+#if defined(NDEBUG)
+#  define __GAMEFU_DEBUG__  (0)
+#else
+#  define __GAMEFU_DEBUG__  (1)
+#endif
+
+
 #if __GAMEFU_HOSTOS_WINDOWS__
 #  include <io.h>
 #endif
@@ -287,6 +313,7 @@ __GAMEFU_C_HEADER_PROLOGUE__
 #include <ctype.h>
 #include <errno.h>
 #include <inttypes.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -307,8 +334,72 @@ __GAMEFU_C_HEADER_PROLOGUE__
 #endif
 
 
+#if __GAMEFU_C23__
+#  define unreachable  do { [[unreachable]]; } while (0)
+#elif __GAMEFU_HOSTCC_CLANG__ || __GAMEFU_HOSTCC_GCC__
+#  define unreachable  do { __builtin_unreachable(); } while (0)
+#elif __GAMEFU_HOSTCC_MSVC__
+#  define unreachable  do { __assume(false); } while (0)
+#else
+#  if __GAMEFU_HAS_NORETURN__
+__GAMEFU_NORETURN__ inline void __gfu_unreachable__(__GAMEFU_VOIDPROTO__) { }
+#    define unreachable  do { __gfu_unreachable__(); } while (0)
+#  else
+#    define unreachable  do { gfu_assertn(false); } while (0)
+#  endif /* __GAMEFU_HAS_NORETURN__ */
+#endif
+
+
 #define GFU_PPSTR1(X) #X
 #define GFU_PPSTR(X) GFU_PPSTR1(X)
+
+
+#if __GAMEFU_DEBUG__
+#  define gfu_assert(Cond, Message) do { \
+        if (!(Cond)) { \
+            (void)fprintf(stderr, __FILE__ ":" GFU_PPSTR(__LINE__) \
+                ": Assertion '" #Cond "' failed:\n    " Message "\n"); \
+            abort(); \
+        } \
+    } while (0)
+
+#  define gfu_assertn(Cond) do { \
+        if (!(Cond)) { \
+            (void)fprintf(stderr, __FILE__ ":" GFU_PPSTR(__LINE__) \
+                ": Assertion '" #Cond "' failed.\n"); \
+            abort(); \
+        } \
+    } while (0)
+
+#  define gfu_assertf(Cond, Message, ...) do { \
+        if (!(Cond)) { \
+            (void)fprintf(stderr, __FILE__ ":" GFU_PPSTR(__LINE__) \
+                ": Assertion '" #Cond "' failed:\n    " Message "\n", \
+                __VA_ARGS__); \
+            abort(); \
+        } \
+    } while (0)
+
+#  if __CINDER_C23__
+#    define gfu_static_assert(Cond, Message) static_assert((Cond), (Message))
+#  elif __CINDER_C11__
+#    define gfu_static_assert(Cond, Message) _Static_assert((Cond), (Message))
+#  else
+#    define gfu_static_assert(Cond, Message) \
+    extern int (*__gamefu_static_assert__(void))[\
+        !!sizeof(struct { int _error_if_negative[(Cond) ? 2 : -1]; }) \
+    ]
+#  endif /* !__CINDER_C11__ */
+#else
+#  define gfu_assert(Cond, Message) do { } while (0)
+#  define gfu_assertn(Cond) do { } while (0)
+#  define gfu_assertf(Cond, Message, ...) do { } while (0)
+#  define gfu_static_assert(Cond, Message)
+#endif
+
+
+/* TODO(echoe): Ideally we'd like to remove `return_defer`. */
+#define return_defer(Result) do { result = (Result); goto defer; } while (0)
 
 
 __GAMEFU_C_HEADER_EPILOGUE__

@@ -23,7 +23,7 @@ typedef union gfusx_chip_status {
     } bits;
 } gfusx_chip_status_t;
 
-static_assert(sizeof(gfusx_chip_status_t) == sizeof(gfu_uword), "Ensure that CHIP status is always word-sized.");
+gfu_static_assert(sizeof(gfusx_chip_status_t) == sizeof(gfu_uword), "Ensure that CHIP status is always word-sized.");
 
 typedef struct gfusx_chip {
     gfu_ubyte* data;

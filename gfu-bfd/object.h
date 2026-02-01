@@ -4,7 +4,7 @@
 #include <gamefu/common.h>
 #include <gamefu/bfd/system.h>
 
-#define GFUOBJ_MAGIC 0xF0FF6109
+#define GFUOBJ_MAGIC_VALUE 0xF0FF6109
 
 #define GFUOBJ_ADDRSPACE_BIOS 0x01
 #define GFUOBJ_ADDRSPACE_USER 0x02
