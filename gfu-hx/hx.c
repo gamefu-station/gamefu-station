@@ -114,12 +114,12 @@ hx_dump_opt(FILE* output_stream, void* buff, size_t length, size_t offset, hx_op
 hx_dump_state*
 hx_dump_begin(FILE* output_stream, hx_opts opts) {
     hx_dump_state *state = calloc(1, sizeof(*state));
-    assertn(state != NULL);
+    gfu_assertn(state != NULL);
 
     state->output_stream = output_stream;
     state->opts = opts;
     state->temp = malloc(opts.column_count);
-    assertn(state->temp != NULL);
+    gfu_assertn(state->temp != NULL);
 
     if (opts.print_cinclude) {
         fprintf(output_stream, "unsigned char %s[] = {\n", opts.cinclude_name);

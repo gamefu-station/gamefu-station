@@ -305,7 +305,7 @@ main(int argc, char** argv) {
         if (!configure(program_name, &argc, &argv, build_config_h)) goto fail;
         if (is_config_command) goto success;
     }
-    if (!is_clean_command) gfu_assert(nob_file_exists(build_config_h));
+    if (!is_clean_command) assert(nob_file_exists(build_config_h));
 
     if (command == NULL || 0 == strcmp(command, "build")) {
         if (!run_build(argc, argv)) goto fail;
