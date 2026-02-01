@@ -226,7 +226,7 @@ int main(int argc, char** argv) {
     }
 
     opts.visual_offset = offset;
-    hx_dump_opt(stdout, buff, buff_size, opts);
+    hx_dump_opt(stdout, buff, buff_size, 0, opts);
 
     if (buff) free(buff);
     return 0;
