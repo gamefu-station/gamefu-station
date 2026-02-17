@@ -82,20 +82,16 @@ typedef struct gfuas_stmt {
     gfu_uword operand_count;
     gfuas_expr operands[3];
     gfu_uword pattern_index;
+    gfu_uword address;
+    gfu_uword byte_size;
 } gfuas_stmt;
 
 typedef struct gfuas_strings {
     GFU_DA_FIELDS(char*);
 } gfuas_strings;
 
-typedef struct gfuas_builder_label {
-    const char* name;
-    gfu_uword address;
-    gfu_uword parent;
-} gfuas_builder_label;
-
 typedef struct gfuas_builder_labels {
-    GFU_DA_FIELDS(gfuas_builder_label);
+    GFU_DA_FIELDS(gfuas_stmt*);
 } gfuas_builder_labels;
 
 typedef struct gfuas_builder {
@@ -111,6 +107,9 @@ typedef struct gfuas_builder {
 __GAMEFU_API__ gfuobj_raw* gfuas_source_assemble(gfu_source source);
 __GAMEFU_API__ gfuobj_raw* gfuas_builder_assemble(gfuas_builder* builder);
 
+
+__GAMEFU_API__ void gfuas_builder_init(gfuas_builder* b);
+__GAMEFU_API__ void gfuas_builder_deinit(gfuas_builder* b);
 
 __GAMEFU_API__ void gfuas_builder_position_at_start(gfuas_builder* b);
 __GAMEFU_API__ void gfuas_builder_position_at_end(gfuas_builder* b);

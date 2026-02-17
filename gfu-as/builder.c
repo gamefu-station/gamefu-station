@@ -6,27 +6,41 @@ SPDX-License-Identifier: GPL-2.0-only
 
 #include <gamefu/as.h>
 
-__GAMEFU_API__ void gfuas_builder_position_at_start(gfuas_builder* b) {
+void
+gfuas_builder_init(gfuas_builder* b) {
+    gfu_arena_init(&b->arena, 1024 * 1024);
+}
+
+void
+gfuas_builder_deinit(gfuas_builder* b) {
+    gfu_arena_deinit(&b->arena);
+}
+
+void gfuas_builder_position_at_start(gfuas_builder* b) {
     if (b == nullptr) return;
     b->current = nullptr;
 }
 
-__GAMEFU_API__ void gfuas_builder_position_at_end(gfuas_builder* b) {
+void
+gfuas_builder_position_at_end(gfuas_builder* b) {
     if (b == nullptr) return;
     b->current = b->tail;
 }
 
-__GAMEFU_API__ void gfuas_builder_position_before(gfuas_builder* b, gfuas_stmt* stmt) {
+void
+gfuas_builder_position_before(gfuas_builder* b, gfuas_stmt* stmt) {
     if (b == nullptr || stmt == nullptr) return;
     b->current = stmt->prev;
 }
 
-__GAMEFU_API__ void gfuas_builder_position_after(gfuas_builder* b, gfuas_stmt* stmt) {
+void
+gfuas_builder_position_after(gfuas_builder* b, gfuas_stmt* stmt) {
     if (b == nullptr || stmt == nullptr) return;
     b->current = stmt;
 }
 
-__GAMEFU_API__ void gfuas_builder_insert(gfuas_builder* b, gfuas_stmt* stmt) {
+void
+gfuas_builder_insert(gfuas_builder* b, gfuas_stmt* stmt) {
     if (b == nullptr || stmt == nullptr) return;
     if (b->head == nullptr) {
         gfu_assertn(b->current == nullptr);
@@ -46,13 +60,17 @@ __GAMEFU_API__ void gfuas_builder_insert(gfuas_builder* b, gfuas_stmt* stmt) {
     }
 }
 
-__GAMEFU_API__ void gfuas_set_location(gfuas_stmt* stmt, gfu_source source, gfu_uword location) {
+void
+gfuas_set_location(
+    gfuas_stmt* stmt, gfu_source source, gfu_uword location
+) {
     if (stmt == nullptr) return;
     stmt->source = source;
     stmt->location = location;
 }
 
-__GAMEFU_API__ gfuas_stmt* gfuas_build_directive(
+gfuas_stmt*
+gfuas_build_directive(
     gfuas_builder* b,
     gfuas_directive directive
 ) {
@@ -65,7 +83,8 @@ __GAMEFU_API__ gfuas_stmt* gfuas_build_directive(
     return stmt;
 }
 
-__GAMEFU_API__ gfuas_stmt* gfuas_build_label(
+gfuas_stmt*
+gfuas_build_label(
     gfuas_builder* b,
     const char* label,
     bool is_local
@@ -75,12 +94,29 @@ __GAMEFU_API__ gfuas_stmt* gfuas_build_label(
     *stmt = (gfuas_stmt) {
         .label = label,
         .is_label_local = is_local,
+        .byte_size = 0,
     };
     gfuas_builder_insert(b, stmt);
+    gfu_da_push(&b->labels, stmt);
     return stmt;
 }
 
-__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction0(
+static void
+gfuas_ensure_instruction_byte_size(gfuas_stmt* stmt) {
+    switch (stmt->mnemonic) {
+        default: break;
+        case GFUAS_MNEM_BYTES: {
+            if (stmt->operand_count != 1) break;
+            const gfuas_expr op1 = stmt->operands[0];
+            if (op1.kind == GFUAS_EXPR_BYTE_STRING) {
+                stmt->byte_size = op1.as.byte_string.length;
+            }
+        } break;
+    }
+}
+
+gfuas_stmt*
+gfuas_build_instruction0(
     gfuas_builder* b,
     gfuas_mnemonic mnemonic
 ) {
@@ -88,12 +124,15 @@ __GAMEFU_API__ gfuas_stmt* gfuas_build_instruction0(
     gfuas_stmt* stmt = gfu_arena_alloc(&b->arena, sizeof *stmt);
     *stmt = (gfuas_stmt) {
         .mnemonic = mnemonic,
+        .byte_size = sizeof(gfu_inst),
     };
+    gfuas_ensure_instruction_byte_size(stmt);
     gfuas_builder_insert(b, stmt);
     return stmt;
 }
 
-__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction1(
+gfuas_stmt*
+gfuas_build_instruction1(
     gfuas_builder* b,
     gfuas_mnemonic mnemonic,
     gfuas_expr op1
@@ -104,12 +143,15 @@ __GAMEFU_API__ gfuas_stmt* gfuas_build_instruction1(
         .mnemonic = mnemonic,
         .operand_count = 1,
         .operands[0] = op1,
+        .byte_size = sizeof(gfu_inst),
     };
+    gfuas_ensure_instruction_byte_size(stmt);
     gfuas_builder_insert(b, stmt);
     return stmt;
 }
 
-__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction2(
+gfuas_stmt*
+gfuas_build_instruction2(
     gfuas_builder* b,
     gfuas_mnemonic mnemonic,
     gfuas_expr op1,
@@ -122,12 +164,15 @@ __GAMEFU_API__ gfuas_stmt* gfuas_build_instruction2(
         .operand_count = 2,
         .operands[0] = op1,
         .operands[1] = op2,
+        .byte_size = sizeof(gfu_inst),
     };
+    gfuas_ensure_instruction_byte_size(stmt);
     gfuas_builder_insert(b, stmt);
     return stmt;
 }
 
-__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction3(
+gfuas_stmt*
+gfuas_build_instruction3(
     gfuas_builder* b,
     gfuas_mnemonic mnemonic,
     gfuas_expr op1,
@@ -142,12 +187,15 @@ __GAMEFU_API__ gfuas_stmt* gfuas_build_instruction3(
         .operands[0] = op1,
         .operands[1] = op2,
         .operands[2] = op3,
+        .byte_size = sizeof(gfu_inst),
     };
+    gfuas_ensure_instruction_byte_size(stmt);
     gfuas_builder_insert(b, stmt);
     return stmt;
 }
 
-__GAMEFU_API__ gfuas_stmt* gfuas_build_instruction(
+gfuas_stmt*
+gfuas_build_instruction(
     gfuas_builder* b,
     gfuas_mnemonic mnemonic,
     gfuas_expr* ops,

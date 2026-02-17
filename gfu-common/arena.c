@@ -36,7 +36,9 @@ void gfu_arena_deinit(gfu_arena* a) {
 void* gfu_arena_alloc(gfu_arena* a, gfu_uword size) {
     gfu_assert(a != nullptr, "Can't allocate into a null arena.");
 
-    const gfu_uword align = a->alignment;
+    gfu_uword align = a->alignment;
+    if (align == 0) align = 16;
+
     const gfu_uword padding = (align - (size % align)) % align;
     size += padding;
 
