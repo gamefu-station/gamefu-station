@@ -231,3 +231,5 @@ int main(int argc, char** argv) {
     if (buff) free(buff);
     return 0;
 }
+
+#include "hx.c"

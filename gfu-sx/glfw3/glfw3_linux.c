@@ -12,11 +12,11 @@ SPDX-License-Identifier: GPL-2.0-only
 #endif
 
 #if defined(__linux__)
-#  include "../../vendor/glfw3/src/linux_joystick.c"
-#  include "../../vendor/glfw3/src/posix_module.c"
-#  include "../../vendor/glfw3/src/posix_poll.c"
-#  include "../../vendor/glfw3/src/posix_thread.c"
-#  include "../../vendor/glfw3/src/posix_time.c"
+#  include "vendor/src/linux_joystick.c"
+#  include "vendor/src/posix_module.c"
+#  include "vendor/src/posix_poll.c"
+#  include "vendor/src/posix_thread.c"
+#  include "vendor/src/posix_time.c"
 #else
 static void _linux_glfw_dummy(void) { }
 #endif

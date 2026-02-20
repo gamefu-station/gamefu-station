@@ -12,10 +12,10 @@ SPDX-License-Identifier: GPL-2.0-only
 #endif
 
 #if defined(__linux__)
-#  include "../../vendor/glfw3/src/x11_init.c"
-#  include "../../vendor/glfw3/src/x11_monitor.c"
-#  include "../../vendor/glfw3/src/x11_window.c"
-#  include "../../vendor/glfw3/src/xkb_unicode.c"
+#  include "vendor/src/x11_init.c"
+#  include "vendor/src/x11_monitor.c"
+#  include "vendor/src/x11_window.c"
+#  include "vendor/src/xkb_unicode.c"
 #else
 static void _wl_glfw_dummy(void) { }
 #endif

@@ -234,6 +234,7 @@ build_object(
 #endif
     nob_cc_inputs(&cmd, source_path);
     nob_cc_flags(&cmd);
+    nob_cmd_append(&cmd, "-DGFUSX_PLATFORM_GLFW");
     cmd_append_sanitizer(&cmd);
     if (!nob_cmd_run(&cmd, 0)) goto fail;
 
@@ -646,6 +647,80 @@ fail:;
     return result;
 }
 
+static bool
+build_sx(void) {
+    bool result = false;
+
+    Nob_File_Paths sx_deps = {0};
+
+    /* Build executable. */
+    nob_da_append_many(&sx_deps, common_headers.items, common_headers.count);
+    nob_da_append_many(&sx_deps, opcodes_headers.items, opcodes_headers.count);
+    nob_da_append_many(&sx_deps, bfd_headers.items, bfd_headers.count);
+
+    if (!read_entire_dir_recursive_ext("gfu-sx", ".h", &sx_deps)) {
+        goto fail;
+    }
+
+    Nob_File_Paths sx_sources = {0};
+    if (!read_entire_dir_ext("gfu-sx", ".c", &sx_sources)) {
+        goto fail;
+    }
+
+    Nob_File_Paths sx_objects = {0};
+    for (size_t i = 0; i < sx_sources.count; i++) {
+        const char* source_name =
+            get_file_name_without_extension(sx_sources.items[i]);
+        if (
+            !build_object(
+                &sx_objects, "sx", "gfu-sx", source_name, sx_deps
+            )
+        ) {
+            goto fail;
+        }
+    }
+
+    sx_sources.count = 0;
+    nob_da_append(&sx_sources, "gfu-sx/glfw3/glfw3_linux.c");
+    nob_da_append(&sx_sources, "gfu-sx/glfw3/glfw3_x11.c");
+    nob_da_append(&sx_sources, "gfu-sx/glfw3/glfw3.c");
+
+    const char* sx_glfw_outdir =
+        BUILD_OUTPUT_DIR BUILD_PATH_SEP "o" BUILD_PATH_SEP
+        "sx" BUILD_PATH_SEP "glfw3";
+    if (!nob_mkdir_if_not_exists(sx_glfw_outdir)) goto fail;
+
+    for (size_t i = 0; i < sx_sources.count; i++) {
+        const char* source_name = nob_temp_sprintf(
+            "glfw3/%s", get_file_name_without_extension(sx_sources.items[i])
+        );
+        if (
+            !build_object(
+                &sx_objects, "sx", "gfu-sx", source_name, sx_deps
+            )
+        ) {
+            goto fail;
+        }
+    }
+
+    sx_deps.count = 0;
+    nob_da_append(&sx_deps, common_lib);
+    nob_da_append(&sx_deps, opcodes_lib);
+    nob_da_append(&sx_deps, bfd_lib);
+    if (
+        !link_executable(
+            BUILD_OUTPUT_DIR BUILD_PATH_SEP "gfu-sx", sx_objects, sx_deps
+        )
+    ) {
+        goto fail;
+    }
+
+success:;
+    result = true;
+fail:;
+    return result;
+}
+
 int
 main(int argc, char** argv) {
     int result = 1;
@@ -694,6 +769,7 @@ main(int argc, char** argv) {
     if (!build_readobj()) goto fail;
     if (!build_iselgen()) goto fail;
     if (!build_as()) goto fail;
+    if (!build_sx()) goto fail;
 
 success:;
     result = 0;

@@ -12,9 +12,9 @@ SPDX-License-Identifier: GPL-2.0-only
 #endif
 
 #if defined(__linux__)
-#  include "../../vendor/glfw3/src/wl_init.c"
-#  include "../../vendor/glfw3/src/wl_monitor.c"
-#  include "../../vendor/glfw3/src/wl_window.c"
+#  include "vendor/src/wl_init.c"
+#  include "vendor/src/wl_monitor.c"
+#  include "vendor/src/wl_window.c"
 #else
 static void _wl_glfw_dummy(void) { }
 #endif

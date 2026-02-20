@@ -11,13 +11,13 @@ SPDX-License-Identifier: GPL-2.0-only
 #  define _GLFW_X11
 #endif
 
-#include "../../vendor/glfw3/src/context.c"
-#include "../../vendor/glfw3/src/egl_context.c"
-#include "../../vendor/glfw3/src/glx_context.c"
-#include "../../vendor/glfw3/src/init.c"
-#include "../../vendor/glfw3/src/input.c"
-#include "../../vendor/glfw3/src/monitor.c"
-#include "../../vendor/glfw3/src/platform.c"
-#include "../../vendor/glfw3/src/vulkan.c"
-#include "../../vendor/glfw3/src/wgl_context.c"
-#include "../../vendor/glfw3/src/window.c"
+#include "vendor/src/context.c"
+#include "vendor/src/egl_context.c"
+#include "vendor/src/glx_context.c"
+#include "vendor/src/init.c"
+#include "vendor/src/input.c"
+#include "vendor/src/monitor.c"
+#include "vendor/src/platform.c"
+#include "vendor/src/vulkan.c"
+#include "vendor/src/wgl_context.c"
+#include "vendor/src/window.c"

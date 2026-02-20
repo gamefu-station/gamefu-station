@@ -895,3 +895,6 @@ static isel_token isel_lexer_read(etok_lexer* lexer) {
     token.end = lexer->source_current;
     return token;
 }
+
+#include "../gfu-common/diagnostic.c"
+#include "../gfu-common/source.c"

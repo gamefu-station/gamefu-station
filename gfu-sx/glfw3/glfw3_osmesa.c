@@ -11,4 +11,4 @@ SPDX-License-Identifier: GPL-2.0-only
 #  define _GLFW_X11
 #endif
 
-#include "../../vendor/glfw3/src/osmesa_context.c"
+#include "vendor/src/osmesa_context.c"
