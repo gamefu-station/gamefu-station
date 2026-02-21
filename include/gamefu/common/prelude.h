@@ -63,6 +63,10 @@ SPDX-License-Identifier: GPL-2.0-only
 #    define _DEFAULT_SOURCE
 #  endif /* _DEFAULT_SOURCE */
 
+#  if !defined(_GNU_SOURCE)
+#    define _GNU_SOURCE
+#  endif /* _GNU_SOURCE */
+
 #  if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE - 0 < 200809L)
 #    undef _POSIX_C_SOURCE
 #  endif /* _POSIX_C_SOURCE */

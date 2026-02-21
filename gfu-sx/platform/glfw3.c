@@ -4,6 +4,8 @@ See the LICENSE file and LICENSES directory for more information.
 SPDX-License-Identifier: GPL-2.0-only
 ----------------------------------------------------------------------------- */
 
+#include <gamefu/common.h>
+
 #include "../prologue.h"
 #include "../platform.h"
 #include "../vm.h"
