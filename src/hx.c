@@ -27,8 +27,8 @@ static enum {
 
 static FILE* infile = NULL;
 
-static size_t data_pos = 0;
-static size_t data_len = SIZE_MAX / 2;
+static gfu_uword data_pos = 0;
+static gfu_uword data_len = GFU_UWORD_MAX / 2;
 
 static const char* c_header_ident = "bytes";
 
@@ -57,8 +57,8 @@ main(int argc, char** argv) {
                 fprintf(stderr, "error: option `-b` requires an argument.\n");
                 goto fail;
             }
-            data_pos = (size_t) strtoull(arg, NULL, 10);
-            fprintf(stderr, "%zu\n", data_pos);
+            data_pos = (gfu_uword) strtoul(arg, NULL, 10);
+            fprintf(stderr, "%u\n", data_pos);
         } else {
             if (infile != NULL) {
                 fprintf(stderr, "error: multiple input files.\n");
@@ -82,7 +82,7 @@ main(int argc, char** argv) {
         else goto success;
     }
 
-
+    printf("          00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F");
 
 success:;
     result = 0;
@@ -100,19 +100,19 @@ static bool
 emit_c_header(void) {
     assert(c_header_ident != NULL);
 
-    size_t byte_count = 0;
+    gfu_uword count = 0;
 
-    size_t nread = 0;
+    gfu_uword nread = 0;
     char buffer[1024];
 
     while (data_pos > 0 && !feof(infile)) {
-        size_t to_read = data_pos;
+        gfu_uword to_read = data_pos;
         if (to_read > sizeof(buffer)) {
             to_read = sizeof(buffer);
         }
 
         errno = 0;
-        nread = fread(buffer, 1, to_read, infile);
+        nread = (gfu_uword) fread(buffer, 1, to_read, infile);
 
         if (nread < to_read && ferror(infile)) {
             fprintf(stderr, "error: %s.\n", strerror(errno));
@@ -122,28 +122,27 @@ emit_c_header(void) {
         data_pos -= nread;
     }
 
-    printf("#include <stddef.h>\n\n");
     printf("static const unsigned char %s[] = {\n", c_header_ident);
 
-    while (byte_count < data_len && !feof(infile)) {
-        size_t to_read = data_len - byte_count;
+    while (count < data_len && !feof(infile)) {
+        gfu_uword to_read = data_len - count;
         if (to_read > sizeof(buffer)) {
             to_read = sizeof(buffer);
         }
 
         errno = 0;
-        nread = fread(buffer, 1, to_read, infile);
+        nread = (gfu_uword) fread(buffer, 1, to_read, infile);
 
         if (nread < to_read && ferror(infile)) {
             fprintf(stderr, "error: %s.\n", strerror(errno));
             return false;
         }
 
-        byte_count += nread;
+        count += nread;
         if (nread == 0) break;
 
-        for (size_t i = 0; i < nread; i += 16) {
-            for (size_t j = 0; j < 16 && i + j < nread; j++) {
+        for (gfu_uword i = 0; i < nread; i += 16) {
+            for (gfu_uword j = 0; j < 16 && i + j < nread; j++) {
                 printf("0x%02X,", (unsigned char) buffer[i + j]);
             }
             printf("\n");
@@ -151,7 +150,7 @@ emit_c_header(void) {
     }
 
     printf("};\n\n");
-    printf("static const size_t %s_count = %zu;\n", c_header_ident, byte_count);
+    printf("static const gfu_uword %s_count = %u;\n", c_header_ident, count);
 
     return true;
 }
