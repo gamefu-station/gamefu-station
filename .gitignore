@@ -1,6 +1,5 @@
 bin/
 out/
-bin/
 fuzz/
 
 nob
@@ -9,6 +8,7 @@ nob.old
 nob.exe.old
 
 *.gfo
+*.gfa
 *.gfu
 *.bak
 
@@ -18,10 +18,6 @@ nob.exe.old
 .old/
 *.old
 
-build/config.h
-
-gfu-as/fuasm.c.old
-gfu-as/fuasm.h.old
-gfu-as/isel_tables.c
+lib/meta/iseltbl.c
 lib/meta/iselsrc.h
-include/gamefu/as/x/mnemonics.h
+include/gamefu/x/asmnem.h
