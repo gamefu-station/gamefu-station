@@ -1,5 +1,0 @@
-= GameFU Station tooling and components
-
-== Using the development toolchain
-
-== Using the SDK
