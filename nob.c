@@ -72,6 +72,10 @@ main(int argc, char** argv) {
     nob_cc_flags(&cmd);
     if (!cmd_run(&cmd, 0)) return 1;
 
+    nob_cmd_append(&cmd, "out/gfu-hx" EXE);
+    nob_cmd_append(&cmd, "lib/meta/isel.txt", "-i", "-n", "iselsrc");
+    if (!cmd_run(&cmd, .stdout_path = "lib/meta/iselsrc.h")) return 1;
+
     nob_cc(&cmd);
     nob_cc_output(&cmd, "out/gfu-iselgen" EXE);
     nob_cc_inputs(&cmd, "src/iselgen.c");

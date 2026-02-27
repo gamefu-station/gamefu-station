@@ -1,0 +1,557 @@
+;; Part of the GameFU Station Project under the GNU General Public License v2.0.
+;; See the LICENSE file and LICENSES directory for more information.
+;; SPDX-License-Identifier: GPL-2.0-only
+
+;; Emit raw bytes
+match %bytes str $s
+emits bytes($s)
+
+;; Emit `n` bytes of 0
+match %bytes imm $n
+emits bytes($n)
+
+;; Nop out-of-band because it's "special"
+match %nop
+emits reg(SLL, zero, zero, zero, 0)
+
+
+;; -- "Real" Op Codes, ordered, and their aliases
+
+
+;; OP 0x02
+match %j addr $t
+emits addr(J, addr $t)
+
+match %jmp addr $t
+emits addr(J, addr $t)
+
+;; OP 0x03
+match %jal addr $t
+emits addr(JAL, addr $t)
+
+match %jal imm $t
+emits addr(JAL, addr $t)
+
+match %call addr $t
+emits addr(JAL, addr $t)
+
+match %call imm $t
+emits addr(JAL, addr $t)
+
+;; OP 0x04
+match %beq reg $l, reg $r, addr $t
+emits imm(BEQ, $l, $r, offs $t)
+
+;; OP 0x05
+match %bne reg $l, reg $r, addr $t
+emits imm(BNE, $l, $r, offs $t)
+
+;; OP 0x06
+match %blez reg $d, addr $t
+emits imm(BLEZ, $d, zero, offs $t)
+
+;; OP 0x07
+match %bgtz reg $d, addr $t
+emits imm(BGTZ, $d, zero, offs $t)
+
+;; OP 0x08
+match %addi reg $d, reg $l, imm $v
+emits imm(ADDI, $d, $l, $v)
+
+match %add reg $d, reg $l, imm $v
+emits imm(ADDI, $d, $l, $v)
+
+;; OP 0x09
+match %addiu reg $d, reg $l, imm $v
+emits imm(ADDIU, $d, $l, $v)
+
+match %addu reg $d, reg $l, imm $v
+emits imm(ADDIU, $d, $l, $v)
+
+;; OP 0x0A
+match %slti reg $d, reg $l, imm $v
+emits imm(SLTI, $d, $l, $v)
+
+match %slt reg $d, reg $l, imm $v
+emits imm(SLTI, $d, $l, $v)
+
+;; OP 0x0B
+match %sltiu reg $d, reg $l, imm $v
+emits imm(SLTIU, $d, $l, $v)
+
+match %sltu reg $d, reg $l, imm $v
+emits imm(SLTIU, $d, $l, $v)
+
+;; OP 0x0C
+match %andi reg $d, reg $l, imm $v
+emits imm(ANDI, $d, $l, $v)
+
+match %and reg $d, reg $l, imm $v
+emits imm(ANDI, $d, $l, $v)
+
+;; OP 0x0D
+match %ori reg $d, reg $l, imm $v
+emits imm(ORI, $d, $l, $v)
+
+match %or reg $d, reg $l, imm $v
+emits imm(ORI, $d, $l, $v)
+
+;; OP 0x0E
+match %xori reg $d, reg $l, imm $v
+emits imm(XORI, $d, $l, $v)
+
+match %xor reg $d, reg $l, imm $v
+emits imm(XORI, $d, $l, $v)
+
+;; OP 0x0F
+match %lui reg $d, imm $v
+emits imm(LUI, $d, zero, $v)
+
+;; OP 0x18
+match %tgei reg $d, imm $v
+emits imm(TGEI, $d, zero, $v)
+
+match %tge reg $d, imm $v
+emits imm(TGEI, $d, zero, $v)
+
+;; OP 0x19
+match %tgeiu reg $d, imm $v
+emits imm(TGEIU, $d, zero, $v)
+
+match %tgeu reg $d, imm $v
+emits imm(TGEIU, $d, zero, $v)
+
+;; OP 0x1A
+match %tlti reg $d, imm $v
+emits imm(TLTI, $d, zero, $v)
+
+match %tlt reg $d, imm $v
+emits imm(TLTI, $d, zero, $v)
+
+;; OP 0x1B
+match %tltiu reg $d, imm $v
+emits imm(TLTIU, $d, zero, $v)
+
+match %tltu reg $d, imm $v
+emits imm(TLTIU, $d, zero, $v)
+
+;; OP 0x1C
+match %teqi reg $d, imm $v
+emits imm(TEQI, $d, zero, $v)
+
+match %teq reg $d, imm $v
+emits imm(TEQI, $d, zero, $v)
+
+;; OP 0x1D
+match %tnei reg $d, imm $v
+emits imm(TNEI, $d, zero, $v)
+
+match %tne reg $d, imm $v
+emits imm(TNEI, $d, zero, $v)
+
+;; OP 0x20
+match %lb reg $d, reg $l
+emits imm(LB, $d, $l, 0)
+
+match %lb reg $d, imm $v(reg $l)
+emits imm(LB, $d, $l, $v)
+
+;; OP 0x21
+match %lh reg $d, reg $l
+emits imm(LH, $d, $l, 0)
+
+match %lh reg $d, imm $v(reg $l)
+emits imm(LH, $d, $l, $v)
+
+;; OP 0x22
+match %lwl reg $d, reg $l
+emits imm(LWL, $d, $l, 0)
+
+match %lwl reg $d, imm $v(reg $l)
+emits imm(LWL, $d, $l, $v)
+
+;; OP 0x23
+match %lw reg $d, reg $l
+emits imm(LW, $d, $l, 0)
+
+match %lw reg $d, imm $v(reg $l)
+emits imm(LW, $d, $l, $v)
+
+match %lw reg $d, imm $v
+emits imm(LUI, at, zero, upper $v)
+      imm(ORI, at, at, lower $v)
+      imm(LW, $d, at, 0)
+
+;; OP 0x24
+match %lbu reg $d, reg $l
+emits imm(LBU, $d, $l, 0)
+
+match %lbu reg $d, imm $v(reg $l)
+emits imm(LBU, $d, $l, $v)
+
+;; OP 0x25
+match %lhu reg $d, reg $l
+emits imm(LHU, $d, $l, 0)
+
+match %lhu reg $d, imm $v(reg $l)
+emits imm(LHU, $d, $l, $v)
+
+;; OP 0x26
+match %lwr reg $d, reg $l
+emits imm(LWR, $d, $l, 0)
+
+match %lwr reg $d, imm $v(reg $l)
+emits imm(LWR, $d, $l, $v)
+
+;; OP 0x28
+match %sb reg $d, reg $l
+emits imm(SB, $d, $l, 0)
+
+match %sb imm $v(reg $d), reg $l
+emits imm(SB, $d, $l, $v)
+
+;; OP 0x29
+match %sh reg $d, reg $l
+emits imm(SH, $d, $l, 0)
+
+match %sh addr $d, reg $l
+emits imm(LUI, at, zero, upper $d)
+      imm(ORI, at, at, lower $d)
+      imm(SH, at, $l, 0)
+
+match %sh imm $d, reg $l
+emits imm(LUI, at, zero, upper $d)
+      imm(ORI, at, at, lower $d)
+      imm(SH, at, $l, 0)
+
+match %sh reg $d, imm $l
+emits imm(ORI, at, zero, lower $l)
+      imm(SH, $d, at, 0)
+
+match %sh imm $v(reg $d), reg $l
+emits imm(SH, $d, $l, $v)
+
+match %sh imm $v(reg $d), imm $l
+emits imm(ORI, at, zero, lower $l)
+      imm(SH, $d, at, $v)
+
+;; OP 0x2A
+match %swl reg $d, reg $l
+emits imm(SWL, $d, $l, 0)
+
+match %swl imm $v(reg $d), reg $l
+emits imm(SWL, $d, $l, $v)
+
+;; OP 0x2B
+match %sw reg $d, reg $l
+emits imm(SW, $d, $l, 0)
+
+match %sw reg $d, imm $l
+emits imm(LUI, at, zero, upper $l)
+      imm(ORI, at, at, lower $l)
+      imm(SW, $d, at, 0)
+
+match %sw imm $v(reg $d), reg $l
+emits imm(SW, $d, $l, $v)
+
+match %sw imm $v(reg $d), imm $l
+emits imm(LUI, at, zero, upper $l)
+      imm(ORI, at, at, lower $l)
+      imm(SW, $d, at, $v)
+
+match %sw imm $d, reg $l
+emits imm(LUI, at, zero, upper $d)
+      imm(ORI, at, at, lower $d)
+      imm(SW, at, $l, 0)
+
+;; OP 0x2E
+match %swr reg $d, reg $l
+emits imm(SWR, $d, $l, 0)
+
+match %swr imm $v(reg $d), reg $l
+emits imm(SWR, $d, $l, $v)
+
+;; OP 0x30
+match %bltz reg $d, imm $v
+emits imm(BLTZ, $d, zero, addr $v)
+
+;; OP 0x31
+match %bgez reg $d, imm $v
+emits imm(BGEZ, $d, zero, addr $v)
+
+;; OP 0x32
+match %bltzal reg $d, imm $v
+emits imm(BLTZAL, $d, zero, addr $v)
+
+;; OP 0x33
+match %bgezal reg $d, imm $v
+emits imm(BGEZAL, $d, zero, addr $v)
+
+;; OP 0x3E
+match %break
+emits addr(BREAK, 0)
+
+match %break addr $c
+emits addr(BREAK, $c)
+
+;; OP 0x3F
+match %sdbbp
+emits addr(SDBBP, 0)
+
+match %sdbbp addr $c
+emits addr(SDBBP, $c)
+
+
+;; "Real" Function Codes, ordered, and their aliases
+
+
+;; FN 0x00
+match %sll reg $d, reg $l, imm $s
+emits reg(SLL, $d, $l, zero, $s)
+
+;; FN 0x02
+match %srl reg $d, reg $l, imm $s
+emits reg(SRL, $d, $l, zero, $s)
+
+;; FN 0x03
+match %sra reg $d, reg $l, imm $s
+emits reg(SRA, $d, $l, zero, $s)
+
+;; FN 0x04
+match %sllv reg $d, reg $l, reg $r
+emits reg(SLLV, $d, $l, $r, 0)
+
+match %sll reg $d, reg $l, reg $r
+emits reg(SLLV, $d, $l, $r, 0)
+
+;; FN 0x06
+match %srlv reg $d, reg $l, reg $r
+emits reg(SRLV, $d, $l, $r, 0)
+
+match %srl reg $d, reg $l, reg $r
+emits reg(SRLV, $d, $l, $r, 0)
+
+;; FN 0x07
+match %srav reg $d, reg $l, reg $r
+emits reg(SRAV, $d, $l, $r, 0)
+
+match %sra reg $d, reg $l, reg $r
+emits reg(SRAV, $d, $l, $r, 0)
+
+;; FN 0x08
+match %jr reg $l
+emits reg(JR, zero, $l, zero, 0)
+
+match %ret
+emits reg(JR, zero, ra, zero, 0)
+
+;; FN 0x09
+match %jalr reg $l
+emits reg(JALR, ra, $l, zero, 0)
+
+match %jalr reg $d, reg $l
+emits reg(JALR, $d, $l, zero, 0)
+
+;; FN 0x0A
+match %movz reg $d, reg $l, reg $r
+emits reg(MOVZ, $d, $l, $r, 0)
+
+match %movzi reg $d, imm $v, reg $r
+emits imm(LUI, at, zero, upper $v)
+      imm(ORI, at, at, lower $v)
+      reg(MOVZ, $d, at, $r, 0)
+
+match %move reg $d, reg $l
+emits reg(MOVZ, $d, $l, zero, 0)
+
+;; FN 0x0B
+match %movn reg $d, reg $l, reg $r
+emits reg(MOVN, $d, $l, $r, 0)
+
+match %movni reg $d, imm $v, reg $r
+emits imm(LUI, at, zero, upper $v)
+      imm(ORI, at, at, lower $v)
+      reg(MOVN, $d, at, $r, 0)
+
+;; FN 0x0C
+match %syscall
+emits reg(SYSCALL, zero, zero, zero, 0)
+
+;; FN 0x10
+match %mfhi reg $d
+emits reg(MFHI, $d, 0, 0, 0)
+
+;; FN 0x11
+match %mthi reg $l
+emits reg(MTHI, zero, $l, 0, 0)
+
+;; FN 0x12
+match %mflo reg $d
+emits reg(MFLO, $d, 0, 0, 0)
+
+;; FN 0x13
+match %mtlo reg $l
+emits reg(MTLO, zero, $l, 0, 0)
+
+;; FN 0x14
+match %madd reg $l, reg $r
+emits reg(MADD, zero, $l, $r, 0)
+
+;; FN 0x15
+match %maddu reg $l, reg $r
+emits reg(MADDU, zero, $l, $r, 0)
+
+;; FN 0x16
+match %msub reg $l, reg $r
+emits reg(MSUB, zero, $l, $r, 0)
+
+;; FN 0x17
+match %msubu reg $l, reg $r
+emits reg(MSUBU, zero, $l, $r, 0)
+
+;; FN 0x18
+match %mult reg $l, reg $r
+emits reg(MULT, zero, $l, $r, 0)
+
+;; FN 0x19
+match %multu reg $l, reg $r
+emits reg(MULTU, zero, $l, $r, 0)
+
+;; FN 0x1A
+match %div reg $l, reg $r
+emits reg(DIV, zero, $l, $r, 0)
+
+;; FN 0x1B
+match %divu reg $l, reg $r
+emits reg(DIVU, zero, $l, $r, 0)
+
+;; FN 0x1C
+match %mul reg $d, reg $l, reg $r
+emits reg(MUL, $d, $l, $r, 0)
+
+match %mul reg $d, reg $l, imm $r
+emits imm(ORI, at, zero, $r)
+      reg(MUL, $d, $l, at, 0)
+
+;; FN 0x20
+match %add reg $d, reg $l, reg $r
+emits reg(ADD, $d, $l, $r, 0)
+
+match %add reg $l, reg $r
+emits reg(ADD, $l, $l, $r, 0)
+
+;; FN 0x21
+match %addu reg $d, reg $l, reg $r
+emits reg(ADDU, $d, $l, $r, 0)
+
+;; FN 0x22
+match %sub reg $d, reg $l, reg $r
+emits reg(SUB, $d, $l, $r, 0)
+
+match %subi reg $d, reg $l, imm $v
+emits imm(LUI, at, zero, upper $v)
+      imm(ORI, at, at, lower $v)
+      reg(SUB, $d, $l, at)
+
+;; FN 0x23
+match %subu reg $d, reg $l, reg $r
+emits reg(SUBU, $d, $l, $r, 0)
+
+;; FN 0x24
+match %and reg $d, reg $l, reg $r
+emits reg(AND, $d, $l, $r, 0)
+
+;; FN 0x25
+match %or reg $d, reg $l, reg $r
+emits reg(OR, $d, $l, $r, 0)
+
+;; FN 0x26
+match %xor reg $d, reg $l, reg $r
+emits reg(XOR, $d, $l, $r, 0)
+
+;; FN 0x27
+match %nor reg $d, reg $l, reg $r
+emits reg(NOR, $d, $l, $r, 0)
+
+;; FN 0x28
+match %clz reg $d, reg $l
+emits reg(CLZ, $d, $l, zero, 0)
+
+;; FN 0x29
+match %clo reg $d, reg $l
+emits reg(CLO, $d, $l, zero, 0)
+
+;; FN 0x2A
+match %slt reg $d, reg $l, reg $r
+emits reg(SLT, $d, $l, $r, 0)
+
+match %sgt reg $d, reg $l, reg $r
+emits reg(SLT, $d, $r, $l, 0)
+
+;; FN 0x2B
+match %sltu reg $d, reg $l, reg $r
+emits reg(SLTU, $d, $l, $r, 0)
+
+;; FN 0x30
+match %tge reg $l, reg $r
+emits reg(TGE, zero, $l, $r, 0)
+
+;; FN 0x31
+match %tgeu reg $l, reg $r
+emits reg(TGEU, zero, $l, $r, 0)
+
+;; FN 0x32
+match %tlt reg $l, reg $r
+emits reg(TLT, zero, $l, $r, 0)
+
+;; FN 0x33
+match %tltu reg $l, reg $r
+emits reg(TLTU, zero, $l, $r, 0)
+
+;; FN 0x34
+match %teq reg $l, reg $r
+emits reg(TEQ, zero, $l, $r, 0)
+
+;; FN 0x35
+match %tne reg $l, reg $r
+emits reg(TNE, zero, $l, $r, 0)
+
+
+;; "Compound" pseudo instructions
+
+
+match %li reg $d, imm $v
+emits imm(LUI, $d, zero, upper $v)
+      imm(ORI, $d, $d, lower $v)
+
+match %la reg $d, addr $v
+emits imm(LUI, $d, zero, upper $v)
+      imm(ORI, $d, $d, lower $v)
+
+match %stal imm $v
+emits imm(ADDIU, sp, sp, -$v)
+
+match %stdal imm $v
+emits imm(ADDIU, sp, sp, $v)
+
+match %push reg $d
+emits imm(ADDIU, sp, sp, -4)
+      imm(SW, sp, $d, 0)
+
+match %pop reg $d
+emits imm(LW, $d, sp, 0)
+      imm(ADDIU, sp, sp, 4)
+
+
+;; Coprocessor 0 instructions
+
+match %mfc0 reg $d, imm $l
+emits cop0(MF, $d, $l, zero, 0)
+
+match %mtc0 imm $d, reg $l
+emits cop0(MT, $d, $l, zero, 0)
+
+match %mtc0 imm $d, imm $l
+emits imm(LUI, at, zero, upper $l)
+      imm(ORI, at, at, lower $l)
+      cop0(MT, $d, at, zero, 0)

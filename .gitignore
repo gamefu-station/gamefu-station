@@ -23,5 +23,5 @@ build/config.h
 gfu-as/fuasm.c.old
 gfu-as/fuasm.h.old
 gfu-as/isel_tables.c
-gfu-iselgen/isel_source.h
+lib/meta/iselsrc.h
 include/gamefu/as/x/mnemonics.h

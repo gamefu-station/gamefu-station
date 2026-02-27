@@ -122,6 +122,7 @@ emit_c_header(void) {
         data_pos -= nread;
     }
 
+    printf("#include <gamefu/types.h>\n\n");
     printf("static const unsigned char %s[] = {\n", c_header_ident);
 
     while (count < data_len && !feof(infile)) {
