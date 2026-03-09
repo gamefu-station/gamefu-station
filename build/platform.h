@@ -7,6 +7,7 @@ SPDX-License-Identifier: GPL-2.0-only
 #ifndef GAMEFU_NOB_BUILD_PLATFORM_H_
 #define GAMEFU_NOB_BUILD_PLATFORM_H_
 
+
 #if defined(_WIN32)
 #  define BUILD_PATH_SEP  "\\"
 #  define BUILD_EXE_EXT  ".exe"
@@ -22,5 +23,6 @@ SPDX-License-Identifier: GPL-2.0-only
         nob_cmd_run((Cmd), 0) \
     )
 #endif /* _WIN32 */
+
 
 #endif /* GAMEFU_NOB_BUILD_PLATFORM_H_ */
